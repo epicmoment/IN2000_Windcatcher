@@ -11,8 +11,7 @@ class NowcastAPItest {
     fun test_API() {
         runBlocking {
             val response = getNowcast(59.9138, 10.7387)
-            Assert.assertEquals(response.type, "Point")
+            Assert.assertEquals("Feature", response.type)
         }
-
     }
 }

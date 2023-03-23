@@ -34,7 +34,6 @@ data class WeatherTime(
     val time: String
 )
 @Serializable
-
 data class Units(
     val air_temperature: String,
     val precipitation_amount: String,
@@ -48,7 +47,7 @@ data class Units(
 @Serializable
 data class Data(
     val instant: Instant,
-    val next_1_hours: Next1Hours
+    val next_1_hours: Next1Hours? = null
 )
 
 @Serializable
@@ -64,12 +63,12 @@ data class Next1Hours(
 
 @Serializable
 data class Details(
-    val air_temperature: Double,
-    val precipitation_rate: Double,
-    val relative_humidity: Double,
-    val wind_from_direction: Double,
-    val wind_speed: Double,
-    val wind_speed_of_gust: Double
+    val air_temperature: Double = 0.0,
+    val precipitation_rate: Double = 0.0,
+    val relative_humidity: Double = 0.0,
+    val wind_from_direction: Double = 0.0,
+    val wind_speed: Double = 0.0,
+    val wind_speed_of_gust: Double = 0.0
 )
 
 @Serializable
