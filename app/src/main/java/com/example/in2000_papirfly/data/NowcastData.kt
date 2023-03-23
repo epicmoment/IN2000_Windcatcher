@@ -1,5 +1,5 @@
 package com.example.in2000_papirfly.data
-
+/*
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -46,3 +46,5 @@ data class WeatherTime (
     val time: String,
     val data: Object //TODO
 )
+
+ */
