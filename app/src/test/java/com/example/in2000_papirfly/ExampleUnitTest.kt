@@ -1,5 +1,7 @@
 package com.example.in2000_papirfly
 
+import com.example.in2000_papirfly.network.getNowcast
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 
 import org.junit.Assert.*
