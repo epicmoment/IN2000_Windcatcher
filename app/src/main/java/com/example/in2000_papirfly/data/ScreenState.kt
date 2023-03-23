@@ -1,5 +1,5 @@
 package com.example.in2000_papirfly.data
 
 data class ScreenState (
-    val location : Int = 0
+    val location : Location = Location(0.0, 0.0)
 )
