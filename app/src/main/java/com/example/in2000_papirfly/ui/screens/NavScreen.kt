@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -14,6 +15,8 @@ import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 @Composable
 fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
+    val screenState = viewModel.screenState.collectAsState()
+
     val navController = rememberNavController()
 
     NavHost (
@@ -23,11 +26,20 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
     ) {
 
         composable(route = "PositionScreen") {
-            PositionScreen()
+
+            PositionScreen { newLocation ->
+
+                viewModel.setLocation(newLocation)
+                navController.navigate("ThrowScreen")
+
+            }
+
         }
 
         composable(route = "ThrowScreen") {
-            ThrowScreen()
+
+            ThrowScreen(screenState.value.location)
+
         }
 
 
