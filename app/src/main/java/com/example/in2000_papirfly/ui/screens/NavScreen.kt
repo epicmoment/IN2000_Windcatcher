@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.in2000_papirfly.ui.screens.MainScreen
 import com.example.in2000_papirfly.ui.screens.PositionScreen
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 
@@ -21,9 +22,15 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
     NavHost (
         navController = navController,
-        startDestination = "PositionScreen",
+        startDestination = "MainScreen",
         modifier = Modifier.padding(8.dp)
     ) {
+
+        composable(route = "MainScreen") {
+            MainScreen {
+                navController.navigate("PositionScreen")
+            }
+        }
 
         composable(route = "PositionScreen") {
 
@@ -42,8 +49,6 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         }
 
-
     }
-
 
 }
