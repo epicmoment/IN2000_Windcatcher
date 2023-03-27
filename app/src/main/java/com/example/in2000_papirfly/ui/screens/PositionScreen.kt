@@ -15,14 +15,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
-import com.example.in2000_papirfly.ui.viewModels.PositionScreenViewModel
+import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionScreen(
-                   viewModel: PositionScreenViewModel = viewModel(),
-                   modifier: Modifier = Modifier,
-                   onNextPage : (Location) -> Unit
+    viewModel: PositionScreenViewModel = viewModel(),
+    modifier: Modifier = Modifier,
+    onNextPage : (Location) -> Unit
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()

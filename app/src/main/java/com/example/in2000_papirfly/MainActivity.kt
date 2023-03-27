@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.in2000_papirfly.ui.NavScreen
+import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 
 class MainActivity : ComponentActivity() {
