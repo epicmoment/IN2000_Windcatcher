@@ -6,11 +6,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.in2000_papirfly.ui.NavScreen
+import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,7 +24,7 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     NavScreen()
-
+//                    MapView()
                 }
             }
         }

@@ -9,13 +9,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.data.Location
-import com.example.in2000_papirfly.ui.viewModels.PositionScreenViewModel
+import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 
 @Composable
 fun PositionScreen(
-                   viewModel: PositionScreenViewModel = viewModel(),
-                   modifier: Modifier = Modifier,
-                   onNextPage : (Location) -> Unit
+    viewModel: PositionScreenViewModel = viewModel(),
+    modifier: Modifier = Modifier,
+    onNextPage : (Location) -> Unit
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()
