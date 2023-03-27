@@ -57,7 +57,7 @@ data class NCInstant(
 
 @Serializable
 data class NCNext1Hours(
-    val details: NCDetailsX,
+    val details: NCPrecipitationNext1Hours,
     val summary: NCSummary
 )
 
@@ -72,7 +72,7 @@ data class NCDetails(
 )
 
 @Serializable
-data class NCDetailsX(
+data class NCPrecipitationNext1Hours(
     val precipitation_amount: Double
 )
 

@@ -64,13 +64,13 @@ data class LFNext12Hours(
 
 @Serializable
 data class LFNext1Hours(
-    val details: LFDetailsX,
+    val details: LFPrecipitationNext1Hours,
     val summary: LFSummary
 )
 
 @Serializable
 data class LFNext6Hours(
-    val details: LFDetailsXX,
+    val details: LFPrecipitationNext6Hours,
     val summary: LFSummary
 )
 
@@ -90,11 +90,11 @@ data class LFSummary(
 )
 
 @Serializable
-data class LFDetailsX(
+data class LFPrecipitationNext1Hours(
     val precipitation_amount: Double
 )
 
 @Serializable
-data class LFDetailsXX(
+data class LFPrecipitationNext6Hours(
     val precipitation_amount: Double
 )
