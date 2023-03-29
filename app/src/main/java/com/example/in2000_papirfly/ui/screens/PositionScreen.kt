@@ -16,7 +16,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionScreen(
@@ -43,7 +42,7 @@ fun PositionScreen(
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        //text = posScrUiState.name
+                        //text = "${posScrUiState.weather.name}"
                         text = "Oslo",
                         fontSize = 30.sp
                     )
@@ -56,7 +55,6 @@ fun PositionScreen(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.baseline_wb_sunny_24),
-                            //Icons.Outlined.Person,
                             modifier = modifier.size(size = 70.dp),
                             contentDescription = "Full sol",
                             tint = Color.Yellow
@@ -64,14 +62,14 @@ fun PositionScreen(
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            //text = posScrUiState.name
+                            //text = "${posScrUiState.weather.temperature}°C"
                             text = "25°C",
                             fontSize = 30.sp
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            //text = posScrUiState.name
+                            //text = "${posScrUiState.wind}(${posScrUiState.gust}m/s)"
                             text = "4(6) m/s",
                             fontSize = 20.sp
                         )
