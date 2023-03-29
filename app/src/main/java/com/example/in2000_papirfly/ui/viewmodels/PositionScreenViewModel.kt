@@ -22,6 +22,7 @@ class PositionScreenViewModel: ViewModel() {
     private fun posScreenView() {
         viewModelScope.launch {
             try {
+                //
                 //val weatherRepo = getWeatherAt(Location())
                 _posScrUiState.update { currentState ->
                     currentState.copy(
