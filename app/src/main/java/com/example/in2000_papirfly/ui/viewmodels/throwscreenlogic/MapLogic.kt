@@ -56,7 +56,7 @@ fun rememberMapViewWithLifecycle(): MapView {
     mapView.overlays.add(startMarker)
 
     // Moves the map to IFI as default
-    mapView.controller.setCenter(IFI)
+//    mapView.controller.setCenter(IFI)
 
     // Restricts the map view to cover Norway
     mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
@@ -81,7 +81,8 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
 @Composable
 fun MapView(
     modifier: Modifier = Modifier,
-    onLoad: ((map: MapView) -> Unit)? = null
+    onLoad: ((map: MapView) -> Unit)? = null,
+    startLocation: GeoPoint
 ) {
     val mapViewState = rememberMapViewWithLifecycle()
 
@@ -89,4 +90,6 @@ fun MapView(
         { mapViewState },
         modifier
     ) { mapView -> onLoad?.invoke(mapView) }
+
+    mapViewState.controller.setCenter(startLocation)
 }
