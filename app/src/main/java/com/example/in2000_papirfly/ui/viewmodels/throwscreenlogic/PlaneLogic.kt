@@ -14,13 +14,13 @@ class PlaneLogic(
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState
-    private val dropRate = 0.8
+    private val dropRate = 0.9
     private val slowRate = 0.8
     private val planeStartHeight = 100.0
     private val maxPlaneStartSpeed = 20.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
-    public val updateFrequency: Long = 1000
+    val updateFrequency: Long = 1000
 
     fun update(){
     // This update method fetches the current plane state and uses the position, angle, speed
@@ -51,24 +51,11 @@ class PlaneLogic(
         planeRepository.update(plane.copy(pos = listOf(newPlanePos.latitude, newPlanePos.longitude), speed = newPlaneSpeed, height = newHeight, angle = newPlaneAngle))
     }
 
-    fun getPlanePos(): List<Double>{
-        return planeRepository.planeState.value.pos
-    }
-
-    fun getPlaneAngle(): Double{
-        return planeRepository.planeState.value.angle
-    }
-
-    fun getPlaneHeight(): Double{
-        return planeRepository.planeState.value.height
-    }
-
-    fun getPlaneSpeed(): Double{
-        return planeRepository.planeState.value.speed
-    }
 
     fun getPlaneScale(): Float{
-        return (minPlaneScale + (maxPlaneScale - minPlaneScale) * (planeState.value.height / planeStartHeight)).toFloat()
+        var planeScale = (minPlaneScale + (maxPlaneScale - minPlaneScale) * (planeState.value.height / planeStartHeight)).toFloat()
+        if (planeScale < minPlaneScale) planeScale = minPlaneScale.toFloat()
+        return planeScale
     }
 
     fun planeIsFlying(): Boolean{
@@ -82,8 +69,8 @@ class PlaneLogic(
         // TEMP //
         // Currently only affected by plane speed
         // if speed is low drop rate is high
-        return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))
-        //return dropRate * getPlaneSpeed() / maxPlaneStartSpeed
+        //return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))    // I like the idea of this, but I think it might not be as fun. Could be a plane type that functions like this
+        return dropRate
     }
 
     private fun calculateSlowRate(): Double{
@@ -92,10 +79,6 @@ class PlaneLogic(
     }
 
     // Wind
-    fun getWindAngle(): Double{
-        return weatherRepository.windState.value.angle
-    }
-
     fun calculateWindEffect(): Double{
         return planeState.value.flightModifier.windEffect
     }
