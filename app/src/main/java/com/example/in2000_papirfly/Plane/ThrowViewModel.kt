@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.Location
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
 
 class ThrowViewModel: ViewModel() {
     // TODO
@@ -14,9 +15,9 @@ class ThrowViewModel: ViewModel() {
     private val planeLogic = PlaneLogic(planeRepository, weatherRepository)
     val planeState = planeLogic.planeState
 
-    fun throwPlane(selectedLocation: Location){
+    fun throwPlane(selectedLocation: GeoPoint){
         viewModelScope.launch{
-            planeLogic.throwPlane(100.0, 98.0)
+            planeLogic.throwPlane(100.0, 98.0, selectedLocation)
 
         }
     }

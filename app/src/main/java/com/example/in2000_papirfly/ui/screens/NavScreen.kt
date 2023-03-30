@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
+import org.osmdroid.util.GeoPoint
 
 @Composable
 fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
@@ -26,7 +27,7 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         composable(route = "MainScreen") {
             MainScreen {
-                navController.navigate("ThrowScreen")
+                navController.navigate("PositionScreen")
             }
         }
 
@@ -42,8 +43,8 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
         }
 
         composable(route = "ThrowScreen") {
-
-            ThrowScreen(screenState.value.location)
+            val pos = GeoPoint(screenState.value.location.latitude, screenState.value.location.longitude)
+            ThrowScreen(pos)
 
         }
 

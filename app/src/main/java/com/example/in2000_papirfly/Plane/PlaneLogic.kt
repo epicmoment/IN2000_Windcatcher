@@ -3,6 +3,7 @@ package com.example.in2000_papirfly.Plane
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.*
+import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 
 class PlaneLogic(
@@ -59,9 +60,9 @@ class PlaneLogic(
         planeRepository.update(plane.copy(pos = newPlanePos, speed = newSpeed, height = newHeight, angle = newPlaneAngle))
     }
 
-    suspend fun throwPlane(speed: Double, angle: Double){
+    suspend fun throwPlane(speed: Double, angle: Double, startPos: GeoPoint){
         // initialize plane
-        planeRepository.update(Plane(speed = speed, angle = angle, height = planeStartHeight))
+        planeRepository.update(Plane(speed = speed, angle = angle, height = planeStartHeight, pos= listOf(startPos.latitude, startPos.longitude)))
 
         while (planeIsFlying()) {
             weatherRepository.updateWindState()

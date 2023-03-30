@@ -19,16 +19,20 @@ import androidx.compose.ui.unit.dp
 import com.example.in2000_papirfly.Plane.*
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.MapView
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import kotlinx.serialization.internal.throwMissingFieldException
+import org.osmdroid.util.GeoPoint
 
 @Composable
-fun ThrowScreen(selectedLocation : Location) {
+fun ThrowScreen(selectedLocation : GeoPoint) {
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{ThrowViewModel()}
+    
+    MapView(location = selectedLocation)
 
 
     // Wind arrow
@@ -52,18 +56,17 @@ fun ThrowScreen(selectedLocation : Location) {
         Text(text = "Plane pos: \n${throwViewModel.getPlanePos()[0].toFloat()}\n${throwViewModel.getPlanePos()[1].toFloat()}")
 
         // Paper plane
-        Box(
+        Image(
+            painter = painterResource(id = R.drawable.plane01),
+            contentDescription = "TODO",
             modifier = Modifier
-                .offset(throwViewModel.getPlanePos()[0].dp, throwViewModel.getPlanePos()[1].dp)
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.plane01),
-                contentDescription = "TODO",
-                modifier = Modifier
-                    .rotate(throwViewModel.getPlaneAngle().toFloat())
-                    .scale(throwViewModel.getPlaneScale())
-            )
-        }
+                .rotate(
+                    throwViewModel
+                        .getPlaneAngle()
+                        .toFloat()
+                )
+                .scale(throwViewModel.getPlaneScale())
+        )
 
 
         Text(

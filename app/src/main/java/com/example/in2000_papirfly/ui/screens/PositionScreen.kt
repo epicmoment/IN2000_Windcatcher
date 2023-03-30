@@ -37,7 +37,7 @@ fun PositionScreen(
                         .fillMaxSize()
                         .padding(15.dp)
                         .clickable {
-                            onNextPage(Location())
+                            onNextPage(Location(59.9441, 10.7191))
                         }
                 ) {
                     Text(
