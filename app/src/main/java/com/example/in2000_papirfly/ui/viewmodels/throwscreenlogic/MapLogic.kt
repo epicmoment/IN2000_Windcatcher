@@ -21,7 +21,7 @@ import kotlin.math.*
 
 //Entire code based on this: gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
 @Composable
-fun rememberMapViewWithLifecycle(location: GeoPoint): MapView {
+fun rememberMapViewWithLifecycle(): MapView {
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -61,7 +61,7 @@ fun rememberMapViewWithLifecycle(location: GeoPoint): MapView {
     mapView.overlays.add(startMarker)
 
     // Moves the map to IFI as default
-    mapView.controller.setCenter(location)
+//    mapView.controller.setCenter()
 
     // Restricts the map view to cover Norway
     mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
@@ -107,9 +107,9 @@ fun MapView(
     modifier: Modifier = Modifier,
     onLoad: ((map: MapView) -> Unit)? = null,
     location: GeoPoint,
-    scrollable: Boolean
+//    scrollable: Boolean
 ) {
-    val mapViewState = rememberMapViewWithLifecycle(location)
+    val mapViewState = rememberMapViewWithLifecycle()
 
     AndroidView(
         { mapViewState },
