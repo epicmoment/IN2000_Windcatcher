@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
 
 class ScreenStateViewModel : ViewModel() {
 
     private val _screenState = MutableStateFlow(ScreenState())
     val screenState : StateFlow<ScreenState> = _screenState.asStateFlow()
 
-
-    fun setLocation(newLocation : Location) {
+    fun setLocation(newLocation : GeoPoint) {
 
         viewModelScope.launch {
             _screenState.update {
@@ -25,11 +25,5 @@ class ScreenStateViewModel : ViewModel() {
 
             }
         }
-
-
-
     }
-
-
-
 }

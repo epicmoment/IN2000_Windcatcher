@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.offset
 import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -18,6 +20,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.in2000_papirfly.Plane.*
 import com.example.in2000_papirfly.R
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.Location
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.MapView
 import kotlinx.coroutines.coroutineScope
@@ -25,14 +29,28 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runInterruptible
 import kotlinx.serialization.internal.throwMissingFieldException
 import org.osmdroid.util.GeoPoint
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.MapView
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import org.osmdroid.views.MapView
 
 @Composable
-fun ThrowScreen(selectedLocation : GeoPoint) {
+fun ThrowScreen(
+    selectedLocation : GeoPoint,
+    onLoad: ((map: MapView) -> Unit)? = null
+) {
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{ThrowViewModel()}
-    
-    MapView(location = selectedLocation)
+
+
+    // Map View
+    val mapViewState = rememberMapViewWithLifecycle()
+    AndroidView(
+        { mapViewState },
+        Modifier
+    ) { mapView -> onLoad?.invoke(mapView) }
+
+    mapViewState.controller.setCenter(selectedLocation)
 
 
     // Wind arrow
