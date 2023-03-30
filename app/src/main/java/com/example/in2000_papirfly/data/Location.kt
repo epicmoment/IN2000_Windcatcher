@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly.data
 
+import org.osmdroid.util.GeoPoint
+
 data class Location(
-    val longitude : Double = 0.0,
-    val latitude : Double = 0.0
+    val geoPoint: GeoPoint
 )

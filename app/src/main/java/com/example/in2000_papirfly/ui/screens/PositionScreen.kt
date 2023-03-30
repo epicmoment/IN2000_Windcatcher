@@ -16,12 +16,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
+import org.osmdroid.util.GeoPoint
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionScreen(
     viewModel: PositionScreenViewModel = viewModel(),
     modifier: Modifier = Modifier,
-    onNextPage : (Location) -> Unit
+    onNextPage : (GeoPoint) -> Unit
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()
@@ -30,20 +32,19 @@ fun PositionScreen(
         modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = modifier
             .fillMaxSize()) {
-            items(1){
+            items(posScrUiState.value.weather.size){
                 Card(
                     shape = MaterialTheme.shapes.medium,
                     modifier = modifier
                         .fillMaxSize()
                         .padding(15.dp)
                         .clickable {
-                            onNextPage(Location())
+                            onNextPage(GeoPoint(posScrUiState.value.weather[it].geoPoint))
                         }
                 ) {
                     Text(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                        //text = "${posScrUiState.weather.name}"
-                        text = "Oslo",
+                        text = "${posScrUiState.value.weather[it].namePos}",
                         fontSize = 30.sp
                     )
 
@@ -62,15 +63,16 @@ fun PositionScreen(
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            //text = "${posScrUiState.weather.temperature}°C"
-                            text = "25°C",
+                            text = "${"%.0f".format(posScrUiState.value.weather[it].temperature)}°C" ,
+                            //text = "25°C",
                             fontSize = 30.sp
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            //text = "${posScrUiState.wind}(${posScrUiState.gust}m/s)"
-                            text = "4(6) m/s",
+                            //text = "${posScrUiState.value.weather.windSpeed}(${posScrUiState.value.weather.gust}m/s)",
+                            text = "${"%.0f".format(posScrUiState.value.weather[it].windSpeed)}m/s",
+                            //text = "4(6) m/s",
                             fontSize = 20.sp
                         )
 

@@ -13,7 +13,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.MapView
+//import com.example.in2000_papirfly.ui.screens.MapView
+import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
@@ -39,10 +40,10 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-//                    NavScreen()
-                    MapView(
-                        location = GeoPoint(59.9441, 10.7191)
-                    )
+                    NavScreen()
+                    //MapView(
+                    //    startLocation = GeoPoint(59.9441, 10.7191)
+                    //)
                 }
             }
         }
