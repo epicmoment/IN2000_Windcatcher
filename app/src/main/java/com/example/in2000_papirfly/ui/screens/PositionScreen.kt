@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -55,7 +56,7 @@ fun PositionScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.baseline_wb_sunny_24),
+                            painter = painterResource(id = R.drawable.clear_day_48px),
                             modifier = modifier.size(size = 70.dp),
                             contentDescription = "Full sol",
                             tint = Color.Yellow
@@ -78,7 +79,9 @@ fun PositionScreen(
 
                         Icon(
                             painterResource(id = R.drawable.baseline_arrow_right_alt_24),
-                            modifier = modifier.size(size = 45.dp),
+                            modifier = modifier
+                                .size(size = 45.dp)
+                                .rotate(posScrUiState.value.weather[it].windFromDirection.toFloat()),
                             contentDescription = "Vind retning",
                         )
                     }
