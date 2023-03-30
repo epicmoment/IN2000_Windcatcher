@@ -43,7 +43,7 @@ fun ThrowScreen(
     val throwViewModel = remember{ThrowViewModel()}
 
 
-    // Map View
+    // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
     AndroidView(
         { mapViewState },
@@ -88,7 +88,7 @@ fun ThrowScreen(
 
 
         Text(
-            text = "Height: ${throwViewModel.getPlaneHeight()}}")
+            text = "Height: ${"%.0f".format(throwViewModel.getPlaneHeight())}")
 
 
         Button(
