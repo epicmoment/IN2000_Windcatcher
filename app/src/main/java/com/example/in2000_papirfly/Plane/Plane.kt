@@ -16,7 +16,7 @@ data class Plane(
 
 data class FlightModifier(
     // This class is used in PlaneLogic when the effects of the weather is calculated, and are usually a number between 0 and 1
-    val windEffect: Double = 4.0
+    val windEffect: Double = 1.0
 
     // Ideas here are:
     // rainDropRateEffect

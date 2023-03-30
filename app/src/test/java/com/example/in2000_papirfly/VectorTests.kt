@@ -23,8 +23,17 @@ class VectorTests {
     fun test_calculateAngle(){
         val planeLogic = PlaneLogic(PlaneRepository(), WeatherRepository())
         val vector1 = listOf(1.0, 1.0)
-        val vector2 = listOf(1.0, 0.0)
-        assertEquals(45, planeLogic.calculateAngle(vector1, vector2))
+
+        assertEquals(45, planeLogic.calculateAngle(vector1).toInt())
+        val vector2 = listOf(-1.0, 1.0)
+
+        assertEquals(135, planeLogic.calculateAngle(vector2).toInt())
+        val vector3 = listOf(-1.0, -1.0)
+
+        assertEquals(225, planeLogic.calculateAngle(vector3).toInt())
+        val vector4 = listOf(1.0, -1.0)
+
+        assertEquals(315, planeLogic.calculateAngle(vector4).toInt())
     }
     @Test
     fun test_vectorLength(){

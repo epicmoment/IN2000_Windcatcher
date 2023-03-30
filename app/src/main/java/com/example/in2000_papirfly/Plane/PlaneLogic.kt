@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.Plane
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.calculateDestinationPoint
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
@@ -15,10 +16,10 @@ class PlaneLogic(
     private val dropRate = 0.8
     private val slowRate = 0.8
     private val planeStartHeight = 100.0
-    private val maxPlaneStartSpeed = 100.0
+    private val maxPlaneStartSpeed = 10.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
-    private val updateFrequency: Long = 1000
+    public val updateFrequency: Long = 1000
 
     fun update(){
         // Set up
@@ -35,8 +36,8 @@ class PlaneLogic(
 
 
 
-        val planeVector = calculateVector(plane.angle, newSpeed)
-        val windVector = calculateVector(wind.angle, wind.speed)
+        val planeVector = calculateVector(plane.angle, newSpeed / 110)
+        val windVector = calculateVector(wind.angle, wind.speed / 110)
 
         // Affect the trajectory of the plane
         val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, plane.flightModifier.windEffect))
@@ -45,19 +46,20 @@ class PlaneLogic(
         /*
         val newPlanePos = calculateDestinationPoint(
             distance = vectorLength(affectedPlaneVector),
-            angle = calculateAngle(affectedPlaneVector),
-            plane.pos
+            direction = calculateAngle(affectedPlaneVector),
+            currentPosition = GeoPoint(plane.pos[0], plane.pos[1])
         )
         */
 
-        val newPlanePos = addVectors(plane.pos, affectedPlaneVector)
+        val newVector = addVectors(plane.pos, affectedPlaneVector)
+        val newPlanePos = GeoPoint(newVector[0], newVector[1])
 
         // Calculate new plane angle
-        val newPlaneAngle = calculateAngle(subtractVectors(newPlanePos, plane.pos), listOf(1.0, 0.0))
+        val newPlaneAngle = calculateAngle(subtractVectors(listOf(newPlanePos.latitude, newPlanePos.longitude), plane.pos), listOf(1.0, 0.0))
 
 
         // Update planeState
-        planeRepository.update(plane.copy(pos = newPlanePos, speed = newSpeed, height = newHeight, angle = newPlaneAngle))
+        planeRepository.update(plane.copy(pos = listOf(newPlanePos.latitude, newPlanePos.longitude), speed = newSpeed, height = newHeight, angle = newPlaneAngle))
     }
 
     suspend fun throwPlane(speed: Double, angle: Double, startPos: GeoPoint){
@@ -71,6 +73,7 @@ class PlaneLogic(
         }
 
     }
+
 
 
     fun getPlanePos(): List<Double>{
@@ -104,7 +107,7 @@ class PlaneLogic(
         // TEMP //
         // Currently only affected by plane speed
         // if speed is low drop rate is high
-        return dropRate * getPlaneSpeed() / maxPlaneStartSpeed
+        return dropRate //* getPlaneSpeed() / maxPlaneStartSpeed / 110
     }
 
     private fun calculateSlowRate(): Double{
@@ -121,11 +124,38 @@ class PlaneLogic(
     // Help methods
 
 
-    fun calculateDestinationPoint(distance: Double, angle: Double, currentPos: List<Double>): List<Double>{
+    fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint{
         // This method is going to be replaced by the one Sivert has
         val coordinateDistance = distance / 110.0
-        return addVectors(currentPos, calculateVector(coordinateDistance, angle))
+        val newVector = addVectors(listOf(currentPosition.latitude, currentPosition.longitude), calculateVector(coordinateDistance, direction))
+        return GeoPoint(newVector[0], newVector[1])
     }
+
+
+
+    /* ChatGPT wrote the following function based on the following prompt:
+ * Hi! Can you write me a Kotlin function that takes the following inputs:
+ * distance (in kilometers), direction (in degrees), and coordinates (as latitude and longitude),
+ * and returns the new point (with latitude and longitude) you would end up at if you went the
+ * given direction for the given distance?
+ *//*
+    fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint {
+        // Julian addition
+        val correctedDirection = direction - 0.0
+
+        val R = 6371.0 // Earth's radius in km
+        val lat1 = currentPosition.latitude * PI / 180.0 // Convert latitude to radians
+        val lon1 = currentPosition.longitude * PI / 180.0 // Convert longitude to radians
+        val brng = correctedDirection * PI / 180.0 // Convert bearing to radians
+        val d = distance / R // Convert distance to angular distance in radians
+
+        val lat2 = asin(sin(lat1) * cos(d) + cos(lat1) * sin(d) * cos(brng))
+        val lon2 = lon1 + atan2(sin(brng) * sin(d) * cos(lat1), cos(d) - sin(lat1) * sin(lat2))
+
+        return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI) // Convert back to degrees
+    }
+    */
+
 
     fun calculateVector(angle: Double, magnitude: Double): List<Double>{
         val radianAngle = Math.toRadians(angle)
@@ -136,7 +166,11 @@ class PlaneLogic(
 
     fun calculateAngle(vector1: List<Double>, vector2: List<Double> = listOf(1.0, 0.0)): Double{
         // returns the angle of a vector given in degrees
-        return Math.toDegrees( acos(dotProduct(vector1, vector2) / (vectorLength(vector1) * vectorLength(vector2))) )
+        var newAngle =  Math.toDegrees( acos(dotProduct(vector1, vector2) / (vectorLength(vector1) * vectorLength(vector2))) )
+        if (vector1[1] < 0){
+            newAngle = 360.0 - newAngle
+        }
+        return newAngle
     }
 
     fun dotProduct(vector1: List<Double>, vector2: List<Double>): Double{
