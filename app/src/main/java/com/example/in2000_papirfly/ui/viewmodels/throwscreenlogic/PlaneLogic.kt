@@ -1,8 +1,9 @@
-package com.example.in2000_papirfly.Plane
+package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.calculateDestinationPoint
+import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.plane.WeatherRepository
+import com.example.in2000_papirfly.data.Plane
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
@@ -107,7 +108,7 @@ class PlaneLogic(
         // TEMP //
         // Currently only affected by plane speed
         // if speed is low drop rate is high
-        return dropRate //* getPlaneSpeed() / maxPlaneStartSpeed / 110
+        return dropRate * getPlaneSpeed() / maxPlaneStartSpeed
     }
 
     private fun calculateSlowRate(): Double{

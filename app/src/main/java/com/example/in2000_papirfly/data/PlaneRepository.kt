@@ -1,4 +1,4 @@
-package com.example.in2000_papirfly.Plane
+package com.example.in2000_papirfly.data
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf

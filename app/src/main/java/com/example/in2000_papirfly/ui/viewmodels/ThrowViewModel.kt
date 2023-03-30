@@ -1,11 +1,10 @@
-package com.example.in2000_papirfly.Plane
+package com.example.in2000_papirfly.ui.viewmodels
 
-import android.provider.SyncStateContract.Helpers.update
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.in2000_papirfly.data.Location
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.plane.WeatherRepository
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint

@@ -1,4 +1,4 @@
-package com.example.in2000_papirfly.Plane
+package com.example.in2000_papirfly.data
 
 import java.util.Vector
 import kotlin.math.acos
@@ -16,7 +16,7 @@ data class Plane(
 
 data class FlightModifier(
     // This class is used in PlaneLogic when the effects of the weather is calculated, and are usually a number between 0 and 1
-    val windEffect: Double = 1.0
+    val windEffect: Double = 0.2
 
     // Ideas here are:
     // rainDropRateEffect
