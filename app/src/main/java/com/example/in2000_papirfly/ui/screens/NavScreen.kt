@@ -10,11 +10,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
+import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 
 @Composable
 fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
     val screenState = viewModel.screenState.collectAsState()
+
+    val repository : WeatherRepositoryMVP = viewModel()
 
     val navController = rememberNavController()
 

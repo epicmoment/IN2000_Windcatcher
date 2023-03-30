@@ -13,7 +13,8 @@ import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import java.io.IOException
 
-val list = listOf<WeatherRepositoryDummy>(WeatherRepositoryDummy(
+val list = listOf<WeatherRepositoryDummy>(
+    WeatherRepositoryDummy(
         namePos = "Oslo", geoPoint = GeoPoint(59.944030, 10.719282)),
     WeatherRepositoryDummy(
         namePos = "Stavanger", geoPoint = GeoPoint(58.89729, 5.71185)),
