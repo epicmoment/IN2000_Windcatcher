@@ -28,7 +28,7 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         composable(route = "MainScreen") {
             MainScreen {
-                navController.navigate("PositionScreen")
+                navController.navigate("ThrowScreen")
             }
         }
 
