@@ -38,10 +38,6 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     onLoad: ((map: MapView) -> Unit)? = null
 ) {
-    // TODO
-    // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
-    val throwViewModel = remember{ThrowViewModel()}
-
 
     // Map View
     val mapViewState = rememberMapViewWithLifecycle()
@@ -52,17 +48,16 @@ fun ThrowScreen(
 
     mapViewState.controller.setCenter(selectedLocation)
 
+    // TODO
+    // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
+    val throwViewModel = remember{ThrowViewModel(selectedLocation, mapViewState)}
 
     // Wind arrow
     Image(
         painter = painterResource(id = R.drawable.arrow01),
         contentDescription = "TODO",
         modifier = Modifier
-            .rotate(
-                throwViewModel
-                    .getWindAngle()
-                    .toFloat()
-            )
+            .rotate((throwViewModel.getWindAngle() - 90).toFloat())
             .scale(0.2f)
     )
 
@@ -78,22 +73,18 @@ fun ThrowScreen(
             painter = painterResource(id = R.drawable.plane01),
             contentDescription = "TODO",
             modifier = Modifier
-                .rotate(
-                    throwViewModel
-                        .getPlaneAngle()
-                        .toFloat()
-                )
+                .rotate((throwViewModel.getPlaneAngle() - 90.0).toFloat())
                 .scale(throwViewModel.getPlaneScale())
         )
 
 
         Text(
-            text = "Height: ${throwViewModel.getPlaneHeight()}}")
+            text = "Height: ${"%.0f".format(throwViewModel.getPlaneHeight())}")
 
 
         Button(
             onClick = {
-                throwViewModel.throwPlane(selectedLocation);
+                throwViewModel.throwPlane();
             }
         ){
             Text("Throw")
