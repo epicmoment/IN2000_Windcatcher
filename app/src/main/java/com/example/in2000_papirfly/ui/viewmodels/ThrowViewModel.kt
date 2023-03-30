@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.data.Plane
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
