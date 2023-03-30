@@ -1,5 +1,7 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import android.view.MotionEvent
+import android.view.View
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -10,16 +12,16 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.in2000_papirfly.R
-import kotlin.math.*
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import kotlin.math.*
 
 
 //Entire code based on this: gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
 @Composable
-fun rememberMapViewWithLifecycle(): MapView {
+fun rememberMapViewWithLifecycle(location: GeoPoint): MapView {
     val context = LocalContext.current
     val mapView = remember {
         MapView(context).apply {
@@ -59,7 +61,7 @@ fun rememberMapViewWithLifecycle(): MapView {
     mapView.overlays.add(startMarker)
 
     // Moves the map to IFI as default
-    mapView.controller.setCenter(IFI)
+    mapView.controller.setCenter(location)
 
     // Restricts the map view to cover Norway
     mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
@@ -104,14 +106,15 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
 fun MapView(
     modifier: Modifier = Modifier,
     onLoad: ((map: MapView) -> Unit)? = null,
-    location: GeoPoint
+    location: GeoPoint,
+    scrollable: Boolean
 ) {
-    val mapViewState = rememberMapViewWithLifecycle()
+    val mapViewState = rememberMapViewWithLifecycle(location)
 
     AndroidView(
         { mapViewState },
         modifier
     ) { mapView -> onLoad?.invoke(mapView) }
 
-    mapViewState.controller.animateTo(location)
+//    mapViewState.controller.animateTo(location)
 }
