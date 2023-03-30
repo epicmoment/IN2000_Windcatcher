@@ -17,65 +17,39 @@ class PlaneLogic(
     private val dropRate = 0.8
     private val slowRate = 0.8
     private val planeStartHeight = 100.0
-    private val maxPlaneStartSpeed = 10.0
+    private val maxPlaneStartSpeed = 20.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
     public val updateFrequency: Long = 1000
 
     fun update(){
+    // This update method fetches the current plane state and uses the position, angle, speed
+    // and modifiers to calculate how it should be affected by the weather
+
         // Set up
         val wind = weatherRepository.windState.value
         val plane = planeRepository.planeState.value
+        val windVector = calculateVector(wind.angle, wind.speed )
 
-        // Calculate the effect of the weather based on
-        // weather data and plane modifiers
-        // Slow plane down every time
-        val newSpeed = plane.speed * calculateSlowRate()
-
-        // Decrease height based on the modifier
-        val newHeight = plane.height * calculateDropRate()
-
-
-
-        val planeVector = calculateVector(plane.angle, newSpeed / 110)
-        val windVector = calculateVector(wind.angle, wind.speed / 110)
-
-        // Affect the trajectory of the plane
-        val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, plane.flightModifier.windEffect))
+        // Calculate the modified trajectory of the plane
+        val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
+        val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, calculateWindEffect()))
 
         // Make new plane pos
-        /*
         val newPlanePos = calculateDestinationPoint(
             distance = vectorLength(affectedPlaneVector),
             direction = calculateAngle(affectedPlaneVector),
             currentPosition = GeoPoint(plane.pos[0], plane.pos[1])
         )
-        */
 
-        val newVector = addVectors(plane.pos, affectedPlaneVector)
-        val newPlanePos = GeoPoint(newVector[0], newVector[1])
-
-        // Calculate new plane angle
+        // Calculate new plane stats
         val newPlaneAngle = calculateAngle(subtractVectors(listOf(newPlanePos.latitude, newPlanePos.longitude), plane.pos), listOf(1.0, 0.0))
-
+        val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
+        val newPlaneSpeed = vectorLength(affectedPlaneVector)
 
         // Update planeState
-        planeRepository.update(plane.copy(pos = listOf(newPlanePos.latitude, newPlanePos.longitude), speed = newSpeed, height = newHeight, angle = newPlaneAngle))
+        planeRepository.update(plane.copy(pos = listOf(newPlanePos.latitude, newPlanePos.longitude), speed = newPlaneSpeed, height = newHeight, angle = newPlaneAngle))
     }
-
-    suspend fun throwPlane(speed: Double, angle: Double, startPos: GeoPoint){
-        // initialize plane
-        planeRepository.update(Plane(speed = speed, angle = angle, height = planeStartHeight, pos= listOf(startPos.latitude, startPos.longitude)))
-
-        while (planeIsFlying()) {
-            weatherRepository.updateWindState()
-            update()
-            delay(updateFrequency)
-        }
-
-    }
-
-
 
     fun getPlanePos(): List<Double>{
         return planeRepository.planeState.value.pos
@@ -94,21 +68,22 @@ class PlaneLogic(
     }
 
     fun getPlaneScale(): Float{
-        return (minPlaneScale + (maxPlaneScale - minPlaneScale) * (getPlaneHeight() / planeStartHeight)).toFloat()
+        return (minPlaneScale + (maxPlaneScale - minPlaneScale) * (planeState.value.height / planeStartHeight)).toFloat()
     }
 
     fun planeIsFlying(): Boolean{
         return planeRepository.planeState.value.height > 0.1
     }
 
-    private fun calculateDropRate(): Double{
+    private fun calculateDropRate(speed: Double): Double{
         // Should calculate how much or little the plane height should decrease
         // Should be a double in the range 0.0 - 1.0 if it should never gain height
 
         // TEMP //
         // Currently only affected by plane speed
         // if speed is low drop rate is high
-        return dropRate * getPlaneSpeed() / maxPlaneStartSpeed
+        return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))
+        //return dropRate * getPlaneSpeed() / maxPlaneStartSpeed
     }
 
     private fun calculateSlowRate(): Double{
@@ -121,33 +96,24 @@ class PlaneLogic(
         return weatherRepository.windState.value.angle
     }
 
-
-    // Help methods
-
-
-    fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint{
-        // This method is going to be replaced by the one Sivert has
-        val coordinateDistance = distance / 110.0
-        val newVector = addVectors(listOf(currentPosition.latitude, currentPosition.longitude), calculateVector(coordinateDistance, direction))
-        return GeoPoint(newVector[0], newVector[1])
+    fun calculateWindEffect(): Double{
+        return planeState.value.flightModifier.windEffect
     }
 
 
+    // Help methods
 
     /* ChatGPT wrote the following function based on the following prompt:
  * Hi! Can you write me a Kotlin function that takes the following inputs:
  * distance (in kilometers), direction (in degrees), and coordinates (as latitude and longitude),
  * and returns the new point (with latitude and longitude) you would end up at if you went the
  * given direction for the given distance?
- *//*
+ *//**/
     fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint {
-        // Julian addition
-        val correctedDirection = direction - 0.0
-
         val R = 6371.0 // Earth's radius in km
         val lat1 = currentPosition.latitude * PI / 180.0 // Convert latitude to radians
         val lon1 = currentPosition.longitude * PI / 180.0 // Convert longitude to radians
-        val brng = correctedDirection * PI / 180.0 // Convert bearing to radians
+        val brng = direction * PI / 180.0 // Convert bearing to radians
         val d = distance / R // Convert distance to angular distance in radians
 
         val lat2 = asin(sin(lat1) * cos(d) + cos(lat1) * sin(d) * cos(brng))
@@ -155,9 +121,9 @@ class PlaneLogic(
 
         return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI) // Convert back to degrees
     }
-    */
+    /**/
 
-
+    // This vector stuff should probably be extracted
     fun calculateVector(angle: Double, magnitude: Double): List<Double>{
         val radianAngle = Math.toRadians(angle)
         val x = magnitude * cos(radianAngle)

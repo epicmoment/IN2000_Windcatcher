@@ -80,4 +80,8 @@ class ThrowViewModel(
     fun getWindAngle(): Double{
         return weatherRepository.windState.value.angle
     }
+
+    fun getWindSpeed(): Double{
+        return weatherRepository.windState.value.speed
+    }
 }
