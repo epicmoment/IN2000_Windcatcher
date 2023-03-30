@@ -4,37 +4,37 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class NowcastData(
-    val geometry: Geometry,
-    val properties: Properties,
+    val geometry: NCGeometry,
+    val properties: NCProperties,
     val type: String
 )
 
 @Serializable
-data class Geometry(
+data class NCGeometry(
     val coordinates: List<Double>,
     val type: String
 )
 
 @Serializable
-data class Properties(
-    val meta: Meta,
-    val timeseries: List<WeatherTime>
+data class NCProperties(
+    val meta: NCMeta,
+    val timeseries: List<NCWeatherTime>
 )
 
 @Serializable
-data class Meta(
+data class NCMeta(
     val radar_coverage: String,
-    val units: Units,
+    val units: NCUnits,
     val updated_at: String
 )
 
 @Serializable
-data class WeatherTime(
-    val data: Data,
+data class NCWeatherTime(
+    val data: NCData,
     val time: String
 )
 @Serializable
-data class Units(
+data class NCUnits(
     val air_temperature: String,
     val precipitation_amount: String,
     val precipitation_rate: String,
@@ -45,24 +45,24 @@ data class Units(
 )
 
 @Serializable
-data class Data(
-    val instant: Instant,
-    val next_1_hours: Next1Hours? = null
+data class NCData(
+    val instant: NCInstant,
+    val next_1_hours: NCNext1Hours? = null
 )
 
 @Serializable
-data class Instant(
-    val details: Details
+data class NCInstant(
+    val details: NCDetails
 )
 
 @Serializable
-data class Next1Hours(
-    val details: DetailsX,
-    val summary: Summary
+data class NCNext1Hours(
+    val details: NCPrecipitationNext1Hours,
+    val summary: NCSummary
 )
 
 @Serializable
-data class Details(
+data class NCDetails(
     val air_temperature: Double = 0.0,
     val precipitation_rate: Double = 0.0,
     val relative_humidity: Double = 0.0,
@@ -72,11 +72,11 @@ data class Details(
 )
 
 @Serializable
-data class DetailsX(
+data class NCPrecipitationNext1Hours(
     val precipitation_amount: Double
 )
 
 @Serializable
-data class Summary(
+data class NCSummary(
     val symbol_code: String
 )

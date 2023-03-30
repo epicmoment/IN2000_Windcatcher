@@ -1,4 +1,4 @@
-package com.example.in2000_papirfly.ui
+package com.example.in2000_papirfly.ui.screens
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
