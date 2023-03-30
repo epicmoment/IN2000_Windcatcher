@@ -8,7 +8,7 @@ import kotlin.math.sin
 data class Plane(
     val flightModifier: FlightModifier = FlightModifier(),
     val pos : List<Double> = listOf(59.943325914913615, 10.717908529673489),
-    val launched : Boolean = false,
+    val flying : Boolean = false,
     val angle : Double = 45.0,  // given in degrees
     val speed : Double = 0.0,
     val height : Double = 100.0
