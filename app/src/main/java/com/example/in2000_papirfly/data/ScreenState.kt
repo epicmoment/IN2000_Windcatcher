@@ -1,5 +1,7 @@
 package com.example.in2000_papirfly.data
 
-data class ScreenState (
-    val location : Location = Location(0.0, 0.0)
+import org.osmdroid.util.GeoPoint
+
+data class ScreenState(
+    val location: GeoPoint = GeoPoint(0.0, 0.0)
 )
