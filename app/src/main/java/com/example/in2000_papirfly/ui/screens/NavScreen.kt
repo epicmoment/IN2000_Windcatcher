@@ -36,12 +36,16 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         composable(route = "PositionScreen") {
 
-            PositionScreen { newLocation ->
+            PositionScreen(onNextPage =  { newLocation ->
 
                 viewModel.setLocation(newLocation)
                 navController.navigate("ThrowScreen")
 
-            }
+            },
+                getWeather = { location: String ->
+                    repository.getWeatherAt(location)
+                }
+            )
 
         }
 

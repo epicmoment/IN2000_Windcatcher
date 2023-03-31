@@ -24,7 +24,6 @@ class ThrowViewModel(
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
 
-
     fun throwPlane(){
         // Calculate or get the angle and speed the plane should be launched at
         // TODO //
@@ -45,11 +44,11 @@ class ThrowViewModel(
                 // Animate the map
                 mapViewState.controller.animateTo(GeoPoint(planeState.value.pos[0], planeState.value.pos[1]))
                 delay(planeLogic.updateFrequency)
+                // This fixes the map glitching
+                previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
             }
-
         }
     }
-
 
     // Lifting out fetch methods
     fun getPlanePos(): List<Double>{
