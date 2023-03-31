@@ -19,12 +19,11 @@ val list = listOf<WeatherRepositoryDummy>(
     WeatherRepositoryDummy(
         namePos = "Stavanger", geoPoint = GeoPoint(58.89729, 5.71185)),
     WeatherRepositoryDummy(
-        namePos = "Galdhøpiggen", geoPoint = GeoPoint(61.63681, 8.31250))
+        namePos = "Galdhøpiggen", geoPoint = GeoPoint(61.63630, 8.31289))
 )
 
 class PositionScreenViewModel: ViewModel() {
-    private var _posScrUiState: MutableStateFlow<PositionScreenUiState> = MutableStateFlow(PositionScreenUiState(list)
-    )
+    private var _posScrUiState: MutableStateFlow<PositionScreenUiState> = MutableStateFlow(PositionScreenUiState(list))
     var posScrUiState: StateFlow<PositionScreenUiState> = _posScrUiState.asStateFlow()
 
     init {
