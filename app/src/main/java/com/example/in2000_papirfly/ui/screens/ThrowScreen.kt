@@ -49,8 +49,8 @@ fun ThrowScreen(
 
     Column(){
         Text(text = "Throw Screen wow!")
-        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()}")
-        Text(text = "Plane angle: ${throwViewModel.getPlaneAngle().toFloat()}")
+        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
+        Text(text = "Plane angle: ${throwViewModel.getPlaneAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getPlaneSpeed().toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.getPlanePos()[0].toFloat()}\n${throwViewModel.getPlanePos()[1].toFloat()}")
 
         // Paper plane

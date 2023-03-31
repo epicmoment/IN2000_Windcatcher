@@ -8,6 +8,8 @@ class WeatherRepository {
     val windState : State<Wind> = _windState
 
     fun updateWindState(){
-        _windState.value = Wind(Math.random()*10, Math.random()*360)
+        var plusMinus = { random: Double -> if (random < 0.5)  -1 else 1 }
+        val newAngle = windState.value.angle + Math.random()*90 * plusMinus(Math.random())
+        _windState.value = Wind(Math.random()*10, newAngle)
     }
 }
