@@ -52,13 +52,13 @@ fun rememberMapViewWithLifecycle(): MapView {
     mapView.controller.setZoom(18.0)
 
     // Creates a GeoPoint at IFI and adds a marker there
-    val IFI = GeoPoint(59.9441, 10.7191)
-    val startMarker = Marker(mapView)
-
-    startMarker.position = IFI
-    startMarker.title = "Tårnet på IFI!"
-    startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    mapView.overlays.add(startMarker)
+//    val IFI = GeoPoint(59.9441, 10.7191)
+//    val startMarker = Marker(mapView)
+//
+//    startMarker.position = IFI
+//    startMarker.title = "Tårnet på IFI!"
+//    startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+//    mapView.overlays.add(startMarker)
 
     // Moves the map to IFI as default
 //    mapView.controller.setCenter()
@@ -87,6 +87,16 @@ fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direc
     val lon2 = lon1 + atan2(sin(brng) * sin(d) * cos(lat1), cos(d) - sin(lat1) * sin(lat2))
 
     return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI) // Convert back to degrees
+}
+
+fun lockMapToPosition(mapViewState: MapView, position: GeoPoint) {
+    mapViewState.setScrollableAreaLimitLatitude(position.latitude, position.latitude, 0)
+    mapViewState.setScrollableAreaLimitLongitude(position.longitude, position.longitude, 0)
+}
+
+fun unlockMap(mapViewState: MapView) {
+    mapViewState.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
+    mapViewState.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
 }
 
 @Composable

@@ -31,11 +31,12 @@ fun ThrowScreen(
         Modifier
     ) { mapView -> onLoad?.invoke(mapView) }
 
-    mapViewState.controller.setCenter(selectedLocation)
-
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{ ThrowViewModel(selectedLocation, mapViewState) }
+
+    // This fixes the map glitching
+    mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
 
     // Wind arrow
     Image(

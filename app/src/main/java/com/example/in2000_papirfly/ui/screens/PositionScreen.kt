@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
+import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 import org.osmdroid.util.GeoPoint
 
@@ -24,7 +25,8 @@ import org.osmdroid.util.GeoPoint
 fun PositionScreen(
     viewModel: PositionScreenViewModel = viewModel(),
     modifier: Modifier = Modifier,
-    onNextPage : (GeoPoint) -> Unit
+    onNextPage : (GeoPoint) -> Unit,
+    getWeather : (String) -> Weather
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()
