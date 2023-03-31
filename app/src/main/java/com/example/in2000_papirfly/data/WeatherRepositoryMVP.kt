@@ -64,29 +64,29 @@ class WeatherRepositoryMVP : ViewModel() {
             ).properties.timeseries[0].data.instant.details
 
             val galdData : NCDetails = getNowcastData(
-                    lat = 61.63681,
-                    lon = 8.31250
+                    lat = 61.63630,
+                    lon = 8.31289
             ).properties.timeseries[0].data.instant.details
 
             val osloWeather = Weather(
                 windSpeed = osloData.wind_speed,
                 windAngle = osloData.wind_from_direction,
                 rain = osloData.precipitation_rate,
-                temperature = osloData.precipitation_rate
+                temperature = osloData.air_temperature
             )
 
             val stavangerWeather = Weather(
                 windSpeed = stavData.wind_speed,
                 windAngle = stavData.wind_from_direction,
                 rain = stavData.precipitation_rate,
-                temperature = stavData.precipitation_rate
+                temperature = stavData.air_temperature
             )
 
             val galdhopiggenWeather = Weather(
                 windSpeed = galdData.wind_speed,
                 windAngle = galdData.wind_from_direction,
                 rain = galdData.precipitation_rate,
-                temperature = galdData.precipitation_rate
+                temperature = galdData.air_temperature
             )
 
             val unixTimeStamp = System.currentTimeMillis() / 1000L
@@ -99,10 +99,6 @@ class WeatherRepositoryMVP : ViewModel() {
                     lastUpdateUnix = unixTimeStamp
                 )
             }
-
         }
-
     }
-
-
 }

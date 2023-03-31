@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
+import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 import org.osmdroid.util.GeoPoint
 
@@ -24,16 +26,21 @@ import org.osmdroid.util.GeoPoint
 fun PositionScreen(
     viewModel: PositionScreenViewModel = viewModel(),
     modifier: Modifier = Modifier,
-    onNextPage : (GeoPoint) -> Unit
+    onNextPage : (GeoPoint) -> Unit,
+    getWeather: (String) -> Weather
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()
+
+    val locationList = listOf("Oslo", "Stavanger", "Galdhøpiggen")
 
     Column(horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = modifier
             .fillMaxSize()) {
-            items(posScrUiState.value.weather.size){
+            //items(posScrUiState.value.weather.size){
+            items(locationList.size) {
+                val location = getWeather(locationList[it])
                 Card(
                     shape = MaterialTheme.shapes.medium,
                     modifier = modifier
@@ -64,15 +71,16 @@ fun PositionScreen(
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            text = "${"%.0f".format(posScrUiState.value.weather[it].temperature)}°C" ,
+                            text = "${"%.0f".format(location.temperature)}°C",
+                            //text = "${"%.0f".format(posScrUiState.value.weather[it].temperature)}°C" ,
                             //text = "25°C",
                             fontSize = 30.sp
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                            //text = "${posScrUiState.value.weather.windSpeed}(${posScrUiState.value.weather.gust}m/s)",
-                            text = "${"%.0f".format(posScrUiState.value.weather[it].windSpeed)}m/s",
+                            text = "${"%.0f".format(location.windSpeed)}m/s",
+                            //text = "${"%.0f".format(posScrUiState.value.weather[it].windSpeed)}m/s",
                             //text = "4(6) m/s",
                             fontSize = 20.sp
                         )
@@ -81,7 +89,8 @@ fun PositionScreen(
                             painterResource(id = R.drawable.baseline_arrow_right_alt_24),
                             modifier = modifier
                                 .size(size = 45.dp)
-                                .rotate(posScrUiState.value.weather[it].windFromDirection.toFloat()),
+                                .rotate(location.windAngle.toFloat() + 90.toFloat()),
+                                //.rotate(posScrUiState.value.weather[it].windFromDirection.toFloat()),
                             contentDescription = "Vind retning",
                         )
                     }
