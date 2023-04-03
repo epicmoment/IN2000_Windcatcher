@@ -6,6 +6,8 @@ import com.example.in2000_papirfly.data.Plane
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.drawPlanePath
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
@@ -41,13 +43,21 @@ class ThrowViewModel(
             while (planeIsFlying()) {
                 weatherRepository.updateWindState()
                 planeLogic.update()
+                nextPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
                 // Animate the map
-                mapViewState.controller.animateTo(GeoPoint(planeState.value.pos[0], planeState.value.pos[1]))
+                mapViewState.controller.animateTo(nextPlanePos)
 
                 delay(planeLogic.updateFrequency)
+
+                // Draws the plane path
+                drawPlanePath(mapViewState, previousPlanePos, nextPlanePos)
+
                 // This fixes the map glitching
                 previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
             }
+
+            // Draws goal flag
+            drawGoalMarker(mapViewState, previousPlanePos)
         }
     }
 

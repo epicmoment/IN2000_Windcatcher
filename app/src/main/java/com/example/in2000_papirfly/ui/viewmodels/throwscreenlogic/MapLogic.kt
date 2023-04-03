@@ -1,8 +1,7 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
-import android.os.Handler
-import android.view.MotionEvent
-import android.view.View
+
+import android.graphics.Color
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -10,15 +9,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.in2000_papirfly.R
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polyline
+import kotlin.coroutines.coroutineContext
 import kotlin.math.*
 
 
@@ -81,6 +81,23 @@ fun lockMapToPosition(mapViewState: MapView, position: GeoPoint) {
 fun unlockMap(mapViewState: MapView) {
     mapViewState.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
     mapViewState.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
+}
+
+fun drawPlanePath(mapViewState: MapView, origin: GeoPoint, destination: GeoPoint) {
+    val points = listOf(origin, destination)
+    val polyline = Polyline(mapViewState)
+    polyline.outlinePaint.color = Color.RED
+    polyline.setPoints(points)
+    mapViewState.overlays.add(polyline)
+}
+
+fun drawGoalMarker(mapViewState: MapView, position: GeoPoint) {
+    val marker = Marker(mapViewState)
+
+    marker.position = position
+    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_flag_24)
+    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    mapViewState.overlays.add(marker)
 }
 
 @Composable
