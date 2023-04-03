@@ -47,6 +47,22 @@ class WeatherRepositoryMVP : ViewModel() {
 
     }
 
+    suspend fun getWeatherAtPoint(latitude : Double, longitude : Double) : Weather {
+
+        val pointData = getNowcastData(
+            lat = latitude,
+            lon = longitude
+        ).properties.timeseries[0].data.instant.details
+
+        return Weather(
+            windSpeed = pointData.wind_speed,
+            windAngle = pointData.wind_from_direction,
+            rain = pointData.precipitation_rate,
+            temperature = pointData.air_temperature
+        )
+
+    }
+
     // dette er helt forferdelig, i know. Gjentakende kode, hardkoding, outofbounds, osv
     // Midlertidig for MVPen lol
     private fun updateWeather() {
