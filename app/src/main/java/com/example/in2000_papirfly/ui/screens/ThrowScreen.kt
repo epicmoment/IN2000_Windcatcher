@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly.ui.screens
 
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.Button
@@ -13,15 +14,23 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.WeatherRepositoryMVP
+import com.example.in2000_papirfly.data.WeatherState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
+
+@SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,
-    onLoad: ((map: MapView) -> Unit)? = null
+    onLoad: ((map: MapView) -> Unit)? = null,
+    getWeather: (location: String) -> Weather,
+    weather: Weather
 ) {
 
     // fun Map View() {
@@ -33,7 +42,13 @@ fun ThrowScreen(
 
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
-    val throwViewModel = remember{ ThrowViewModel(selectedLocation, mapViewState) }
+    val throwViewModel = remember{
+        ThrowViewModel(
+            selectedLocation,
+            mapViewState,
+            getWeather = getWeather
+        )
+    }
 
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
@@ -43,7 +58,8 @@ fun ThrowScreen(
         painter = painterResource(id = R.drawable.arrow01),
         contentDescription = "TODO",
         modifier = Modifier
-            .rotate((throwViewModel.getWindAngle() - 90).toFloat())
+            //.rotate((throwViewModel.getWindAngle() - 90).toFloat())
+            .rotate((weatherState.value.oslo.windAngle - 90).toFloat())
             .scale(0.2f)
     )
 

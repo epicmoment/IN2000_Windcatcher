@@ -48,7 +48,13 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         composable(route = "ThrowScreen") {
             val pos = GeoPoint(screenState.value.location.latitude, screenState.value.location.longitude)
-            ThrowScreen(pos)
+            ThrowScreen(
+                selectedLocation = pos,
+                getWeather = { location: String ->
+                    repository.getWeatherAt(location)
+                },
+                weather = repository.weatherState.value
+            )
 
         }
 

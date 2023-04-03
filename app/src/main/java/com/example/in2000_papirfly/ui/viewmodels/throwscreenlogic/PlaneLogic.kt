@@ -4,13 +4,15 @@ import androidx.lifecycle.ViewModel
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.data.Plane
+import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 
 class PlaneLogic(
     private val planeRepository : PlaneRepository,
-    private val weatherRepository: WeatherRepository
+    val getWeather: (location: String) -> Weather
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState
@@ -21,15 +23,17 @@ class PlaneLogic(
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
     val updateFrequency: Long = 1000
+    val zeroDegreeAngle = listOf(1.0, 0.0)
 
     fun update(){
     // This update method fetches the current plane state and uses the position, angle, speed
     // and modifiers to calculate how it should be affected by the weather
 
         // Set up
-        val wind = weatherRepository.windState.value
         val plane = planeRepository.planeState.value
-        val windVector = calculateVector(wind.angle, wind.speed )
+        //val weather = weatherRepository.getWeatherAt("Oslo")    // TODO // This should use the current plane.pos coordinates to fetch the right weather
+        val weather = getWeather("Oslo")
+        val windVector = calculateVector(weather.windAngle, weather.windSpeed)
 
         // Calculate the modified trajectory of the plane
         val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
@@ -43,12 +47,24 @@ class PlaneLogic(
         )
 
         // Calculate new plane stats
-        val newPlaneAngle = calculateAngle(subtractVectors(listOf(newPlanePos.latitude, newPlanePos.longitude), plane.pos), listOf(1.0, 0.0))
+        val newPlaneAngle = calculateAngle(
+            subtractVectors(
+                listOf(newPlanePos.latitude, newPlanePos.longitude),
+                plane.pos
+            )
+        )
         val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
 
         // Update planeState
-        planeRepository.update(plane.copy(pos = listOf(newPlanePos.latitude, newPlanePos.longitude), speed = newPlaneSpeed, height = newHeight, angle = newPlaneAngle))
+        planeRepository.update(
+            plane.copy(
+                pos = listOf(newPlanePos.latitude, newPlanePos.longitude),
+                speed = newPlaneSpeed,
+                height = newHeight,
+                angle = newPlaneAngle
+            )
+        )
     }
 
 
@@ -114,7 +130,7 @@ class PlaneLogic(
         return listOf(x, y)
     }
 
-    fun calculateAngle(vector1: List<Double>, vector2: List<Double> = listOf(1.0, 0.0)): Double{
+    fun calculateAngle(vector1: List<Double>, vector2: List<Double> = zeroDegreeAngle): Double{
         // returns the angle of a vector given in degrees
         var newAngle =  Math.toDegrees( acos(dotProduct(vector1, vector2) / (vectorLength(vector1) * vectorLength(vector2))) )
         if (vector1[1] < 0){
