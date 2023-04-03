@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import android.os.Handler
 import android.view.MotionEvent
 import android.view.View
 import androidx.compose.runtime.Composable
@@ -12,6 +13,8 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.in2000_papirfly.R
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
@@ -70,25 +73,6 @@ fun rememberMapViewWithLifecycle(): MapView {
     return mapView
 }
 
-/* ChatGPT wrote the following function based on the following prompt:
- * Hi! Can you write me a Kotlin function that takes the following inputs:
- * distance (in kilometers), direction (in degrees), and coordinates (as latitude and longitude),
- * and returns the new point (with latitude and longitude) you would end up at if you went the
- * given direction for the given distance?
- */
-fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint {
-    val R = 6371.0 // Earth's radius in km
-    val lat1 = currentPosition.latitude * PI / 180.0 // Convert latitude to radians
-    val lon1 = currentPosition.longitude * PI / 180.0 // Convert longitude to radians
-    val brng = direction * PI / 180.0 // Convert bearing to radians
-    val d = distance / R // Convert distance to angular distance in radians
-
-    val lat2 = asin(sin(lat1) * cos(d) + cos(lat1) * sin(d) * cos(brng))
-    val lon2 = lon1 + atan2(sin(brng) * sin(d) * cos(lat1), cos(d) - sin(lat1) * sin(lat2))
-
-    return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI) // Convert back to degrees
-}
-
 fun lockMapToPosition(mapViewState: MapView, position: GeoPoint) {
     mapViewState.setScrollableAreaLimitLatitude(position.latitude, position.latitude, 0)
     mapViewState.setScrollableAreaLimitLongitude(position.longitude, position.longitude, 0)
@@ -116,8 +100,7 @@ fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =
 fun MapView(
     modifier: Modifier = Modifier,
     onLoad: ((map: MapView) -> Unit)? = null,
-    location: GeoPoint,
-//    scrollable: Boolean
+    location: GeoPoint
 ) {
     val mapViewState = rememberMapViewWithLifecycle()
 

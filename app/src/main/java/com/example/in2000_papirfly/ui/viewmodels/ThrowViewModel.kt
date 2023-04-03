@@ -43,6 +43,7 @@ class ThrowViewModel(
                 planeLogic.update()
                 // Animate the map
                 mapViewState.controller.animateTo(GeoPoint(planeState.value.pos[0], planeState.value.pos[1]))
+
                 delay(planeLogic.updateFrequency)
                 // This fixes the map glitching
                 previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])

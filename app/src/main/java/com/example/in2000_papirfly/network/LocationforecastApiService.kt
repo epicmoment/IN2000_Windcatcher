@@ -39,8 +39,8 @@ val locationforecastClient = HttpClient(Android) {
  * LocationforecastData-object
  */
 suspend fun getLocationforecastData(lat: Double, lon: Double): LocationforecastData {
-    val roundedLat = String.format("%.4f", lat).toDouble()
-    val roundedLon = String.format("%.4f", lon).toDouble()
+    val roundedLat = kotlin.math.round(lat * 10000.0) / 10000.0
+    val roundedLon = kotlin.math.round(lon * 10000.0) / 10000.0
 
     return locationforecastClient.get(LocationforecastURL.urlBuilder(roundedLat, roundedLon)) {
         headers {
