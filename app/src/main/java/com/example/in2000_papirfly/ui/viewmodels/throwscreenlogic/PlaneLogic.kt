@@ -33,7 +33,7 @@ class PlaneLogic(
         val plane = planeRepository.planeState.value
         //val weather = weatherRepository.getWeatherAt("Oslo")    // TODO // This should use the current plane.pos coordinates to fetch the right weather
         val weather = getWeather("Oslo")
-        val windVector = calculateVector(weather.windAngle, weather.windSpeed)
+        val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
 
         // Calculate the modified trajectory of the plane
         val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )

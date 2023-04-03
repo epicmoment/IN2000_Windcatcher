@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.Plane
@@ -16,11 +17,12 @@ import org.osmdroid.views.MapView
 class ThrowViewModel(
     var selectedLocation: GeoPoint,
     val mapViewState: MapView,
-    val getWeather: (location: String) -> Weather
+    val getWeather: (location: String) -> Weather,
+    val planeRepository: PlaneRepository
 ): ViewModel() {
     // TODO
     // I'm making a lot of new ViewModel objects that should be made somewhere else here
-    val planeRepository = PlaneRepository()
+    //val planeRepository = PlaneRepository()
     private val planeLogic = PlaneLogic(planeRepository, getWeather)
     val planeState = planeLogic.planeState
     var previousPlanePos: GeoPoint = selectedLocation
@@ -30,7 +32,7 @@ class ThrowViewModel(
         // Calculate or get the angle and speed the plane should be launched at
         // TODO //
         val speed = 10.0
-        val angle = 45.0
+        val angle = 0.0
         val planeStartHeight = 100.0
         // initialize plane
         planeRepository.update(
@@ -62,7 +64,7 @@ class ThrowViewModel(
         return planeState.value.pos
     }
 
-    fun getPlaneAngle(): Double{
+    suspend fun getPlaneAngle(): Double{
         return planeState.value.angle
     }
 

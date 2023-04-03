@@ -12,12 +12,11 @@ class PlaneRepository(){
     private val _planeState = MutableStateFlow(Plane())
     val planeState : StateFlow<Plane> = _planeState.asStateFlow()
 
-    /*
-    private val _planeState = mutableStateOf(Plane())
-    val planeState : State<Plane> = _planeState
-    */
     fun update(newPlane : Plane){
-        //_planeState.value = newPlane
         _planeState.update { _ -> newPlane }
+    }
+
+    fun getCurrentPlane(): Plane{
+        return planeState.value
     }
 }
