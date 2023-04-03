@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
@@ -19,6 +20,7 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
     val screenState = viewModel.screenState.collectAsState()
 
     val repository : WeatherRepositoryMVP = viewModel()
+    val planeRepository = PlaneRepository()     // TODO // Burde bli flyttet, dependency injection
 
     val navController = rememberNavController()
 
@@ -52,7 +54,13 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
         composable(route = "ThrowScreen") {
             val pos = GeoPoint(screenState.value.location.latitude, screenState.value.location.longitude)
-            ThrowScreen(pos)
+            ThrowScreen(
+                selectedLocation = pos,
+                getWeather = { location: String ->
+                    repository.getWeatherAt(location)
+                },
+                planeRepository = planeRepository
+            )
 
         }
 
