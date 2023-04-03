@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,7 +15,7 @@ import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 
 @Composable
-fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
+fun NavScreen(viewModel : ScreenStateViewModel = viewModel(), context : Context) {
 
     val screenState = viewModel.screenState.collectAsState()
 
@@ -44,7 +45,9 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
                 getWeather = { location: String ->
                 repository.getWeatherAt(location)
-                }
+                },
+
+                context = context
 
             )
 

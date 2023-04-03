@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.screens
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,7 +28,8 @@ fun PositionScreen(
     viewModel: PositionScreenViewModel = viewModel(),
     modifier: Modifier = Modifier,
     onNextPage : (GeoPoint) -> Unit,
-    getWeather: (String) -> Weather
+    getWeather: (String) -> Weather,
+    context : Context
 ) {
 
     val posScrUiState = viewModel.posScrUiState.collectAsState()
@@ -84,9 +86,9 @@ fun PositionScreen(
                             //text = "4(6) m/s",
                             fontSize = 20.sp
                         )
-
+                        val id = context.resources.getIdentifier("clear_day_48px", "drawable", context.packageName)
                         Icon(
-                            painterResource(id = R.drawable.baseline_arrow_right_alt_24),
+                            painterResource(id = id),
                             modifier = modifier
                                 .size(size = 45.dp)
                                 .rotate(location.windAngle.toFloat() + 90.toFloat()),
