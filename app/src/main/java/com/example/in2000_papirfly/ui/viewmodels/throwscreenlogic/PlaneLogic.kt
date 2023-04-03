@@ -12,8 +12,6 @@ import kotlin.math.*
 
 class PlaneLogic(
     val planeRepository : PlaneRepository,
-    val weatherRepository: WeatherRepositoryMVP,
-    val getWeather: (location: String) -> Weather
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState
@@ -24,11 +22,14 @@ class PlaneLogic(
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
     val updateFrequency: Long = 1000
+    val distanceMultiplier = 1000
     val zeroDegreeAngle = listOf(1.0, 0.0)
 
     suspend fun update(weather: Weather){
     // This update method fetches the current plane state and uses the position, angle, speed
     // and modifiers to calculate how it should be affected by the weather
+    // Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
+    // is multiplied by a constant, distanceMultiplier (probably valued at 1000)
 
         // Set up
         val plane = planeRepository.planeState.value
@@ -39,21 +40,15 @@ class PlaneLogic(
         val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, calculateWindEffect()))
 
         // Make new plane pos
-        val newPlanePos = calculateDestinationPoint(
-            distance = vectorLength(affectedPlaneVector),
-            direction = calculateAngle(affectedPlaneVector),
-            currentPosition = GeoPoint(plane.pos[0], plane.pos[1])
+        val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
+            vectorLength(affectedPlaneVector) * distanceMultiplier,
+            calculateAngle(affectedPlaneVector)
         )
 
         // Calculate new plane stats
-        val newPlaneAngle = calculateAngle(
-            subtractVectors(
-                listOf(newPlanePos.latitude, newPlanePos.longitude),
-                plane.pos
-            )
-        )
-        val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
+        val newPlaneAngle = calculateAngle(affectedPlaneVector)
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
+        val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
 
         // Update planeState with the calculated changes
         planeRepository.update(
@@ -100,26 +95,6 @@ class PlaneLogic(
 
 
     // Help methods
-
-    /* ChatGPT wrote the following function based on the following prompt:
- * Hi! Can you write me a Kotlin function that takes the following inputs:
- * distance (in kilometers), direction (in degrees), and coordinates (as latitude and longitude),
- * and returns the new point (with latitude and longitude) you would end up at if you went the
- * given direction for the given distance?
- *//**/
-    fun calculateDestinationPoint(currentPosition: GeoPoint, distance: Double, direction: Double): GeoPoint {
-        val R = 6371.0 // Earth's radius in km
-        val lat1 = currentPosition.latitude * PI / 180.0 // Convert latitude to radians
-        val lon1 = currentPosition.longitude * PI / 180.0 // Convert longitude to radians
-        val brng = direction * PI / 180.0 // Convert bearing to radians
-        val d = distance / R // Convert distance to angular distance in radians
-
-        val lat2 = asin(sin(lat1) * cos(d) + cos(lat1) * sin(d) * cos(brng))
-        val lon2 = lon1 + atan2(sin(brng) * sin(d) * cos(lat1), cos(d) - sin(lat1) * sin(lat2))
-
-        return GeoPoint(lat2 * 180.0 / PI, lon2 * 180.0 / PI) // Convert back to degrees
-    }
-    /**/
 
     // This vector stuff should probably be extracted
     fun calculateVector(angle: Double, magnitude: Double): List<Double>{
