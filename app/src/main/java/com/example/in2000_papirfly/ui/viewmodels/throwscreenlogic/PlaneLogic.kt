@@ -11,7 +11,8 @@ import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 
 class PlaneLogic(
-    private val planeRepository : PlaneRepository,
+    val planeRepository : PlaneRepository,
+    val weatherRepository: WeatherRepositoryMVP,
     val getWeather: (location: String) -> Weather
 ) : ViewModel() {
 
@@ -25,14 +26,12 @@ class PlaneLogic(
     val updateFrequency: Long = 1000
     val zeroDegreeAngle = listOf(1.0, 0.0)
 
-    fun update(){
+    suspend fun update(weather: Weather){
     // This update method fetches the current plane state and uses the position, angle, speed
     // and modifiers to calculate how it should be affected by the weather
 
         // Set up
         val plane = planeRepository.planeState.value
-        //val weather = weatherRepository.getWeatherAt("Oslo")    // TODO // This should use the current plane.pos coordinates to fetch the right weather
-        val weather = getWeather("Oslo")
         val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
 
         // Calculate the modified trajectory of the plane
@@ -56,7 +55,7 @@ class PlaneLogic(
         val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
 
-        // Update planeState
+        // Update planeState with the calculated changes
         planeRepository.update(
             plane.copy(
                 pos = listOf(newPlanePos.latitude, newPlanePos.longitude),

@@ -17,9 +17,11 @@ import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
@@ -29,6 +31,7 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     onLoad: ((map: MapView) -> Unit)? = null,
     getWeather: (location: String) -> Weather,
+    weatherRepository: WeatherRepositoryMVP,
     planeRepository: PlaneRepository
 ) {
 
@@ -46,7 +49,8 @@ fun ThrowScreen(
             selectedLocation,
             mapViewState,
             getWeather = getWeather,
-            planeRepository = planeRepository
+            planeRepository = planeRepository,
+            weatherRepository = weatherRepository
         )
     }
 
@@ -63,7 +67,10 @@ fun ThrowScreen(
     )
 
 
-    Column(){
+    Column {
+        val planeState = throwViewModel.planeState.collectAsState()
+        val planePosLatitude = planeState.value.pos[0].toFloat()
+        val planePosLongitude = planeState.value.pos[1].toFloat()
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
