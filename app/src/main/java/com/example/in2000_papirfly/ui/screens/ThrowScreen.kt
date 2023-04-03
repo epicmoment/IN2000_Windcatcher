@@ -4,12 +4,16 @@ package com.example.in2000_papirfly.ui.screens
 import android.annotation.SuppressLint
 import android.util.Half.toFloat
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -66,17 +70,11 @@ fun ThrowScreen(
             .scale(0.2f)
     )
 
-
-    Column {
-        val planeState = throwViewModel.planeState.collectAsState()
-        val planePosLatitude = planeState.value.pos[0].toFloat()
-        val planePosLongitude = planeState.value.pos[1].toFloat()
-        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
-        Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
-        Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-
-
-        // Paper plane
+    // Paper plane
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
         Image(
             painter = painterResource(id = R.drawable.plane01),
             contentDescription = "TODO",
@@ -84,6 +82,13 @@ fun ThrowScreen(
                 .rotate((throwViewModel.planeState.collectAsState().value.angle).toFloat())
                 .scale(throwViewModel.getPlaneScale())
         )
+    }
+
+
+    Column {
+        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
+        Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
+        Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
 
 
         Text(
@@ -97,5 +102,12 @@ fun ThrowScreen(
         ){
             Text("Throw")
         }
+
+        Slider(
+            value = 0.0f,
+            onValueChange = {value ->
+                val plane = throwViewModel.planeState.value
+                throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        })
     }
 }

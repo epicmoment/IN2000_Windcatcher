@@ -38,9 +38,8 @@ class ThrowViewModel(
 
         // initialize starter plane
         planeRepository.update(
-            Plane(
+            planeState.value.copy(
                 speed = speed,
-                angle = angle,
                 height = planeStartHeight,
                 pos= listOf(selectedLocation.latitude, selectedLocation.longitude)
             )
