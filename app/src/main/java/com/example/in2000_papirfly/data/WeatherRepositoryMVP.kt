@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.data
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.network.getLocationforecastData
 import com.example.in2000_papirfly.network.getNowcastData
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -74,40 +75,73 @@ class WeatherRepositoryMVP : ViewModel() {
 
         viewModelScope.launch {
 
-            val osloData : NCDetails = getNowcastData(
+            val osloData : LFDetails = getLocationforecastData(
                 lat = 59.944030,
                 lon = 10.719282
             ).properties.timeseries[0].data.instant.details
 
-            val stavData : NCDetails = getNowcastData(
+            val osloRain : LFPrecipitationNext1Hours = getLocationforecastData(
+                lat = 59.944030,
+                lon = 10.719282
+            ).properties.timeseries[0].data.next_1_hours!!.details
+
+            val osloIcon : LFSummary = getLocationforecastData(
+                lat = 59.944030,
+                lon = 10.719282
+            ).properties.timeseries[0].data.next_1_hours!!.summary
+
+            val stavData : LFDetails = getLocationforecastData(
                 lat = 58.89729,
                 lon = 5.71185
             ).properties.timeseries[0].data.instant.details
 
-            val galdData : NCDetails = getNowcastData(
-                    lat = 61.63630,
-                    lon = 8.31289
+            val stavRain : LFPrecipitationNext1Hours = getLocationforecastData(
+                lat = 58.89729,
+                lon = 5.71185
+            ).properties.timeseries[0].data.next_1_hours!!.details
+
+            val stavIcon : LFSummary = getLocationforecastData(
+                lat = 58.89729,
+                lon = 5.71185
+            ).properties.timeseries[0].data.next_1_hours!!.summary
+
+            val galdData : LFDetails = getLocationforecastData(
+                lat = 61.63630,
+                lon = 8.31289
             ).properties.timeseries[0].data.instant.details
+
+            val galdRain : LFPrecipitationNext1Hours = getLocationforecastData(
+                lat = 61.63630,
+                lon = 8.31289
+            ).properties.timeseries[0].data.next_1_hours!!.details
+
+            val galdIcon : LFSummary = getLocationforecastData(
+                lat = 61.63630,
+                lon = 8.31289
+            ).properties.timeseries[0].data.next_1_hours!!.summary
 
             val osloWeather = Weather(
                 windSpeed = osloData.wind_speed,
                 windAngle = osloData.wind_from_direction,
-                rain = osloData.precipitation_rate,
-                temperature = osloData.air_temperature
+                rain = osloRain.precipitation_amount,
+                temperature = osloData.air_temperature,
+                icon = osloIcon.symbol_code
             )
 
             val stavangerWeather = Weather(
                 windSpeed = stavData.wind_speed,
                 windAngle = stavData.wind_from_direction,
-                rain = stavData.precipitation_rate,
-                temperature = stavData.air_temperature
+                rain = stavRain.precipitation_amount,
+                temperature = stavData.air_temperature,
+                icon = stavIcon.symbol_code
             )
 
             val galdhopiggenWeather = Weather(
                 windSpeed = galdData.wind_speed,
                 windAngle = galdData.wind_from_direction,
-                rain = galdData.precipitation_rate,
-                temperature = galdData.air_temperature
+                rain = galdRain.precipitation_amount,
+                temperature = galdData.air_temperature,
+                icon = galdIcon.symbol_code
             )
 
             val unixTimeStamp = System.currentTimeMillis() / 1000L

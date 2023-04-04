@@ -94,5 +94,4 @@ dependencies {
     // Maps
     implementation 'org.osmdroid:osmdroid-android:6.1.1'
     implementation 'androidx.preference:preference:1.2.0'
-
 }
