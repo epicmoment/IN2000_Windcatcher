@@ -1,16 +1,11 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.in2000_papirfly.data.Plane
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
-import com.example.in2000_papirfly.plane.WeatherRepository
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.drawGoalMarker
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.drawPlanePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
@@ -27,8 +22,14 @@ class ThrowViewModel(
     // I'm making a lot of new ViewModel objects that should be made somewhere else here
     private val planeLogic = PlaneLogic(planeRepository)
     val planeState = planeLogic.planeState
+    val startPos: GeoPoint = selectedLocation
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
+    var weather: Weather = Weather()
+
+    init {
+        drawStartMarker(mapViewState, startPos)
+    }
 
     fun throwPlane(){
         //  TODO // Calculate or get the angle and speed the plane should be launched at
@@ -44,13 +45,15 @@ class ThrowViewModel(
                 pos= listOf(selectedLocation.latitude, selectedLocation.longitude)
             )
         )
+        previousPlanePos = startPos
+        mapViewState.controller.setCenter(startPos)
 
         // Start the coroutine that updates the plane every second
         viewModelScope.launch{
             //planeLogic.throwPlane(100.0, 98.0, selectedLocation)
 
             // Get the weather at the start location
-            var weather = weatherRepository.getWeatherAtPoint(selectedLocation.latitude, selectedLocation.longitude)
+            weather = weatherRepository.getWeatherAtPoint(selectedLocation.latitude, selectedLocation.longitude)
 
             while (planeIsFlying()) {
                 planeLogic.update(weather)
@@ -70,8 +73,9 @@ class ThrowViewModel(
                 previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
             }
 
+            planeLogic.update(weather)
             // Draws goal flag
-            drawGoalMarker(mapViewState, previousPlanePos)
+            drawGoalMarker(mapViewState, startPos, previousPlanePos)
         }
     }
 

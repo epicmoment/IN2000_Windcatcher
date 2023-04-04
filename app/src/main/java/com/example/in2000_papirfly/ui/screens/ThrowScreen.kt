@@ -7,12 +7,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Slider
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -66,7 +62,7 @@ fun ThrowScreen(
         painter = painterResource(id = R.drawable.arrow01),
         contentDescription = "TODO",
         modifier = Modifier
-            .rotate((getWeather("Oslo").windAngle + 180).toFloat())
+            .rotate((throwViewModel.weather.windAngle + 180).toFloat())
             .scale(0.2f)
     )
 
@@ -97,17 +93,22 @@ fun ThrowScreen(
 
         Button(
             onClick = {
-                throwViewModel.throwPlane();
+                throwViewModel.throwPlane()
             }
         ){
             Text("Throw")
         }
 
+        var sliderPosition by remember { mutableStateOf(0f) }
+
         Slider(
-            value = 0.0f,
+            value = sliderPosition,
             onValueChange = {value ->
                 val plane = throwViewModel.planeState.value
                 throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
-        })
+                sliderPosition = value
+                throwViewModel.previousPlanePos = throwViewModel.startPos
+            }
+        )
     }
 }
