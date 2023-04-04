@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.network
 
+import android.util.Log
 import com.example.in2000_papirfly.data.LocationforecastData
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -38,13 +39,21 @@ val locationforecastClient = HttpClient(Android) {
  * @return Weather data for the given coordinates as a
  * LocationforecastData-object
  */
-suspend fun getLocationforecastData(lat: Double, lon: Double): LocationforecastData {
+suspend fun getLocationforecastData(lat: Double, lon: Double): LocationforecastData? {
     val roundedLat = kotlin.math.round(lat * 10000.0) / 10000.0
     val roundedLon = kotlin.math.round(lon * 10000.0) / 10000.0
 
-    return locationforecastClient.get(LocationforecastURL.urlBuilder(roundedLat, roundedLon)) {
+    val response = locationforecastClient.get(LocationforecastURL.urlBuilder(roundedLat, roundedLon)) {
         headers {
             append("X-Gravitee-Api-Key", "c473e19e-965e-4c53-8408-5c4cb9622403")
         }
-    }.body()
+    }
+
+    Log.i("HTTP response", "${response.status.value}")
+
+    return if (response.status.value in 200..299) {
+        response.body()
+    } else {
+        LocationforecastData()
+    }
 }

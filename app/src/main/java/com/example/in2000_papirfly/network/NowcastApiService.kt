@@ -9,8 +9,6 @@ import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
-import java.lang.Math.round
-import java.text.DecimalFormat
 
 object NowcastURL {
     private const val BASE_URL =
@@ -45,9 +43,17 @@ suspend fun getNowcastData(lat: Double, lon: Double): NowcastData {
     val roundedLat = kotlin.math.round(lat * 10000.0) / 10000.0
     val roundedLon = kotlin.math.round(lon * 10000.0) / 10000.0
 
-    return nowcastClient.get(NowcastURL.urlBuilder(roundedLat, roundedLon)) {
+    val response = nowcastClient.get(NowcastURL.urlBuilder(roundedLat, roundedLon)) {
         headers {
             append("X-Gravitee-Api-Key", "c473e19e-965e-4c53-8408-5c4cb9622403")
         }
-    }.body()
+    }
+
+    Log.i("HTTP response", "${response.status.value}")
+
+    return if (response.status.value in 200..299) {
+        response.body()
+    } else {
+        NowcastData()
+    }
 }
