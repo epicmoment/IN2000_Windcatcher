@@ -54,14 +54,6 @@ fun ThrowScreen(
         Text(text = "Plane angle: ${throwViewModel.getPlaneAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getPlaneSpeed().toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.getPlanePos()[0].toFloat()}\n${throwViewModel.getPlanePos()[1].toFloat()}")
 
-        // Wind arrow
-        Image(
-            painter = painterResource(id = R.drawable.baseline_arrow_right_alt_24),
-            contentDescription = "TODO",
-            modifier = Modifier
-                .rotate((throwViewModel.getWindAngle() - 90).toFloat())
-                //.scale(2f)
-        )
         // Paper plane
         Image(
             painter = painterResource(id = R.drawable.plane01),
