@@ -6,13 +6,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Location
@@ -20,6 +23,7 @@ import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 import org.osmdroid.util.GeoPoint
+import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

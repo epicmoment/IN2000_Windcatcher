@@ -48,7 +48,7 @@ data class LFUnits(
 data class LFData(
     val instant: LFInstant = LFInstant(),
     val next_12_hours: LFNext12Hours? = null,
-    val next_1_hours: LFNext1Hours? = null,
+    val next_1_hours: LFNext1Hours = LFNext1Hours(),
     val next_6_hours: LFNext6Hours? = null
 )
 

@@ -18,8 +18,6 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import kotlin.coroutines.coroutineContext
-import kotlin.math.*
 
 
 //Entire code based on this: gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
@@ -54,18 +52,6 @@ fun rememberMapViewWithLifecycle(): MapView {
     mapView.minZoomLevel = 8.0
     mapView.controller.setZoom(18.0)
 
-    // Creates a GeoPoint at IFI and adds a marker there
-//    val IFI = GeoPoint(59.9441, 10.7191)
-//    val startMarker = Marker(mapView)
-//
-//    startMarker.position = IFI
-//    startMarker.title = "Tårnet på IFI!"
-//    startMarker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-//    mapView.overlays.add(startMarker)
-
-    // Moves the map to IFI as default
-//    mapView.controller.setCenter()
-
     // Restricts the map view to cover Norway
     mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
     mapView.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
@@ -85,17 +71,27 @@ fun unlockMap(mapViewState: MapView) {
 
 fun drawPlanePath(mapViewState: MapView, origin: GeoPoint, destination: GeoPoint) {
     val points = listOf(origin, destination)
-    val polyline = Polyline(mapViewState)
+    val polyline = Polyline() //TODO
     polyline.outlinePaint.color = Color.RED
     polyline.setPoints(points)
     mapViewState.overlays.add(polyline)
 }
 
-fun drawGoalMarker(mapViewState: MapView, position: GeoPoint) {
+fun drawStartMarker(mapViewState: MapView, startPos: GeoPoint) {
+    val marker = Marker(mapViewState)
+    marker.position = startPos
+    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_push_pin_green_48)
+    marker.title = "Start"
+    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    mapViewState.overlays.add(marker)
+}
+
+fun drawGoalMarker(mapViewState: MapView, startPos: GeoPoint, markerPos: GeoPoint) {
     val marker = Marker(mapViewState)
 
-    marker.position = position
-    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_flag_24)
+    marker.position = markerPos
+    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_push_pin_48)
+    marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapViewState.overlays.add(marker)
 }
