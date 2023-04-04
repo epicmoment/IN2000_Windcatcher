@@ -47,6 +47,11 @@ class WeatherRepositoryMVP : ViewModel() {
 
     }
 
+    // Added to prevent the APIs from being called too many times at once from PositionScreen
+    init {
+        updateWeather()
+    }
+
     suspend fun getWeatherAtPoint(latitude : Double, longitude : Double) : Weather {
 
         val pointData = getNowcastData(
