@@ -59,6 +59,7 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
                 getWeather = { location: String ->
                     repository.getWeatherAt(location)
                 },
+                weatherRepository = repository,
                 planeRepository = planeRepository
             )
 

@@ -4,12 +4,16 @@ package com.example.in2000_papirfly.ui.screens
 import android.annotation.SuppressLint
 import android.util.Half.toFloat
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -17,9 +21,11 @@ import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
@@ -29,6 +35,7 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     onLoad: ((map: MapView) -> Unit)? = null,
     getWeather: (location: String) -> Weather,
+    weatherRepository: WeatherRepositoryMVP,
     planeRepository: PlaneRepository
 ) {
 
@@ -46,7 +53,8 @@ fun ThrowScreen(
             selectedLocation,
             mapViewState,
             getWeather = getWeather,
-            planeRepository = planeRepository
+            planeRepository = planeRepository,
+            weatherRepository = weatherRepository
         )
     }
 
@@ -62,14 +70,11 @@ fun ThrowScreen(
             .scale(0.2f)
     )
 
-
-    Column(){
-        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
-        Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
-        Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-
-
-        // Paper plane
+    // Paper plane
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ){
         Image(
             painter = painterResource(id = R.drawable.plane01),
             contentDescription = "TODO",
@@ -77,6 +82,13 @@ fun ThrowScreen(
                 .rotate((throwViewModel.planeState.collectAsState().value.angle).toFloat())
                 .scale(throwViewModel.getPlaneScale())
         )
+    }
+
+
+    Column {
+        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
+        Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
+        Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
 
 
         Text(
@@ -90,5 +102,12 @@ fun ThrowScreen(
         ){
             Text("Throw")
         }
+
+        Slider(
+            value = 0.0f,
+            onValueChange = {value ->
+                val plane = throwViewModel.planeState.value
+                throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        })
     }
 }
