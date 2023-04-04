@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-
 data class WeatherState (
     val oslo : Weather = Weather(),
     val stavanger : Weather = Weather(),
@@ -75,73 +74,43 @@ class WeatherRepositoryMVP : ViewModel() {
 
         viewModelScope.launch {
 
-            val osloData : LFDetails = getLocationforecastData(
+            val osloData : LocationforecastData = getLocationforecastData(
                 lat = 59.944030,
                 lon = 10.719282
-            ).properties.timeseries[0].data.instant.details
+            )
 
-            val osloRain : LFPrecipitationNext1Hours = getLocationforecastData(
-                lat = 59.944030,
-                lon = 10.719282
-            ).properties.timeseries[0].data.next_1_hours!!.details
-
-            val osloIcon : LFSummary = getLocationforecastData(
-                lat = 59.944030,
-                lon = 10.719282
-            ).properties.timeseries[0].data.next_1_hours!!.summary
-
-            val stavData : LFDetails = getLocationforecastData(
+            val stavData : LocationforecastData = getLocationforecastData(
                 lat = 58.89729,
                 lon = 5.71185
-            ).properties.timeseries[0].data.instant.details
+            )
 
-            val stavRain : LFPrecipitationNext1Hours = getLocationforecastData(
-                lat = 58.89729,
-                lon = 5.71185
-            ).properties.timeseries[0].data.next_1_hours!!.details
-
-            val stavIcon : LFSummary = getLocationforecastData(
-                lat = 58.89729,
-                lon = 5.71185
-            ).properties.timeseries[0].data.next_1_hours!!.summary
-
-            val galdData : LFDetails = getLocationforecastData(
+            val galdData : LocationforecastData = getLocationforecastData(
                 lat = 61.63630,
                 lon = 8.31289
-            ).properties.timeseries[0].data.instant.details
-
-            val galdRain : LFPrecipitationNext1Hours = getLocationforecastData(
-                lat = 61.63630,
-                lon = 8.31289
-            ).properties.timeseries[0].data.next_1_hours!!.details
-
-            val galdIcon : LFSummary = getLocationforecastData(
-                lat = 61.63630,
-                lon = 8.31289
-            ).properties.timeseries[0].data.next_1_hours!!.summary
+            )
 
             val osloWeather = Weather(
-                windSpeed = osloData.wind_speed,
-                windAngle = osloData.wind_from_direction,
-                rain = osloRain.precipitation_amount,
-                temperature = osloData.air_temperature,
-                icon = osloIcon.symbol_code
+                windSpeed = osloData.properties.timeseries[0].data.instant.details.wind_speed,
+                windAngle = osloData.properties.timeseries[0].data.instant.details.wind_from_direction,
+                rain = osloData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount,
+                temperature = osloData.properties.timeseries[0].data.instant.details.air_temperature,
+                icon = osloData.properties.timeseries[0].data.next_1_hours.summary.symbol_code
             )
 
             val stavangerWeather = Weather(
-                windSpeed = stavData.wind_speed,
-                windAngle = stavData.wind_from_direction,
-                rain = stavRain.precipitation_amount,
-                temperature = stavData.air_temperature,
-                icon = stavIcon.symbol_code
+                windSpeed = stavData.properties.timeseries[0].data.instant.details.wind_speed,
+                windAngle = stavData.properties.timeseries[0].data.instant.details.wind_from_direction,
+                rain = stavData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount,
+                temperature = stavData.properties.timeseries[0].data.instant.details.air_temperature,
+                icon = stavData.properties.timeseries[0].data.next_1_hours.summary.symbol_code
             )
 
             val galdhopiggenWeather = Weather(
-                windSpeed = galdData.wind_speed,
-                windAngle = galdData.wind_from_direction,
-                rain = galdRain.precipitation_amount,
-                temperature = galdData.air_temperature,
-                icon = galdIcon.symbol_code
+                windSpeed = galdData.properties.timeseries[0].data.instant.details.wind_speed,
+                windAngle = galdData.properties.timeseries[0].data.instant.details.wind_from_direction,
+                rain = galdData.properties.timeseries[0].data.next_1_hours.details.precipitation_amount,
+                temperature = galdData.properties.timeseries[0].data.instant.details.air_temperature,
+                icon = galdData.properties.timeseries[0].data.next_1_hours.summary.symbol_code
             )
 
             val unixTimeStamp = System.currentTimeMillis() / 1000L
