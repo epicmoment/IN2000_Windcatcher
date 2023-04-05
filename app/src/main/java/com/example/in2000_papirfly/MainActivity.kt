@@ -40,7 +40,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavScreen()
+                    NavScreen(context = ctx)
                     //MapView(
                     //    startLocation = GeoPoint(59.9441, 10.7191)
                     //)

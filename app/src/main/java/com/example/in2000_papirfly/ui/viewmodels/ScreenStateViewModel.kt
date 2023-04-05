@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
-class ScreenStateViewModel : ViewModel() {
+class ScreenStateViewModel () : ViewModel() {
 
     private val _screenState = MutableStateFlow(ScreenState())
     val screenState : StateFlow<ScreenState> = _screenState.asStateFlow()
