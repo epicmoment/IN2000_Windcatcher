@@ -18,6 +18,8 @@ import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
+import androidx.activity.viewModels
+import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +35,11 @@ class MainActivity : ComponentActivity() {
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         // END OSM config
 
+        //val viewModel: ScreenStateViewModel by viewModels(factoryProducer = { ScreenStateViewModel.Factory } )
+        //
+
+        val appContainer = (application as PapirflyApplication).appContainer
+
         setContent {
             IN2000_PapirflyTheme {
                 // A surface container using the 'background' color from the theme
@@ -40,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavScreen(context = ctx)
+                    NavScreen()
                     //MapView(
                     //    startLocation = GeoPoint(59.9441, 10.7191)
                     //)

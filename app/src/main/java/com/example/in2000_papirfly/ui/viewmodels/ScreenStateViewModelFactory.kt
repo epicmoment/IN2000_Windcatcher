@@ -4,8 +4,8 @@ import android.app.Application
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
-class ScreenStateViewModelFactory (
-    private val application : Application,
+/*class ScreenStateViewModelFactory (
+    //private val application : Application,
     private val param : String
 ) : ViewModelProvider.Factory {
 
@@ -13,10 +13,10 @@ class ScreenStateViewModelFactory (
         modelClass: Class<T>
     ): T {
 
-        return ScreenStateViewModel() as T
+        return ScreenStateViewModel(param = param) as T
 
     }
 
 
 
-}
+}*/
