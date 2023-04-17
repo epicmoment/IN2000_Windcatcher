@@ -29,12 +29,15 @@ class WeatherRepositoryMVP : ViewModel() {
     private val _weatherState = MutableStateFlow(WeatherState())
     val weatherState : StateFlow<WeatherState> = _weatherState.asStateFlow()
 
+    var isUpdating = false
+
     // Bruker stedsnavn til MVPen i stedet for Location eller GeoPoint
 
     fun getWeatherAt(locationName : String) : Weather {
 
         // hvis 5 min siden forrige oppdatering
-        if (System.currentTimeMillis() / 1000L - weatherState.value.lastUpdateUnix > 300) {
+        if (System.currentTimeMillis() / 1000L - weatherState.value.lastUpdateUnix > 300 && !isUpdating) {
+            isUpdating = true
             updateWeather()
         }
 
@@ -123,6 +126,9 @@ class WeatherRepositoryMVP : ViewModel() {
                     lastUpdateUnix = unixTimeStamp
                 )
             }
+
+            isUpdating = false
+
         }
     }
 }

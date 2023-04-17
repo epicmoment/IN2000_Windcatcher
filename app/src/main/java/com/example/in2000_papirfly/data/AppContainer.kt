@@ -6,6 +6,6 @@ class AppContainer {
 
     val weatherRepository = WeatherRepositoryMVP()
 
-    //val screenStateViewModelFactory = ScreenStateViewModel.Factory
+    val screenStateViewModelFactory = ScreenStateViewModel.Factory
 
 }
