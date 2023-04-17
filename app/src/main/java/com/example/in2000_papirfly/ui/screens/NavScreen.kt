@@ -34,50 +34,50 @@ fun NavScreen(
 
     val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
 
-         NavHost(
-            navController = navController,
-            startDestination = "MainScreen",
-            modifier = Modifier.padding(8.dp)
-        ) {
+     NavHost(
+        navController = navController,
+        startDestination = "MainScreen",
+        modifier = Modifier.padding(8.dp)
+    ) {
 
-            composable(route = "MainScreen") {
-                MainScreen {
-                    navController.navigate("PositionScreen")
-                }
+        composable(route = "MainScreen") {
+            MainScreen {
+                navController.navigate("PositionScreen")
             }
+        }
 
-            composable(route = "PositionScreen") {
+        composable(route = "PositionScreen") {
 
-                PositionScreen(
-                    onNextPage = { newLocation ->
-                        viewModel.setLocation(newLocation)
-                        navController.navigate("ThrowScreen")
-                    },
+            PositionScreen(
+                onNextPage = { newLocation ->
+                    viewModel.setLocation(newLocation)
+                    navController.navigate("ThrowScreen")
+                },
 
-                    getWeather = { location: String ->
-                        repository.getWeatherAt(location)
-                    },
+                getWeather = { location: String ->
+                    repository.getWeatherAt(location)
+                },
 
-                    )
-
-            }
-
-            composable(route = "ThrowScreen") {
-                val pos = GeoPoint(
-                    screenState.value.location.latitude,
-                    screenState.value.location.longitude
                 )
-                ThrowScreen(
-                    selectedLocation = pos,
-                    getWeather = { location: String ->
-                        repository.getWeatherAt(location)
-                    },
-                    weatherRepository = repository,
-                    planeRepository = planeRepository
-                )
-
-            }
 
         }
+
+        composable(route = "ThrowScreen") {
+            val pos = GeoPoint(
+                screenState.value.location.latitude,
+                screenState.value.location.longitude
+            )
+            ThrowScreen(
+                selectedLocation = pos,
+                getWeather = { location: String ->
+                    repository.getWeatherAt(location)
+                },
+                weatherRepository = repository,
+                planeRepository = planeRepository
+            )
+
+        }
+
+    }
 
 }
