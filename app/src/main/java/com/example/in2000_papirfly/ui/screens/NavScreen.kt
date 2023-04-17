@@ -13,9 +13,17 @@ import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Text
+import androidx.compose.ui.platform.LocalContext
+import com.example.in2000_papirfly.PapirflyApplication
 
 @Composable
-fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
+fun NavScreen(
+    viewModel : ScreenStateViewModel = viewModel(
+        factory = (LocalContext.current.applicationContext as PapirflyApplication).appContainer.screenStateViewModelFactory
+    )
+) {
 
     val screenState = viewModel.screenState.collectAsState()
 
@@ -24,7 +32,9 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
 
     val navController = rememberNavController()
 
-    NavHost (
+    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
+
+     NavHost(
         navController = navController,
         startDestination = "MainScreen",
         modifier = Modifier.padding(8.dp)
@@ -45,15 +55,18 @@ fun NavScreen(viewModel : ScreenStateViewModel = viewModel()) {
                 },
 
                 getWeather = { location: String ->
-                repository.getWeatherAt(location)
-                }
+                    repository.getWeatherAt(location)
+                },
 
-            )
+                )
 
         }
 
         composable(route = "ThrowScreen") {
-            val pos = GeoPoint(screenState.value.location.latitude, screenState.value.location.longitude)
+            val pos = GeoPoint(
+                screenState.value.location.latitude,
+                screenState.value.location.longitude
+            )
             ThrowScreen(
                 selectedLocation = pos,
                 getWeather = { location: String ->

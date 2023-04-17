@@ -18,6 +18,8 @@ import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
 import org.osmdroid.util.GeoPoint
+import androidx.activity.viewModels
+import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -32,6 +34,11 @@ class MainActivity : ComponentActivity() {
         val ctx: Context = applicationContext
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx))
         // END OSM config
+
+        //val viewModel: ScreenStateViewModel by viewModels(factoryProducer = { ScreenStateViewModel.Factory } )
+        //
+
+        val appContainer = (application as PapirflyApplication).appContainer
 
         setContent {
             IN2000_PapirflyTheme {
