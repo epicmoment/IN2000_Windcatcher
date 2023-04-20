@@ -16,4 +16,7 @@ interface FlightPathDao {
 
     @Query("DELETE FROM flight_paths WHERE location = :location")
     fun deleteFLightPath(location: String)
+
+    @Query("SELECT count(*) FROM flight_paths")
+    fun getSize(): Int
 }

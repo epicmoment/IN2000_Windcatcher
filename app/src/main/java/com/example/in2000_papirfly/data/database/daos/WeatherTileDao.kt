@@ -13,4 +13,7 @@ interface WeatherTileDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(tile: WeatherTile)
+
+    @Query("SELECT count(*) FROM tiles")
+    fun getSize(): Int
 }

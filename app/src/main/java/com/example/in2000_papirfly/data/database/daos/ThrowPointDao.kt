@@ -13,4 +13,7 @@ interface ThrowPointDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(location: ThrowPoint)
+
+    @Query("SELECT count(*) FROM throw_points")
+    fun getSize(): Int
 }
