@@ -13,7 +13,7 @@ import org.osmdroid.views.MapView
 
 class ThrowViewModel(
     var selectedLocation: GeoPoint,
-    val mapViewState: MapView,
+    val mapViewState: DisableMapView,
     val getWeather: (location: String) -> Weather,
     val weatherRepository: WeatherRepositoryMVP,
     val planeRepository: PlaneRepository
@@ -52,6 +52,9 @@ class ThrowViewModel(
         viewModelScope.launch{
             //planeLogic.throwPlane(100.0, 98.0, selectedLocation)
 
+            // Locks map
+            mapViewState.setInteraction(false)
+
             // Get the weather at the start location
             weather = weatherRepository.getWeatherAtPoint(selectedLocation.latitude, selectedLocation.longitude)
 
@@ -76,6 +79,9 @@ class ThrowViewModel(
             planeLogic.update(weather)
             // Draws goal flag
             drawGoalMarker(mapViewState, startPos, previousPlanePos)
+
+            // Unlock map
+            mapViewState.setInteraction(true)
         }
     }
 

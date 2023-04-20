@@ -1,7 +1,9 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
 
-import android.graphics.Color
+import android.content.Context
+import android.util.AttributeSet
+import android.view.MotionEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -18,14 +20,35 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
+import androidx.compose.ui.graphics.Color
 
+// This class based on comment by grine4ka:
+// https://stackoverflow.com/a/60808815/18814731
+class DisableMapView @JvmOverloads constructor(
+    context: Context, attrs: AttributeSet? = null
+) : MapView(context, attrs) {
+    private var isInteractionEnabled = true
 
-//Entire code based on this: gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
+    override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
+        if (!isInteractionEnabled) {
+            return false
+        }
+        return super.dispatchTouchEvent(event)
+    }
+
+    // This makes it possible to disable scrolling and zooming
+    fun setInteraction(isEnabled: Boolean) {
+        isInteractionEnabled = isEnabled
+    }
+}
+
+// OSMDroid as composable based on:
+// gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
 @Composable
-fun rememberMapViewWithLifecycle(): MapView {
+fun rememberMapViewWithLifecycle(): DisableMapView {
     val context = LocalContext.current
     val mapView = remember {
-        MapView(context).apply {
+        DisableMapView(context).apply {
             id = R.id.map
         }
     }
@@ -52,6 +75,9 @@ fun rememberMapViewWithLifecycle(): MapView {
     mapView.minZoomLevel = 8.0
     mapView.controller.setZoom(18.0)
 
+    //    val filter = androidx.compose.ui.graphics.ColorFilter
+    //    mapView.overlayManager.tilesOverlay.setColorFilter(filter.lighting(Color.Gray, Color.Black).asAndroidColorFilter())
+
     // Restricts the map view to cover Norway
     mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
     mapView.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
@@ -72,7 +98,7 @@ fun unlockMap(mapViewState: MapView) {
 fun drawPlanePath(mapViewState: MapView, origin: GeoPoint, destination: GeoPoint) {
     val points = listOf(origin, destination)
     val polyline = Polyline() //TODO
-    polyline.outlinePaint.color = Color.RED
+    polyline.outlinePaint.color = Color.Red.hashCode()
     polyline.setPoints(points)
     mapViewState.overlays.add(polyline)
 }
