@@ -12,7 +12,8 @@ import org.osmdroid.util.GeoPoint
         ForeignKey(
             entity = WeatherTile::class,
             parentColumns = arrayOf("loc_x", "loc_y"),
-            childColumns = arrayOf("tile_x", "tile_y")
+            childColumns = arrayOf("tile_x", "tile_y"),
+            onDelete = ForeignKey.CASCADE
         )
     ]
 )

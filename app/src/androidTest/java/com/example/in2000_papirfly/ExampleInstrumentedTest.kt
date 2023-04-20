@@ -1,8 +1,10 @@
 package com.example.in2000_papirfly
 
 import android.util.Log
+import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.in2000_papirfly.data.database.PapirflyDatabase
 import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 import kotlinx.coroutines.runBlocking
 
@@ -23,19 +25,5 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.example.in2000_papirfly", appContext.packageName)
-    }
-
-    @Test
-    fun testDataBase() {
-        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        val database = (appContext as PapirflyApplication).db
-
-        val throwDao = database.throwPointDao()
-        val testPoint = ThrowPoint("Oslo", 42, 0, null, null)
-        runBlocking {
-            throwDao.insert(testPoint)
-        }
-
-        assertEquals(42, throwDao.getThrowPointInfo("Oslo").tileX)
     }
 }

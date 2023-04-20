@@ -9,9 +9,10 @@ import androidx.room.ForeignKey
     primaryKeys = ["location", "number"],
     foreignKeys = [
         ForeignKey(
-            entity = WeatherTile::class,
+            entity = ThrowPoint::class,
             parentColumns = arrayOf("name"),
-            childColumns = arrayOf("location")
+            childColumns = arrayOf("location"),
+            onDelete = ForeignKey.CASCADE
         )
     ]
 )

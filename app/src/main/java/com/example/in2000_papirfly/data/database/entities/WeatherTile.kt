@@ -2,7 +2,6 @@ package com.example.in2000_papirfly.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
-import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "tiles",
