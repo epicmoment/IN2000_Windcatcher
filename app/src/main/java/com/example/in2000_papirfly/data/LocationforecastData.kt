@@ -86,7 +86,7 @@ data class LFDetails(
 
 @Serializable
 data class LFSummary(
-    val symbol_code: String = ""
+    val symbol_code: String = "cloudy"
 )
 
 @Serializable

@@ -20,6 +20,16 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        // Database schema exporting
+//        javaCompileOptions {
+//            annotationProcessorOptions {
+//                compilerArgumentProviders(
+//                        new RoomSchemaArgProvider(new File(projectDir, "schemas"))
+//                )
+//            }
+//        }
+
     }
 
     buildTypes {
@@ -88,6 +98,22 @@ dependencies {
     implementation "androidx.room:room-ktx:$room_version"
     // To use Kotlin annotation processing tool (kapt)
     kapt "androidx.room:room-compiler:$room_version"
-    // To use Kotlin Symbol Processing (KSP)
-//    ksp "androidx.room:room-compiler:$room_version"
+
 }
+
+// Database schema exporting
+//class RoomSchemaArgProvider implements CommandLineArgumentProvider {
+//
+//    @InputDirectory
+//    @PathSensitive(PathSensitivity.RELATIVE)
+//    File schemaDir
+//
+//    RoomSchemaArgProvider(File schemaDir) {
+//        this.schemaDir = schemaDir
+//    }
+//
+//    @Override
+//    Iterable<String> asArguments() {
+//        return ["-Aroom.schemaLocation=${schemaDir.path}".toString()]
+//    }
+//}

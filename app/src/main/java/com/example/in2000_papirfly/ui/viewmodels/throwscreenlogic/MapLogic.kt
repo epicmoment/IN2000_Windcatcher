@@ -78,10 +78,6 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
     //    val filter = androidx.compose.ui.graphics.ColorFilter
     //    mapView.overlayManager.tilesOverlay.setColorFilter(filter.lighting(Color.Gray, Color.Black).asAndroidColorFilter())
 
-    // Restricts the map view to cover Norway
-    mapView.setScrollableAreaLimitLatitude(72.0, 57.5, 0)
-    mapView.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
-
     return mapView
 }
 

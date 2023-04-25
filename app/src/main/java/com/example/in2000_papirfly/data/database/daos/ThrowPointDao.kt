@@ -9,7 +9,7 @@ import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 @Dao
 interface ThrowPointDao {
     @Query("SELECT * FROM throw_points WHERE name = :location LIMIT 1")
-    fun getThrowPointInfo(location: String): ThrowPoint
+    fun getThrowPointInfo(location: String): ThrowPoint?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(location: ThrowPoint)

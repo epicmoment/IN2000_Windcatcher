@@ -19,7 +19,7 @@ import androidx.room.ForeignKey
 data class FlightPathPoint(
     @ColumnInfo(name = "location") val location: String,
     @ColumnInfo(name = "number") val number: Int,
-    @ColumnInfo(name = "loc_x") val locX: Int,
-    @ColumnInfo(name = "loc_y") val locY: Int,
+    @ColumnInfo(name = "loc_x") val locX: Double,
+    @ColumnInfo(name = "loc_y") val locY: Double,
     @ColumnInfo(name = "info") val info: String?
 )

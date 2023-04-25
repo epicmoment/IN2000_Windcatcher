@@ -19,8 +19,8 @@ import org.osmdroid.util.GeoPoint
 )
 data class ThrowPoint(
     @PrimaryKey val name: String,
-    @ColumnInfo(name = "tile_x") val tileX: Int,
-    @ColumnInfo(name = "tile_y") val tileY: Int,
+    @ColumnInfo(name = "tile_x") val tileX: Double,
+    @ColumnInfo(name = "tile_y") val tileY: Double,
     @ColumnInfo(name = "highscore_date") val hSDate: Long?,
     @ColumnInfo(name = "highscore_distance") val hSDistance: Int?
 )

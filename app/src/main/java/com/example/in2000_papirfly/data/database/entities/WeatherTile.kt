@@ -8,12 +8,15 @@ import androidx.room.Entity
     primaryKeys = ["loc_x", "loc_y"]
 )
 data class WeatherTile(
-    @ColumnInfo(name = "loc_x") val locX: Int,
-    @ColumnInfo(name = "loc_y") val locY: Int,
-    @ColumnInfo(name = "last_updated") val lastUpdated: Long,
-    @ColumnInfo(name = "cloud_cover") val cloudCover: String,
+    @ColumnInfo(name = "loc_x") val locX: Double,
+    @ColumnInfo(name = "loc_y") val locY: Double,
+    @ColumnInfo(name = "last_updated_nc") val lastUpdatedNC: Long,
+    @ColumnInfo(name = "last_updated_lf") val lastUpdatedLF: Long,
+    @ColumnInfo(name = "icon") val icon: String,
+    @ColumnInfo(name = "air_pressure") val airPressure: Double,
+    @ColumnInfo(name = "temperature") val temperature: Double,
     @ColumnInfo(name = "precipitation") val precipitation: Double,
     @ColumnInfo(name = "wind_speed") val windSpeed: Double,
     @ColumnInfo(name = "wind_direction") val windDirection: Double,
-    @ColumnInfo(name = "wind_gusts") val windGusts: Double,
+//    @ColumnInfo(name = "wind_gusts") val windGusts: Double,
 )
