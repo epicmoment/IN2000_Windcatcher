@@ -7,9 +7,6 @@ import com.example.in2000_papirfly.data.database.entities.WeatherTile
 import com.example.in2000_papirfly.network.getLocationforecastData
 import com.example.in2000_papirfly.network.getNowcastData
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
@@ -22,7 +19,9 @@ class DataRepository(database: PapirflyDatabase) {
         mapOf(
             Pair("Oslo", GeoPoint(59.944030, 10.719282)),
             Pair("Stavanger", GeoPoint(58.89729, 5.71185)),
-            Pair("Galdhøpiggen", GeoPoint(61.63630, 8.31289))
+            Pair("Galdhøpiggen", GeoPoint(61.63630, 8.31289)),
+            Pair("Nordkapp", GeoPoint(71.1705, 25.7842)),
+            Pair("Lindesnes Fyr", GeoPoint(57.9828, 7.0466))
         )
 
     init {
@@ -32,9 +31,41 @@ class DataRepository(database: PapirflyDatabase) {
     }
 
     fun getWeatherAt(locationName: String): Weather {
-        return Weather()
+        var weather = Weather()
+
+//        CoroutineScope(Dispatchers.IO).launch {
+        runBlocking {
+            val point = throwDao.getThrowPointInfo(locationName)!!
+            val tile = tileDao.getTileAt(point.tileX, point.tileY)!!
+            weather = Weather(
+                windSpeed = tile.windSpeed,
+                windAngle = tile.windDirection,
+                airPressure = tile.airPressure,
+                rain = tile.precipitation,
+                temperature = tile.temperature,
+                icon = tile.icon,
+                namePos = locationName
+            )
+        }
+
+        return weather
     }
 
+     fun getThrowPointWeatherList(): List<Weather> {
+         val list = mutableListOf<Weather>()
+         CoroutineScope(Dispatchers.IO).launch {
+             throwPoints.forEach {
+                 list += getWeatherAt(it.key)
+             }
+         }
+         return list
+     }
+
+    fun getThrowGeoPoint(locationName: String): GeoPoint {
+        return throwPoints[locationName]!!
+    }
+
+    // TODO: Show a loading screen during population of database to prevent potential crash
     private suspend fun asyncPopulate() = coroutineScope {
         throwPoints.forEach {
             launch {
@@ -67,9 +98,15 @@ class DataRepository(database: PapirflyDatabase) {
 
         var weatherTile = tileDao.getTileAt(lat, lon)
 
+        Log.d("Repo", "Weather tile found: ${weatherTile.toString()}")
+
         // If no weather is saved for the tile, we get it from LocationForecast
         if (weatherTile == null) {
             val weather = getLocationforecastData(lat, lon)
+            Log.d(
+                "Repo",
+                "No data for tile at $lat,$lon found in database, fetching from API"
+            )
 
             tileDao.insert(
                 WeatherTile(
@@ -87,9 +124,13 @@ class DataRepository(database: PapirflyDatabase) {
             )
             weatherTile = tileDao.getTileAt(lat, lon)
 
-        // If LocationForecast hasn't been called in the past hour, the tile is updated
-        } else if (weatherTile.lastUpdatedLF > ((System.currentTimeMillis() / 1000L) + 3600)) {
+            // If LocationForecast hasn't been called in the past hour, the tile is updated
+        } else if (weatherTile.lastUpdatedLF + 3600 < ((System.currentTimeMillis() / 1000L))) {
             val weather = getLocationforecastData(lat, lon)
+            Log.d(
+                "Repo",
+                "Tile at $lat,$lon timed out, fetching from Locationforecast"
+            )
 
             if (weather.type != "") {
                 tileDao.insert(
@@ -109,9 +150,13 @@ class DataRepository(database: PapirflyDatabase) {
                 weatherTile = tileDao.getTileAt(lat, lon)
             }
 
-        // If NowCast hasn't been called in the past five minutes, the tile is updated
-        } else if (weatherTile.lastUpdatedNC > ((System.currentTimeMillis() / 1000L) + 300)) {
+            // If NowCast hasn't been called in the past five minutes, the tile is updated
+        } else if (weatherTile.lastUpdatedNC + 300 < ((System.currentTimeMillis() / 1000L))) {
             val weather = getNowcastData(lat, lon)
+            Log.d(
+                "Repo",
+                "Tile at $lat,$lon timed out, fetching from Nowcast"
+            )
 
             if (weather.type != "") {
                 tileDao.insert(

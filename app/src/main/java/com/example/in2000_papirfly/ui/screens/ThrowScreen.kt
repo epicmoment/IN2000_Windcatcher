@@ -31,7 +31,7 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     onLoad: ((map: MapView) -> Unit)? = null,
     getWeather: (location: String) -> Weather,
-    weatherRepository: WeatherRepositoryMVP,
+    weatherRepository: DataRepository,
     planeRepository: PlaneRepository
 ) {
 

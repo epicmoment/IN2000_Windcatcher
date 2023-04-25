@@ -11,9 +11,6 @@ interface ThrowPointDao {
     @Query("SELECT * FROM throw_points WHERE name = :location LIMIT 1")
     fun getThrowPointInfo(location: String): ThrowPoint?
 
-    @Query("SELECT * FROM throw_points")
-    fun getAllThrowPoints(): List<ThrowPoint>
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(location: ThrowPoint)
 

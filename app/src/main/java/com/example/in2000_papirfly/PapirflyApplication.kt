@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.room.Room
 import com.example.in2000_papirfly.data.AppContainer
@@ -16,4 +17,5 @@ class PapirflyApplication : Application() {
         ).build()
     }
     val appContainer by lazy { AppContainer(database) }
+
 }
