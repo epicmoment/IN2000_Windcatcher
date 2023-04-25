@@ -26,6 +26,6 @@ abstract class PapirflyDatabase: RoomDatabase() {
     abstract fun throwPointDao(): ThrowPointDao
     abstract fun flightPathDao(): FlightPathDao
     init {
-        Log.d("Database", "Database instance created")
+        Log.i("Database", "Database instance created")
     }
 }
