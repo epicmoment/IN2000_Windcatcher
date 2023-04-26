@@ -106,7 +106,7 @@ class DataRepository(database: PapirflyDatabase) {
         )
     }
 
-    fun updateHighScore(location: String, distance: Int, time: Long, path: List<GeoPoint>) {
+    fun updateHighScore(location: String, distance: Int, time: Long, path: List<GeoPoint>, updateHighscore: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             val throwPoint = throwDao.getThrowPointInfo(location)!!
             throwDao.insert(
@@ -129,6 +129,7 @@ class DataRepository(database: PapirflyDatabase) {
                     )
                 )
             }
+            updateHighscore()
         }
     }
 

@@ -50,6 +50,7 @@ fun ThrowScreen(
             weatherRepository = weatherRepository
         )
     }
+    val highscore = throwViewModel.highScore.collectAsState()
 
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
@@ -82,7 +83,7 @@ fun ThrowScreen(
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-        Text(text = "Local highscore at ${throwViewModel.highScore.locationName}: ${throwViewModel.highScore.distance}km")
+        Text(text = "Local highscore at ${highscore.value.locationName}: ${highscore.value.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")

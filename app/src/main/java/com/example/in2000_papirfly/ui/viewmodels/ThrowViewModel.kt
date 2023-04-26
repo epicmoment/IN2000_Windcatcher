@@ -1,10 +1,15 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import org.osmdroid.util.GeoPoint
 
 class ThrowViewModel(
@@ -24,7 +29,10 @@ class ThrowViewModel(
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
     var weather: Weather = Weather()
-    lateinit var highScore: HighScore
+    private var _highScore: MutableStateFlow<HighScore> =
+        MutableStateFlow(HighScore())
+    var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
+
 
     init {
         drawStartMarker(mapViewState, startPos)
@@ -32,9 +40,7 @@ class ThrowViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
-        CoroutineScope(Dispatchers.IO).launch {
-            highScore = weatherRepository.getHighScore(locationName)
-        }
+        updateHighScoreState()
     }
 
     fun throwPlane(){
@@ -105,19 +111,35 @@ class ThrowViewModel(
 
     private fun updateHighScore(startPos: GeoPoint, goalPos: GeoPoint, flightPath: List<GeoPoint>): Boolean {
         val distance = (startPos.distanceToAsDouble(goalPos)/1000).toInt()
-        if (highScore.distance == null || distance > highScore.distance!!) {
+        if (highScore.value.distance == null || distance > highScore.value.distance!!) {
             CoroutineScope(Dispatchers.IO).launch {
                 weatherRepository.updateHighScore(
                     locationName,
                     distance,
                     System.currentTimeMillis() / 1000L,
                     flightPath
-                )
-                highScore = weatherRepository.getHighScore(locationName)
+                ) { updateHighScoreState() }
             }
             return true
         }
         return false
+    }
+
+    private fun updateHighScoreState() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val newHS = weatherRepository.getHighScore(locationName)
+                _highScore.update {
+                    it.copy(
+                        date = newHS.date,
+                        distance = newHS.distance,
+                        flightPath = newHS.flightPath
+                    )
+                }
+            } catch (e: Throwable) {
+                Log.e("Highscore", "Error ${e}")
+            }
+        }
     }
 
     fun getPlaneScale(): Float{
