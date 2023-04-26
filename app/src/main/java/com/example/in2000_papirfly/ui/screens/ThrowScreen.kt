@@ -18,6 +18,8 @@ import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.plane.WeatherRepository
+import com.example.in2000_papirfly.ui.composables.PlaneComposable
+import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
@@ -34,7 +36,6 @@ fun ThrowScreen(
     weatherRepository: DataRepository,
     planeRepository: PlaneRepository
 ) {
-
     // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
     AndroidView(
@@ -54,6 +55,8 @@ fun ThrowScreen(
         )
     }
 
+    val throwScreenState = throwViewModel.getThrowScreenState()
+
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
 
@@ -67,18 +70,11 @@ fun ThrowScreen(
     )
 
     // Paper plane
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ){
-        Image(
-            painter = painterResource(id = R.drawable.plane01),
-            contentDescription = "TODO",
-            modifier = Modifier
-                .rotate((throwViewModel.planeState.collectAsState().value.angle).toFloat())
-                .scale(throwViewModel.getPlaneScale())
-        )
-    }
+    PlaneComposable(
+        planeSize = throwViewModel.getPlaneScale(),
+        planeState = throwViewModel.planeState,
+        planeVisible = showPlane(throwScreenState)
+    )
 
 
     Column {
@@ -105,12 +101,20 @@ fun ThrowScreen(
         Slider(
             value = sliderPosition,
             onValueChange = {value ->
-                val plane = throwViewModel.planeState.value
-                throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+                throwViewModel.changeAngle(value)
                 sliderPosition = value
-                throwViewModel.previousPlanePos = throwViewModel.startPos
             },
             enabled = !throwViewModel.planeState.collectAsState().value.flying,
         )
     }
+}
+
+@Composable
+fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
+    val value = when (throwScreenState.collectAsState().value){
+        is ThrowScreenState.Throwing -> true
+        is ThrowScreenState.Flying -> true
+        is ThrowScreenState.MovingMap -> false
+    }
+    return value
 }
