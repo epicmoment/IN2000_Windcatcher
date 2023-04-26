@@ -1,8 +1,6 @@
 package com.example.in2000_papirfly.ui.screens
 
 
-import android.annotation.SuppressLint
-import android.util.Half.toFloat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +15,16 @@ import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
 
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,
+    locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
     getWeather: (location: String) -> Weather,
     weatherRepository: DataRepository,
@@ -46,6 +42,7 @@ fun ThrowScreen(
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{
         ThrowViewModel(
+            locationName,
             selectedLocation,
             mapViewState,
             getWeather = getWeather,
@@ -85,7 +82,7 @@ fun ThrowScreen(
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-
+        Text(text = "Local highscore at ${throwViewModel.highScore.locationName}: ${throwViewModel.highScore.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")

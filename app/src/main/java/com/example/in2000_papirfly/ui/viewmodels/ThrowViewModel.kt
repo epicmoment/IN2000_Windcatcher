@@ -2,16 +2,13 @@ package com.example.in2000_papirfly.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.in2000_papirfly.data.DataRepository
-import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.data.Weather
-import com.example.in2000_papirfly.data.WeatherRepositoryMVP
+import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.MapView
 
 class ThrowViewModel(
+    val locationName: String,
     var selectedLocation: GeoPoint,
     val mapViewState: DisableMapView,
     val getWeather: (location: String) -> Weather,
@@ -27,12 +24,16 @@ class ThrowViewModel(
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
     var weather: Weather = Weather()
+    lateinit var highScore: HighScore
 
     init {
         drawStartMarker(mapViewState, startPos)
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
+        }
+        CoroutineScope(Dispatchers.IO).launch {
+            highScore = weatherRepository.getHighScore(locationName)
         }
     }
 
@@ -41,6 +42,8 @@ class ThrowViewModel(
         val speed = 10.0
         val angle = 0.0
         val planeStartHeight = 100.0
+        val flightPath = mutableListOf<GeoPoint>()
+        flightPath.add(startPos)
 
         // initialize starter plane
         planeRepository.update(
@@ -82,22 +85,40 @@ class ThrowViewModel(
 
                 // Draws the plane path
                 drawPlanePath(mapViewState, previousPlanePos, nextPlanePos)
+                // Saves flight path point
+                flightPath.add(nextPlanePos)
 
                 // This fixes the map glitching
                 previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
             }
 
             planeLogic.update(weather)
+            val newHS = updateHighScore(startPos, previousPlanePos, flightPath)
             // Draws goal flag
-            drawGoalMarker(mapViewState, startPos, previousPlanePos)
+            drawGoalMarker(mapViewState, startPos, previousPlanePos, newHS)
+
 
             // Unlock map
             mapViewState.setInteraction(true)
         }
     }
 
-
-
+    private fun updateHighScore(startPos: GeoPoint, goalPos: GeoPoint, flightPath: List<GeoPoint>): Boolean {
+        val distance = (startPos.distanceToAsDouble(goalPos)/1000).toInt()
+        if (highScore.distance == null || distance > highScore.distance!!) {
+            CoroutineScope(Dispatchers.IO).launch {
+                weatherRepository.updateHighScore(
+                    locationName,
+                    distance,
+                    System.currentTimeMillis() / 1000L,
+                    flightPath
+                )
+                highScore = weatherRepository.getHighScore(locationName)
+            }
+            return true
+        }
+        return false
+    }
 
     fun getPlaneScale(): Float{
         // This should not be done here like this I think.

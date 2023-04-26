@@ -108,11 +108,14 @@ fun drawStartMarker(mapViewState: MapView, startPos: GeoPoint) {
     mapViewState.overlays.add(marker)
 }
 
-fun drawGoalMarker(mapViewState: MapView, startPos: GeoPoint, markerPos: GeoPoint) {
+fun drawGoalMarker(mapViewState: MapView, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean) {
     val marker = Marker(mapViewState)
 
     marker.position = markerPos
-    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_push_pin_48)
+    marker.icon =
+        ContextCompat.getDrawable(mapViewState.context,
+        if (newHS) R.drawable.baseline_push_pin_48_new_hs else R.drawable.baseline_push_pin_48
+    )
     marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapViewState.overlays.add(marker)

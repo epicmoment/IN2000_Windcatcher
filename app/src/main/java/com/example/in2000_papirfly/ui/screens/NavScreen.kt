@@ -12,9 +12,6 @@ import androidx.navigation.compose.rememberNavController
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import org.osmdroid.util.GeoPoint
-import com.example.in2000_papirfly.data.WeatherRepositoryMVP
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import com.example.in2000_papirfly.PapirflyApplication
 
@@ -50,8 +47,8 @@ fun NavScreen(
         composable(route = "PositionScreen") {
 
             PositionScreen(
-                onNextPage = { newLocation ->
-                    viewModel.setLocation(newLocation)
+                onNextPage = { newLocation, locationName ->
+                    viewModel.setLocation(newLocation, locationName)
                     navController.navigate("ThrowScreen")
                 },
             )
@@ -64,6 +61,7 @@ fun NavScreen(
             )
             ThrowScreen(
                 selectedLocation = pos,
+                locationName = screenState.value.locationName,
                 getWeather = { location: String ->
                     repository.getWeatherAt(location)
                 },

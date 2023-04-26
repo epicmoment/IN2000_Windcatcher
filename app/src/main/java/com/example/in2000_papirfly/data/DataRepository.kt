@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.data
 
 import android.util.Log
 import com.example.in2000_papirfly.data.database.PapirflyDatabase
+import com.example.in2000_papirfly.data.database.entities.FlightPathPoint
 import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 import com.example.in2000_papirfly.data.database.entities.WeatherTile
 import com.example.in2000_papirfly.network.getLocationforecastData
@@ -80,6 +81,53 @@ class DataRepository(database: PapirflyDatabase) {
                         )
                     )
                 }
+            }
+        }
+    }
+
+    fun getHighScore(locationName: String): HighScore {
+
+        val throwPoint = throwDao.getThrowPointInfo(locationName)!!
+        val flightPathInfo = flightDao.getFlightPath(locationName)
+        val flightPathPoints: MutableList<GeoPoint> = mutableListOf()
+
+        if (flightPathInfo.isNotEmpty()) {
+            flightPathInfo.sortBy { it.number }
+            flightPathInfo.forEach {
+                flightPathPoints += GeoPoint(it.locX, it.locY)
+            }
+        }
+
+        return HighScore(
+            locationName,
+            throwPoint.hSDate,
+            throwPoint.hSDistance,
+            flightPathPoints
+        )
+    }
+
+    fun updateHighScore(location: String, distance: Int, time: Long, path: List<GeoPoint>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val throwPoint = throwDao.getThrowPointInfo(location)!!
+            throwDao.insert(
+                ThrowPoint(
+                    name = throwPoint.name,
+                    tileX = throwPoint.tileX,
+                    tileY = throwPoint.tileY,
+                    hSDate = time,
+                    hSDistance = distance
+                )
+            )
+            path.forEach {
+                flightDao.insert(
+                    FlightPathPoint(
+                        location = location,
+                        number = path.indexOf(it),
+                        it.latitude,
+                        it.longitude,
+                        null
+                    )
+                )
             }
         }
     }
