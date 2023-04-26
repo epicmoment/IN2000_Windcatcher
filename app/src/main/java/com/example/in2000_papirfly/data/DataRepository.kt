@@ -12,17 +12,11 @@ import kotlin.math.roundToInt
 
 class DataRepository(database: PapirflyDatabase) {
 
+    private val roundingFactor = 10.0 // Rounds to one decimal point
     private val throwDao = database.throwPointDao()
     private val tileDao = database.weatherTileDao()
     private val flightDao = database.flightPathDao()
-    private val throwPoints =
-        mapOf(
-            Pair("Oslo", GeoPoint(59.944030, 10.719282)),
-            Pair("Stavanger", GeoPoint(58.89729, 5.71185)),
-            Pair("Galdhøpiggen", GeoPoint(61.63630, 8.31289)),
-            Pair("Nordkapp", GeoPoint(71.1705, 25.7842)),
-            Pair("Lindesnes Fyr", GeoPoint(57.9828, 7.0466))
-        )
+    private val throwPoints = ThrowPointList.throwPoints
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -34,12 +28,11 @@ class DataRepository(database: PapirflyDatabase) {
      * This function returns a Weather-object with live weather data for the given location
      */
     fun getWeatherAt(locationName: String): Weather {
-        var weather = Weather()
 
         Log.d("Repo", "Fetching info for throw point at \"$locationName\"")
         val point = throwDao.getThrowPointInfo(locationName)!!
         val tile = tileDao.getTileAt(point.tileX, point.tileY)!!
-        weather = Weather(
+        return Weather(
             windSpeed = tile.windSpeed,
             windAngle = tile.windDirection,
             airPressure = tile.airPressure,
@@ -48,8 +41,6 @@ class DataRepository(database: PapirflyDatabase) {
             icon = tile.icon,
             namePos = locationName
         )
-
-        return weather
     }
 
      fun getThrowPointWeatherList(): List<Weather> {
@@ -74,8 +65,8 @@ class DataRepository(database: PapirflyDatabase) {
                     Log.d("Repo","Populating throw point \"${it.key}\"")
                     getWeatherAtPoint(it.value)
 
-                    val roundedLat = (it.value.latitude * 100.0).roundToInt() / 100.0
-                    val roundedLon = (it.value.longitude * 100.0).roundToInt() / 100.0
+                    val roundedLat = roundCoordinate(it.value.latitude)
+                    val roundedLon = roundCoordinate(it.value.longitude)
 
                     if (tileDao.getTileAt(roundedLat, roundedLon) == null) {
                         Log.d("Database", "Unexpected null value")
@@ -93,6 +84,10 @@ class DataRepository(database: PapirflyDatabase) {
         }
     }
 
+    private fun roundCoordinate(coordinate: Double): Double {
+        return (coordinate * roundingFactor).roundToInt() / roundingFactor
+    }
+
     /**
      * This function returns a Weather-object with live weather data for the given location
      *
@@ -105,8 +100,8 @@ class DataRepository(database: PapirflyDatabase) {
 
         // TODO: show some kind of message to user if no connection
 
-        val lat = kotlin.math.round(point.latitude * 100.0).roundToInt() / 100.0
-        val lon = kotlin.math.round(point.longitude * 100.0).roundToInt() / 100.0
+        val lat = roundCoordinate(point.latitude)
+        val lon = roundCoordinate(point.longitude)
 
         var weatherTile = tileDao.getTileAt(lat, lon)
 
