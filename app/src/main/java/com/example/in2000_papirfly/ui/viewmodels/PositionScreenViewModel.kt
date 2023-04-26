@@ -29,13 +29,13 @@ class PositionScreenViewModel(val repo: DataRepository): ViewModel() {
         posScreenView()
     }
 
-    private fun posScreenView() {
+    fun posScreenView() {
         viewModelScope.launch {
             try {
-//                val weatherRepo = list
+                val throwPointWeatherList = repo.getThrowPointWeatherList()
                 _posScrUiState.update { currentState ->
                     currentState.copy(
-                        weather = repo.getThrowPointWeatherList()
+                        weather = throwPointWeatherList
                     )
                 }
             } catch (e: Throwable) {

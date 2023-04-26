@@ -30,23 +30,24 @@ class DataRepository(database: PapirflyDatabase) {
         }
     }
 
+    /**
+     * This function returns a Weather-object with live weather data for the given location
+     */
     fun getWeatherAt(locationName: String): Weather {
         var weather = Weather()
 
-//        CoroutineScope(Dispatchers.IO).launch {
-        runBlocking {
-            val point = throwDao.getThrowPointInfo(locationName)!!
-            val tile = tileDao.getTileAt(point.tileX, point.tileY)!!
-            weather = Weather(
-                windSpeed = tile.windSpeed,
-                windAngle = tile.windDirection,
-                airPressure = tile.airPressure,
-                rain = tile.precipitation,
-                temperature = tile.temperature,
-                icon = tile.icon,
-                namePos = locationName
-            )
-        }
+        Log.d("Repo", "Fetching info for throw point at \"$locationName\"")
+        val point = throwDao.getThrowPointInfo(locationName)!!
+        val tile = tileDao.getTileAt(point.tileX, point.tileY)!!
+        weather = Weather(
+            windSpeed = tile.windSpeed,
+            windAngle = tile.windDirection,
+            airPressure = tile.airPressure,
+            rain = tile.precipitation,
+            temperature = tile.temperature,
+            icon = tile.icon,
+            namePos = locationName
+        )
 
         return weather
     }
@@ -67,28 +68,39 @@ class DataRepository(database: PapirflyDatabase) {
 
     // TODO: Show a loading screen during population of database to prevent potential crash
     private suspend fun asyncPopulate() = coroutineScope {
-        throwPoints.forEach {
-            launch {
-                getWeatherAtPoint(it.value)
+        if (throwDao.getSize() < throwPoints.size) {
+            throwPoints.forEach {
+                launch {
+                    Log.d("Repo","Populating throw point \"${it.key}\"")
+                    getWeatherAtPoint(it.value)
 
-                val roundedLat = (it.value.latitude * 100.0).roundToInt() / 100.0
-                val roundedLon = (it.value.longitude * 100.0).roundToInt() / 100.0
+                    val roundedLat = (it.value.latitude * 100.0).roundToInt() / 100.0
+                    val roundedLon = (it.value.longitude * 100.0).roundToInt() / 100.0
 
-                if (tileDao.getTileAt(roundedLat, roundedLon) == null) {
-                    Log.d("Database", "Unexpected null value")
-                }
+                    if (tileDao.getTileAt(roundedLat, roundedLon) == null) {
+                        Log.d("Database", "Unexpected null value")
+                    }
 
-                throwDao.insert(
-                    ThrowPoint(
-                        it.key,
-                        roundedLat,
-                        roundedLon,
+                    throwDao.insert(
+                        ThrowPoint(
+                            it.key,
+                            roundedLat,
+                            roundedLon,
+                        )
                     )
-                )
+                }
             }
         }
     }
 
+    /**
+     * This function returns a Weather-object with live weather data for the given location
+     *
+     * **WARNING**: This function cannot be called from the main thread! Please notice that a
+     * viewModelScope-Coroutine always runs on the main thread, and is thus not able to call
+     * this function by itself. Runblocking will also not work from the main thread.
+     * For best results, use CoroutineScope(Dispatchers.IO).launch { ... }
+     */
     suspend fun getWeatherAtPoint(point: GeoPoint): Weather {
 
         // TODO: show some kind of message to user if no connection
@@ -122,9 +134,10 @@ class DataRepository(database: PapirflyDatabase) {
                     weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                 )
             )
-            weatherTile = tileDao.getTileAt(lat, lon)
+            weatherTile = tileDao.getTileAt(lat, lon)!!
+            Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully added.")
 
-            // If LocationForecast hasn't been called in the past hour, the tile is updated
+        // If LocationForecast hasn't been called in the past hour, the tile is updated
         } else if (weatherTile.lastUpdatedLF + 3600 < ((System.currentTimeMillis() / 1000L))) {
             val weather = getLocationforecastData(lat, lon)
             Log.d(
@@ -147,10 +160,12 @@ class DataRepository(database: PapirflyDatabase) {
                         weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                     )
                 )
-                weatherTile = tileDao.getTileAt(lat, lon)
+                weatherTile = tileDao.getTileAt(lat, lon)!!
+
+                Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully updated.")
             }
 
-            // If NowCast hasn't been called in the past five minutes, the tile is updated
+        // If NowCast hasn't been called in the past five minutes, the tile is updated
         } else if (weatherTile.lastUpdatedNC + 300 < ((System.currentTimeMillis() / 1000L))) {
             val weather = getNowcastData(lat, lon)
             Log.d(
@@ -164,7 +179,7 @@ class DataRepository(database: PapirflyDatabase) {
                         lat,
                         lon,
                         System.currentTimeMillis() / 1000L,
-                        System.currentTimeMillis() / 1000L,
+                        weatherTile.lastUpdatedLF,
                         weatherTile.icon,
                         weatherTile.airPressure,
                         weather.properties.timeseries[0].data.instant.details.air_temperature,
@@ -173,12 +188,13 @@ class DataRepository(database: PapirflyDatabase) {
                         weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                     )
                 )
-                weatherTile = tileDao.getTileAt(lat, lon)
+                weatherTile = tileDao.getTileAt(lat, lon)!!
+                Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully updated.")
             }
         }
 
         return Weather(
-            windSpeed = weatherTile!!.windSpeed,
+            windSpeed = weatherTile.windSpeed,
             windAngle = weatherTile.windDirection,
             airPressure = weatherTile.airPressure,
             rain = weatherTile.precipitation,

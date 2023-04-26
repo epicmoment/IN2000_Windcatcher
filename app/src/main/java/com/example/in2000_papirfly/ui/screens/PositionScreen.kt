@@ -37,10 +37,9 @@ fun PositionScreen(
     viewModel: PositionScreenViewModel = PositionScreenViewModel(repo = (LocalContext.current.applicationContext as PapirflyApplication).appContainer.dataRepository),
     onNextPage : (GeoPoint) -> Unit,
 ) {
-
     val posScrUiState = viewModel.posScrUiState.collectAsState()
-    val throwPointWeather = posScrUiState.value.weather
-    Log.d("PosScreen",throwPointWeather.size.toString())
+    val throwPointWeather: List<Weather> = posScrUiState.value.weather
+    Log.d("PosScreen","Throw points fetched: ${throwPointWeather.size}")
 
     Column(horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxSize()) {

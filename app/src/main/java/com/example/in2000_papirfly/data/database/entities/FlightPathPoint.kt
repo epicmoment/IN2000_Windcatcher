@@ -12,7 +12,8 @@ import androidx.room.ForeignKey
             entity = ThrowPoint::class,
             parentColumns = arrayOf("name"),
             childColumns = arrayOf("location"),
-            onDelete = ForeignKey.CASCADE
+            onDelete = ForeignKey.CASCADE,
+            deferred = true,
         )
     ]
 )
