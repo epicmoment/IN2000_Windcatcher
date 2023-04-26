@@ -11,8 +11,6 @@ import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
 class ScreenStateViewModel (
-    val parameter1 : String,
-    val savedStateHandle: SavedStateHandle // Trenger vi denne til noe?
 ) : ViewModel() {
 
     private val _screenState = MutableStateFlow(ScreenState())
@@ -28,29 +26,6 @@ class ScreenStateViewModel (
                     locationName = locationName
                 )
 
-            }
-        }
-    }
-
-    fun getParam() : String {
-        return parameter1
-    }
-
-    companion object {
-
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-
-                val savedStateHandle = extras.createSavedStateHandle()
-
-                return ScreenStateViewModel(
-                    "tekst1",
-                    savedStateHandle
-                ) as T
             }
         }
     }

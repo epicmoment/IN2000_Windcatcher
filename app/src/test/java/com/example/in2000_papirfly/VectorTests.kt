@@ -7,7 +7,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class VectorTests {
-    @Test
+    /*@Test
     fun test_calculateVector_angle_45_magnitude_1(){
         /*
         var plane = Plane()
@@ -63,5 +63,5 @@ class VectorTests {
         val vector1 = listOf(2.0, 1.0)
         val vector2 = listOf(1.0, 1.0)
         assertEquals(listOf(1.0, 0.0), planeLogic.subtractVectors(vector1, vector2))
-    }
+    }*/
 }

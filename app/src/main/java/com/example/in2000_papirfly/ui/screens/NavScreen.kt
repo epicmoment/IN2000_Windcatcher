@@ -17,9 +17,7 @@ import com.example.in2000_papirfly.PapirflyApplication
 
 @Composable
 fun NavScreen(
-    viewModel : ScreenStateViewModel = viewModel(
-        factory = (LocalContext.current.applicationContext as PapirflyApplication).appContainer.screenStateViewModelFactory
-    )
+    viewModel : ScreenStateViewModel = viewModel()
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
@@ -34,17 +32,17 @@ fun NavScreen(
 
      NavHost(
         navController = navController,
-        startDestination = "MainScreen",
-        modifier = Modifier.padding(8.dp)
+        startDestination = "MainScreen"
     ) {
 
-        composable(route = "MainScreen") {
-            MainScreen {
-                navController.navigate("PositionScreen")
-            }
-        }
+         composable(route = "MainScreen") {
+            MainScreen(
+                onNextPage = { navController.navigate("PositionScreen") },
+                onCustomizePage = { navController.navigate("CustomizationScreen")}
+            )
+         }
 
-        composable(route = "PositionScreen") {
+         composable(route = "PositionScreen") {
 
             PositionScreen(
                 onNextPage = { newLocation, locationName ->
@@ -52,6 +50,7 @@ fun NavScreen(
                     navController.navigate("ThrowScreen")
                 },
             )
+
         }
 
         composable(route = "ThrowScreen") {
@@ -70,6 +69,17 @@ fun NavScreen(
             )
 
         }
+
+         composable(route = "CustomizationScreen") {
+             CustomizationScreen(
+                 onNextPage = {
+                     navController.popBackStack(
+                         route = "MainScreen",
+                         inclusive = false
+                     )
+                 }
+             )
+         }
 
     }
 
