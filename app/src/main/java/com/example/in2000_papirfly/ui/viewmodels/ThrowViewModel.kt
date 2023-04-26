@@ -2,12 +2,12 @@ package com.example.in2000_papirfly.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.data.DataRepository
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 
@@ -15,7 +15,8 @@ class ThrowViewModel(
     var selectedLocation: GeoPoint,
     val mapViewState: DisableMapView,
     val getWeather: (location: String) -> Weather,
-    val weatherRepository: WeatherRepositoryMVP,
+//    val weatherRepository: WeatherRepositoryMVP,
+    val weatherRepository: DataRepository,
     val planeRepository: PlaneRepository
 ): ViewModel() {
     // TODO
@@ -29,6 +30,10 @@ class ThrowViewModel(
 
     init {
         drawStartMarker(mapViewState, startPos)
+        // Get the weather at the start location
+        CoroutineScope(Dispatchers.IO).launch {
+            weather = weatherRepository.getWeatherAtPoint(selectedLocation)
+        }
     }
 
     fun throwPlane(){
@@ -46,6 +51,7 @@ class ThrowViewModel(
                 flying = true
             )
         )
+
         previousPlanePos = startPos
         mapViewState.controller.setCenter(startPos)
 
@@ -56,9 +62,6 @@ class ThrowViewModel(
             // Locks map
             mapViewState.setInteraction(false)
 
-            // Get the weather at the start location
-            weather = weatherRepository.getWeatherAtPoint(selectedLocation.latitude, selectedLocation.longitude)
-
             while (planeIsFlying()) {
                 planeLogic.update(weather)
                 nextPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
@@ -66,7 +69,14 @@ class ThrowViewModel(
                 mapViewState.controller.animateTo(nextPlanePos)
 
                 // Call the weather for the next position
-                weather = weatherRepository.getWeatherAtPoint(planeState.value.pos[0], planeState.value.pos[1])
+                CoroutineScope(Dispatchers.IO).launch {
+                    weather = weatherRepository.getWeatherAtPoint(
+                        GeoPoint(
+                            planeState.value.pos[0],
+                            planeState.value.pos[1]
+                        )
+                    )
+                }
                 delay(planeLogic.updateFrequency)
                 // TODO // Await the answer for the weather call // Seems to not be needed
 
@@ -100,12 +110,14 @@ class ThrowViewModel(
     }
 
     fun getWindAngle(): Double{
-        // Should use selected location
-        return getWeather("Oslo").windAngle
+//        // Should use selected location
+//        return getWeather("Oslo").windAngle
+        return 0.0
     }
 
     fun getWindSpeed(): Double{
         // Should use selected location
-        return getWeather("Oslo").windSpeed
+//        return getWeather("Oslo").windSpeed
+        return 0.0
     }
 }
