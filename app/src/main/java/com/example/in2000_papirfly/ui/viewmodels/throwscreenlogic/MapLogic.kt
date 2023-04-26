@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -28,12 +29,18 @@ class DisableMapView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null
 ) : MapView(context, attrs) {
     private var isInteractionEnabled = true
+    private var onMoveMap: () -> Unit = {}
 
     override fun dispatchTouchEvent(event: MotionEvent?): Boolean {
         if (!isInteractionEnabled) {
             return false
         }
+        onMoveMap()
         return super.dispatchTouchEvent(event)
+    }
+
+    fun updateOnMoveMap(newOnMoveMap: () -> Unit){
+        onMoveMap = newOnMoveMap
     }
 
     // This makes it possible to disable scrolling and zooming

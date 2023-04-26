@@ -1,10 +1,19 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,15 +41,22 @@ class ThrowViewModel(
     private var _highScore: MutableStateFlow<HighScore> =
         MutableStateFlow(HighScore())
     var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
-
+    private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
 
     init {
         drawStartMarker(mapViewState, startPos)
+        mapViewState.updateOnMoveMap {
+            throwScreenState.update{ThrowScreenState.MovingMap}
+        }
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
         updateHighScoreState()
+    }
+
+    fun getThrowScreenState(): StateFlow<ThrowScreenState>{
+        return throwScreenState.asStateFlow()
     }
 
     fun throwPlane(){
@@ -50,6 +66,8 @@ class ThrowViewModel(
         val planeStartHeight = 100.0
         val flightPath = mutableListOf<GeoPoint>()
         flightPath.add(startPos)
+
+        throwScreenState.update{ ThrowScreenState.Flying }
 
         // initialize starter plane
         planeRepository.update(
@@ -106,6 +124,8 @@ class ThrowViewModel(
 
             // Unlock map
             mapViewState.setInteraction(true)
+
+            throwScreenState.update{ThrowScreenState.MovingMap}
         }
     }
 
@@ -123,6 +143,13 @@ class ThrowViewModel(
             return true
         }
         return false
+    }
+
+    fun changeAngle(value: Float){
+        throwScreenState.update{ThrowScreenState.Throwing}
+        val plane = planeState.value
+        planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        previousPlanePos = startPos
     }
 
     private fun updateHighScoreState() {
@@ -163,4 +190,13 @@ class ThrowViewModel(
 //        return getWeather("Oslo").windSpeed
         return 0.0
     }
+}
+
+sealed interface ThrowScreenState{
+
+    object Flying: ThrowScreenState
+
+    object Throwing: ThrowScreenState
+
+    object MovingMap: ThrowScreenState
 }
