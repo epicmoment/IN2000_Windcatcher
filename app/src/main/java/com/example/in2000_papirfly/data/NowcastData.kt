@@ -78,5 +78,5 @@ data class NCPrecipitationNext1Hours(
 
 @Serializable
 data class NCSummary(
-    val symbol_code: String = ""
+    val symbol_code: String = "cloudy"
 )

@@ -24,6 +24,7 @@ class PlaneLogic(
     val updateFrequency: Long = 1000
     val distanceMultiplier = 1000
     val zeroDegreeAngle = listOf(1.0, 0.0)
+    val groundedThreshold = 0.0
 
     suspend fun update(weather: Weather){
     // This update method fetches the current plane state and uses the position, angle, speed
@@ -31,9 +32,21 @@ class PlaneLogic(
     // Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
     // is multiplied by a constant, distanceMultiplier (probably valued at 1000)
 
+
+
         // Set up
         val plane = planeRepository.planeState.value
         val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
+
+        // Make sure plane doesn't fly if it shouldn't
+        if (!plane.flying){
+            planeRepository.update(
+                plane.copy(
+                    speed = 0.0
+                )
+            )
+            return
+        }
 
         // Calculate the modified trajectory of the plane
         val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
@@ -48,7 +61,8 @@ class PlaneLogic(
         // Calculate new plane stats
         val newPlaneAngle = calculateAngle(affectedPlaneVector)
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
-        val newHeight = plane.height - (1 - calculateDropRate(plane.speed)) * planeStartHeight
+        val newHeight = plane.height - calculateDropRate(plane.speed)
+        val flying = newHeight > groundedThreshold
 
         // Update planeState with the calculated changes
         planeRepository.update(
@@ -56,7 +70,8 @@ class PlaneLogic(
                 pos = listOf(newPlanePos.latitude, newPlanePos.longitude),
                 speed = newPlaneSpeed,
                 height = newHeight,
-                angle = newPlaneAngle
+                angle = newPlaneAngle,
+                flying = flying
             )
         )
     }
@@ -80,7 +95,7 @@ class PlaneLogic(
         // Currently only affected by plane speed
         // if speed is low drop rate is high
         //return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))    // I like the idea of this, but I think it might not be as fun. Could be a plane type that functions like this
-        return dropRate
+        return round((1 - dropRate) * planeStartHeight)
     }
 
     private fun calculateSlowRate(): Double{

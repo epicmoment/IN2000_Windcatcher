@@ -1,8 +1,6 @@
 package com.example.in2000_papirfly.ui.screens
 
 
-import android.annotation.SuppressLint
-import android.util.Half.toFloat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,10 +16,11 @@ import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.plane.WeatherRepository
+import com.example.in2000_papirfly.ui.composables.PlaneComposable
+import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
@@ -29,12 +28,12 @@ import org.osmdroid.views.MapView
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,
+    locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
     getWeather: (location: String) -> Weather,
-    weatherRepository: WeatherRepositoryMVP,
+    weatherRepository: DataRepository,
     planeRepository: PlaneRepository
 ) {
-
     // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
     AndroidView(
@@ -46,6 +45,7 @@ fun ThrowScreen(
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{
         ThrowViewModel(
+            locationName,
             selectedLocation,
             mapViewState,
             getWeather = getWeather,
@@ -53,6 +53,9 @@ fun ThrowScreen(
             weatherRepository = weatherRepository
         )
     }
+    val highscore = throwViewModel.highScore.collectAsState()
+
+    val throwScreenState = throwViewModel.getThrowScreenState()
 
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
@@ -67,31 +70,25 @@ fun ThrowScreen(
     )
 
     // Paper plane
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ){
-        Image(
-            painter = painterResource(id = R.drawable.plane01),
-            contentDescription = "TODO",
-            modifier = Modifier
-                .rotate((throwViewModel.planeState.collectAsState().value.angle).toFloat())
-                .scale(throwViewModel.getPlaneScale())
-        )
-    }
+    PlaneComposable(
+        planeSize = throwViewModel.getPlaneScale(),
+        planeState = throwViewModel.planeState,
+        planeVisible = showPlane(throwScreenState)
+    )
 
 
     Column {
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-
+        Text(text = "Local highscore at ${highscore.value.locationName}: ${highscore.value.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
 
 
         Button(
+            enabled = !throwViewModel.planeState.collectAsState().value.flying,
             onClick = {
                 throwViewModel.throwPlane()
             }
@@ -104,11 +101,20 @@ fun ThrowScreen(
         Slider(
             value = sliderPosition,
             onValueChange = {value ->
-                val plane = throwViewModel.planeState.value
-                throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+                throwViewModel.changeAngle(value)
                 sliderPosition = value
-                throwViewModel.previousPlanePos = throwViewModel.startPos
-            }
+            },
+            enabled = !throwViewModel.planeState.collectAsState().value.flying,
         )
     }
+}
+
+@Composable
+fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
+    val value = when (throwScreenState.collectAsState().value){
+        is ThrowScreenState.Throwing -> true
+        is ThrowScreenState.Flying -> true
+        is ThrowScreenState.MovingMap -> false
+    }
+    return value
 }

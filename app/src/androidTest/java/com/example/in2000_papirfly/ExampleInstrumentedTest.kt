@@ -1,7 +1,12 @@
 package com.example.in2000_papirfly
 
+import android.util.Log
+import androidx.room.Room
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.in2000_papirfly.data.database.PapirflyDatabase
+import com.example.in2000_papirfly.data.database.entities.ThrowPoint
+import kotlinx.coroutines.runBlocking
 
 import org.junit.Test
 import org.junit.runner.RunWith
