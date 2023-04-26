@@ -1,5 +1,8 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.PlaneRepository
@@ -7,6 +10,10 @@ import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -26,9 +33,17 @@ class ThrowViewModel(
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
     var weather: Weather = Weather()
+    private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
 
     init {
         drawStartMarker(mapViewState, startPos)
+        mapViewState.updateOnMoveMap {
+            throwScreenState.update{ThrowScreenState.MovingMap}
+        }
+    }
+
+    fun getThrowScreenState(): StateFlow<ThrowScreenState>{
+        return throwScreenState.asStateFlow()
     }
 
     fun throwPlane(){
@@ -36,6 +51,8 @@ class ThrowViewModel(
         val speed = 10.0
         val angle = 0.0
         val planeStartHeight = 100.0
+
+        throwScreenState.update{ ThrowScreenState.Flying }
 
         // initialize starter plane
         planeRepository.update(
@@ -83,7 +100,16 @@ class ThrowViewModel(
 
             // Unlock map
             mapViewState.setInteraction(true)
+
+            throwScreenState.update{ThrowScreenState.MovingMap}
         }
+    }
+
+    fun changeAngle(value: Float){
+        throwScreenState.update{ThrowScreenState.Throwing}
+        val plane = planeState.value
+        planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        previousPlanePos = startPos
     }
 
 
@@ -108,4 +134,13 @@ class ThrowViewModel(
         // Should use selected location
         return getWeather("Oslo").windSpeed
     }
+}
+
+sealed interface ThrowScreenState{
+
+    object Flying: ThrowScreenState
+
+    object Throwing: ThrowScreenState
+
+    object MovingMap: ThrowScreenState
 }
