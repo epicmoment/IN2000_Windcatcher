@@ -21,6 +21,7 @@ import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
 
