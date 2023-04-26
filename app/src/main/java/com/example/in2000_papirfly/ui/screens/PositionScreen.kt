@@ -1,17 +1,12 @@
 package com.example.in2000_papirfly.ui.screens
 
-import android.content.Context
-import android.content.res.Resources
-import android.hardware.usb.UsbDevice.getDeviceId
 import android.util.Log
-import android.view.View
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -20,22 +15,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 import io.ktor.http.*
 import org.osmdroid.util.GeoPoint
-import kotlin.coroutines.coroutineContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionScreen(
     modifier: Modifier = Modifier,
     viewModel: PositionScreenViewModel = PositionScreenViewModel(repo = (LocalContext.current.applicationContext as PapirflyApplication).appContainer.dataRepository),
-    onNextPage : (GeoPoint) -> Unit,
+    onNextPage : (GeoPoint, String) -> Unit,
 ) {
     val posScrUiState = viewModel.posScrUiState.collectAsState()
     val throwPointWeather: List<Weather> = posScrUiState.value.weather
@@ -55,7 +47,8 @@ fun PositionScreen(
                         .padding(15.dp)
                         .clickable {
                             onNextPage(
-                                viewModel.repo.getThrowGeoPoint(throwPointWeather[it].namePos!!)
+                                viewModel.repo.getThrowGeoPoint(throwPointWeather[it].namePos!!),
+                                throwPointWeather[it].namePos!!
                             )
                         }
                 ) {
