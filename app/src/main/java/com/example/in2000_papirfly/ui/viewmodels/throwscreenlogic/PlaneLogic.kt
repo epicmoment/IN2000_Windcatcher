@@ -33,10 +33,8 @@ class PlaneLogic(
     // is multiplied by a constant, distanceMultiplier (probably valued at 1000)
 
 
-
         // Set up
         val plane = planeRepository.planeState.value
-        val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
 
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
@@ -49,8 +47,8 @@ class PlaneLogic(
         }
 
         // Calculate the modified trajectory of the plane
-        val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
-        val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, calculateWindEffect()))
+        val currentPlaneVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
+        val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
@@ -85,6 +83,24 @@ class PlaneLogic(
 
     fun planeIsFlying(): Boolean{
         return planeRepository.planeState.value.height > 0.1
+    }
+
+    private fun calculateNewPlaneVector(currentPlaneVector: List<Double>, weather: Weather): List<Double>{
+        // Adjust for wind-effect
+        val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
+        val affectedWindVector = multiplyVector(windVector, calculateWindEffect())
+        var newPlaneVector = addVectors(currentPlaneVector, affectedWindVector)
+
+        // Adjust for rain
+            // Add stuff here
+
+        // Adjust for air pressure
+            // Add stuff here
+
+        // Adjust for whatever
+            // Add stuff here
+
+        return newPlaneVector
     }
 
     private fun calculateDropRate(speed: Double): Double{
