@@ -5,6 +5,6 @@ import com.example.in2000_papirfly.data.AppContainer
 
 class PapirflyApplication : Application() {
 
-    var appContainer = AppContainer()
+    val appContainer = AppContainer()
 
 }
