@@ -92,6 +92,7 @@ fun ThrowScreen(
 
 
         Button(
+            enabled = !throwViewModel.planeState.collectAsState().value.flying,
             onClick = {
                 throwViewModel.throwPlane()
             }
@@ -108,7 +109,8 @@ fun ThrowScreen(
                 throwViewModel.planeRepository.update(plane.copy(angle = value.toDouble() * 360))
                 sliderPosition = value
                 throwViewModel.previousPlanePos = throwViewModel.startPos
-            }
+            },
+            enabled = !throwViewModel.planeState.collectAsState().value.flying,
         )
     }
 }

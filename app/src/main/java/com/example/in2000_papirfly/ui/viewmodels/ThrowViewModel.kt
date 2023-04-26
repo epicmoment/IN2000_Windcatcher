@@ -42,7 +42,8 @@ class ThrowViewModel(
             planeState.value.copy(
                 speed = speed,
                 height = planeStartHeight,
-                pos= listOf(selectedLocation.latitude, selectedLocation.longitude)
+                pos= listOf(selectedLocation.latitude, selectedLocation.longitude),
+                flying = true
             )
         )
         previousPlanePos = startPos
@@ -94,7 +95,8 @@ class ThrowViewModel(
     }
 
     fun planeIsFlying(): Boolean{
-        return planeState.value.height > 0.1
+        //return planeState.value.height > 0.1
+        return planeState.value.flying
     }
 
     fun getWindAngle(): Double{
