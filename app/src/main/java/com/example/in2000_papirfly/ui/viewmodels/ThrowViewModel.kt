@@ -223,14 +223,22 @@ class ThrowViewModelFactory(
     fun newViewModel(
         locationName: String,
         selectedLocation: GeoPoint,
-        mapViewState: DisableMapView,
+        markerFactory: () -> Marker,
+        mapOverlay: MutableList<Overlay>,
+        mapController: IMapController,
+        updateOnMoveMap: (() -> Unit) -> Unit,
+        setInteraction: (Boolean) -> Unit,
     ): ThrowViewModel{
         return ThrowViewModel(
-            locationName,
-            selectedLocation,
-            mapViewState,
-            weatherRepository,
-            planeRepository
+            locationName = locationName,
+            selectedLocation = selectedLocation,
+            markerFactory = markerFactory,
+            mapOverlay = mapOverlay,
+            mapController = mapController,
+            updateOnMoveMap = updateOnMoveMap,
+            setInteraction = setInteraction,
+            weatherRepository = weatherRepository,
+            planeRepository = planeRepository
         )
     }
 }

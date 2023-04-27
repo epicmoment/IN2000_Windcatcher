@@ -56,7 +56,7 @@ fun NavScreen(
             )
             ThrowScreen(
                 selectedLocation = pos,
-                locationName = screenState.value.locationName
+                locationName = screenState.value.locationName,
                 onBack = {
                     navController.popBackStack(
                         route = "PositionScreen",

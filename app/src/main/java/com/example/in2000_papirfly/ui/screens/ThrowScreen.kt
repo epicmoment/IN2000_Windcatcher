@@ -11,11 +11,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -44,16 +45,15 @@ fun ThrowScreen(
         appContainer.throwViewModelFactory.newViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
-            mapViewState = mapViewState,
             { Marker(mapViewState) },
             mapViewState.overlays,
             mapViewState.controller,
             { inputUpdate: () -> Unit
                 -> mapViewState.updateOnMoveMap {
-                inputUpdate()
-            }
+                        inputUpdate()
+                    }
             },
-            { interactionEnabled: Boolean
+            setInteraction = { interactionEnabled: Boolean
                 -> mapViewState.setInteraction(interactionEnabled)
             },
         )
