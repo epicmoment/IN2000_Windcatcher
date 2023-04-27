@@ -11,5 +11,6 @@ object ThrowPointList {
             Pair("Galdhøpiggen", GeoPoint(61.63630, 8.31289)),
             Pair("Nordkapp", GeoPoint(71.1705, 25.7842)),
             Pair("Lindesnes Fyr", GeoPoint(57.9828, 7.0466)),
+            Pair("Drammen", GeoPoint(59.7439, 10.2049)),
         )
 }
