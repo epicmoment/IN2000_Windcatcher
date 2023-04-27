@@ -21,14 +21,7 @@ fun NavScreen(
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
-
-//    val repository : WeatherRepositoryMVP = viewModel()
-    val planeRepository = PlaneRepository()     // TODO // Burde bli flyttet, dependency injection
-
     val navController = rememberNavController()
-
-    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
-    val repository = appContainer.dataRepository
 
      NavHost(
         navController = navController,
@@ -61,11 +54,6 @@ fun NavScreen(
             ThrowScreen(
                 selectedLocation = pos,
                 locationName = screenState.value.locationName,
-                getWeather = { location: String ->
-                    repository.getWeatherAt(location)
-                },
-                weatherRepository = repository,
-                planeRepository = planeRepository
             )
 
         }

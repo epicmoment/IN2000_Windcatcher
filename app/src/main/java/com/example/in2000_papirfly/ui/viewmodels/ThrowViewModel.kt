@@ -21,7 +21,7 @@ class ThrowViewModel(
     val locationName: String,
     var selectedLocation: GeoPoint,
     val mapViewState: DisableMapView,
-    val getWeather: (location: String) -> Weather,
+    //val getWeather: (location: String) -> Weather,
 //    val weatherRepository: WeatherRepositoryMVP,
     val weatherRepository: DataRepository,
     val planeRepository: PlaneRepository
@@ -185,6 +185,25 @@ class ThrowViewModel(
         // Should use selected location
 //        return getWeather("Oslo").windSpeed
         return 0.0
+    }
+}
+
+class ThrowViewModelFactory(
+    val weatherRepository: DataRepository,
+    val planeRepository: PlaneRepository
+){
+    fun newViewModel(
+        locationName: String,
+        selectedLocation: GeoPoint,
+        mapViewState: DisableMapView,
+    ): ThrowViewModel{
+        return ThrowViewModel(
+            locationName,
+            selectedLocation,
+            mapViewState,
+            weatherRepository,
+            planeRepository
+        )
     }
 }
 
