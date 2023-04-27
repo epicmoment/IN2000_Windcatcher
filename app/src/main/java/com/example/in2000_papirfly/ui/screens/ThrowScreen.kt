@@ -2,12 +2,9 @@ package com.example.in2000_papirfly.ui.screens
 
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -15,7 +12,6 @@ import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -23,6 +19,7 @@ import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 
 @Composable
@@ -30,7 +27,6 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
-    getWeather: (location: String) -> Weather,
     weatherRepository: DataRepository,
     planeRepository: PlaneRepository
 ) {
@@ -38,7 +34,7 @@ fun ThrowScreen(
     val mapViewState = rememberMapViewWithLifecycle()
     AndroidView(
         { mapViewState },
-        Modifier
+        Modifier,
     ) { mapView -> onLoad?.invoke(mapView) }
 
     // TODO
@@ -47,13 +43,23 @@ fun ThrowScreen(
         ThrowViewModel(
             locationName,
             selectedLocation,
-            mapViewState,
-            getWeather = getWeather,
+//            mapViewState,
+            { Marker(mapViewState) },
+            mapViewState.overlays,
+            mapViewState.controller,
+            { inputUpdate: () -> Unit
+                -> mapViewState.updateOnMoveMap {
+                inputUpdate
+                }
+            },
+            { interactionEnabled: Boolean
+                -> mapViewState.setInteraction(interactionEnabled)
+            },
             planeRepository = planeRepository,
             weatherRepository = weatherRepository
         )
     }
-    val highscore = throwViewModel.highScore.collectAsState()
+    val highScore = throwViewModel.highScore.collectAsState()
 
     val throwScreenState = throwViewModel.getThrowScreenState()
 
@@ -81,7 +87,7 @@ fun ThrowScreen(
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-        Text(text = "Local highscore at ${highscore.value.locationName}: ${highscore.value.distance}km")
+        Text(text = "Local highscore at ${highScore.value.locationName}: ${highScore.value.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")

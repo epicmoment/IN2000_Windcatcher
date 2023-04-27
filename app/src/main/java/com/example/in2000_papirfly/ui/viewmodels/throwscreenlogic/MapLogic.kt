@@ -22,6 +22,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import androidx.compose.ui.graphics.Color
+import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
 // https://stackoverflow.com/a/60808815/18814731
@@ -98,34 +99,36 @@ fun unlockMap(mapViewState: MapView) {
     mapViewState.setScrollableAreaLimitLongitude(3.5, 32.0, 0)
 }
 
-fun drawPlanePath(mapViewState: MapView, origin: GeoPoint, destination: GeoPoint) {
+fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destination: GeoPoint) {
     val points = listOf(origin, destination)
     val polyline = Polyline() //TODO
     polyline.outlinePaint.color = Color.Red.hashCode()
     polyline.setPoints(points)
-    mapViewState.overlays.add(polyline)
+    mapOverlay.add(polyline)
 }
 
-fun drawStartMarker(mapViewState: MapView, startPos: GeoPoint) {
-    val marker = Marker(mapViewState)
+fun drawStartMarker(markerFactory: () -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint) {
+    val marker = markerFactory()
     marker.position = startPos
-    marker.icon = ContextCompat.getDrawable(mapViewState.context, R.drawable.baseline_push_pin_green_48)
+    // TODO: check if context works in this mega-hacky way
+    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.baseline_push_pin_green_48)
     marker.title = "Start"
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    mapViewState.overlays.add(marker)
+    mapOverlay.add(marker)
 }
 
-fun drawGoalMarker(mapViewState: MapView, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean) {
-    val marker = Marker(mapViewState)
+fun drawGoalMarker(markerFactory: () -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean) {
+    val marker = markerFactory()
 
     marker.position = markerPos
     marker.icon =
-        ContextCompat.getDrawable(mapViewState.context,
+        ContextCompat.getDrawable(marker.infoWindow.mapView.context,
         if (newHS) R.drawable.baseline_push_pin_48_new_hs else R.drawable.baseline_push_pin_48
     )
     marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    mapViewState.overlays.add(marker)
+    mapOverlay.add(marker)
+    marker.showInfoWindow()
 }
 
 @Composable
