@@ -17,7 +17,6 @@ import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
