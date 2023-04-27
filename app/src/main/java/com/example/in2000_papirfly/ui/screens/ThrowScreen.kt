@@ -1,6 +1,8 @@
 package com.example.in2000_papirfly.ui.screens
 
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.*
@@ -28,7 +30,8 @@ fun ThrowScreen(
     locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
     weatherRepository: DataRepository,
-    planeRepository: PlaneRepository
+    planeRepository: PlaneRepository,
+    onBack: () -> Unit
 ) {
     // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
@@ -49,16 +52,24 @@ fun ThrowScreen(
             mapViewState.controller,
             { inputUpdate: () -> Unit
                 -> mapViewState.updateOnMoveMap {
-                inputUpdate
+                inputUpdate()
                 }
             },
             { interactionEnabled: Boolean
                 -> mapViewState.setInteraction(interactionEnabled)
             },
             planeRepository = planeRepository,
-            weatherRepository = weatherRepository
+            weatherRepository = weatherRepository,
         )
     }
+
+    BackHandler {
+        Log.d("ThrowScreen", "Back press detected")
+        throwViewModel.planeFlying.cancel()
+        planeRepository.update(Plane())
+        onBack()
+    }
+
     val highScore = throwViewModel.highScore.collectAsState()
 
     val throwScreenState = throwViewModel.getThrowScreenState()
@@ -94,7 +105,8 @@ fun ThrowScreen(
 
 
         Button(
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+            enabled = !throwViewModel.flyingState,
             onClick = {
                 throwViewModel.throwPlane()
             }
@@ -110,7 +122,8 @@ fun ThrowScreen(
                 throwViewModel.changeAngle(value)
                 sliderPosition = value
             },
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+            enabled = !throwViewModel.flyingState
         )
     }
 }

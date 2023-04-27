@@ -58,7 +58,13 @@ fun NavScreen(
                 selectedLocation = pos,
                 locationName = screenState.value.locationName,
                 weatherRepository = repository,
-                planeRepository = planeRepository
+                planeRepository = planeRepository,
+                onBack = {
+                    navController.popBackStack(
+                        route = "PositionScreen",
+                        inclusive = false
+                    )
+                }
             )
 
         }
