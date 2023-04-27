@@ -41,7 +41,7 @@ fun NavScreen(
                 onNextPage = { newLocation, locationName ->
                     viewModel.setLocation(newLocation, locationName)
                     navController.navigate("ThrowScreen")
-                },
+                }
             )
 
         }
@@ -53,7 +53,7 @@ fun NavScreen(
             )
             ThrowScreen(
                 selectedLocation = pos,
-                locationName = screenState.value.locationName,
+                locationName = screenState.value.locationName
             )
 
         }

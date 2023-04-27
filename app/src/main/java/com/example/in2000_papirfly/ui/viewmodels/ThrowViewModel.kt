@@ -21,13 +21,9 @@ class ThrowViewModel(
     val locationName: String,
     var selectedLocation: GeoPoint,
     val mapViewState: DisableMapView,
-    //val getWeather: (location: String) -> Weather,
-//    val weatherRepository: WeatherRepositoryMVP,
     val weatherRepository: DataRepository,
     val planeRepository: PlaneRepository
 ): ViewModel() {
-    // TODO
-    // I'm making a lot of new ViewModel objects that should be made somewhere else here
     private val planeLogic = PlaneLogic(planeRepository)
     val planeState = planeLogic.planeState
     val startPos: GeoPoint = selectedLocation
@@ -80,9 +76,7 @@ class ThrowViewModel(
 
         // Start the coroutine that updates the plane every second
         viewModelScope.launch{
-            //planeLogic.throwPlane(100.0, 98.0, selectedLocation)
-
-            // Locks map
+              // Locks map
             mapViewState.setInteraction(false)
 
             while (planeIsFlying()) {

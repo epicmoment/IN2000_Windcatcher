@@ -36,3 +36,11 @@ class PositionScreenViewModel(val repo: DataRepository): ViewModel() {
         }
     }
 }
+
+class PositionScreenViewModelFactory(
+    val repo: DataRepository
+){
+    fun newViewModel(): PositionScreenViewModel{
+        return PositionScreenViewModel(repo)
+    }
+}

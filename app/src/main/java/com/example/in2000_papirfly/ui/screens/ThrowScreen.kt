@@ -39,17 +39,6 @@ fun ThrowScreen(
         Modifier
     ) { mapView -> onLoad?.invoke(mapView) }
 
-    // TODO
-    // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
-    /*val throwViewModel = remember{
-        ThrowViewModel(
-            locationName,
-            selectedLocation,
-            mapViewState,
-            planeRepository = planeRepository,
-            weatherRepository = weatherRepository
-        )
-    }*/
     val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
