@@ -9,7 +9,11 @@ import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
-
+/**
+ * If you want to add functionality, do it in one of the calculate-methods.
+ * Together they should use all available FlightModifiers to calculate new vector angle and
+ * length, and drop rate
+ * */
 class PlaneLogic(
     val planeRepository : PlaneRepository,
 ) : ViewModel() {
@@ -26,17 +30,15 @@ class PlaneLogic(
     val zeroDegreeAngle = listOf(1.0, 0.0)
     val groundedThreshold = 0.0
 
+    /**
+     * This method fetches the current plane state and uses the position, angle, speed
+     * and modifiers to calculate how it should be affected by the weather
+     * Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
+     * is multiplied by a constant, distanceMultiplier (probably valued at 1000)
+     */
     suspend fun update(weather: Weather){
-    // This update method fetches the current plane state and uses the position, angle, speed
-    // and modifiers to calculate how it should be affected by the weather
-    // Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
-    // is multiplied by a constant, distanceMultiplier (probably valued at 1000)
-
-
-
         // Set up
         val plane = planeRepository.planeState.value
-        val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
 
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
@@ -49,8 +51,8 @@ class PlaneLogic(
         }
 
         // Calculate the modified trajectory of the plane
-        val planeVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
-        val affectedPlaneVector = addVectors(planeVector, multiplyVector(windVector, calculateWindEffect()))
+        val currentPlaneVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
+        val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
@@ -87,6 +89,35 @@ class PlaneLogic(
         return planeRepository.planeState.value.height > 0.1
     }
 
+    /** Calculates a new plane vector based on the available modifiers.
+     * The new vector represents the new angle and speed.
+     *
+     * **Adding functionality:** Functionality that affects plane angle or speed should added here.
+     **/
+    private fun calculateNewPlaneVector(currentPlaneVector: List<Double>, weather: Weather): List<Double>{
+        // Adjust for wind-effect
+        val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
+        val affectedWindVector = multiplyVector(windVector, calculateWindEffect())
+        var newPlaneVector = addVectors(currentPlaneVector, affectedWindVector)
+
+        // Adjust for rain
+            // Add stuff here
+
+        // Adjust for air pressure
+            // Add stuff here
+
+        // Adjust for whatever
+            // Add stuff here
+
+        return newPlaneVector
+    }
+
+    /**
+     * Calculates a drop rate in meters that is subtracted in the update-method.
+     * Should use available relevant FlightModifiers.
+     *
+     * **Adding functionality:** Any functionality that affects the drop rate goes here.
+     */
     private fun calculateDropRate(speed: Double): Double{
         // Should calculate how much or little the plane height should decrease
         // Should be a double in the range 0.0 - 1.0 if it should never gain height
@@ -97,6 +128,7 @@ class PlaneLogic(
         //return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))    // I like the idea of this, but I think it might not be as fun. Could be a plane type that functions like this
         return round((1 - dropRate) * planeStartHeight)
     }
+
 
     private fun calculateSlowRate(): Double{
         // should take plane modifiers into account
