@@ -74,26 +74,26 @@ fun PositionScreen(
                         Icon(
                             painter = painterResource(id = id),
                             contentDescription = "Weather Icon",
-                            modifier = modifier.size(size = 70.dp),
+                            modifier = modifier.size(size = 65.dp),
                             tint = Color.Unspecified
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                             text = "${"%.0f".format(location.temperature)}°C",
-                            fontSize = 30.sp
+                            fontSize = 28.sp
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                             text = "${"%.0f".format(location.rain)}mm",
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
 
                         Text(
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
                             text = "${"%.0f".format(location.windSpeed)}m/s",
-                            fontSize = 20.sp
+                            fontSize = 18.sp
                         )
 
                         Icon(
