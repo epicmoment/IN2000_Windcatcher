@@ -24,7 +24,6 @@ import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapVie
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
 
-
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,

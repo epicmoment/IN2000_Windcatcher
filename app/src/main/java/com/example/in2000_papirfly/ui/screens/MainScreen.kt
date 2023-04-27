@@ -1,58 +1,136 @@
 package com.example.in2000_papirfly.ui.screens
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.ui.theme.colOrange
 
 @Composable
-fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit ) {
+fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable {
-                onNextPage()
-            }
+            .paint(
+                painter = painterResource(id = R.drawable.kartbl_2),
+                contentScale = ContentScale.Crop,
+            )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxSize()
         ) {
-            Text(
-                text = "Papirflyapp!",
-                fontSize = 28.sp
-            )
-
             Image(
-                painter = painterResource(id = R.drawable.plane01),
-                contentDescription = "papirfly")
-
-            Text(
-                text = "Press to start",
-                fontSize = 15.sp
+                painter = painterResource(id = R.drawable.paperplane),
+                contentDescription = "Paperplane Image",
+                modifier = Modifier
+                    .size(size = 250.dp),
             )
 
-            Button(
-                onClick = onCustomizePage,
+            Button (
+                modifier = Modifier.shadow(
+                    elevation = 10.dp,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black
+                ),
+                onClick = onNextPage,
+                colors = ButtonDefaults.buttonColors(colOrange),
+                shape = RoundedCornerShape(10),
             ) {
-                Text(text = "Customize")
+                Text(
+                    text = "KAST",
+                    fontSize = 40.sp,
+                )
             }
 
+            /*Button (
+                modifier = Modifier.shadow(
+                    elevation = 10.dp,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black
+                ),
+                onClick = onNextPage,
+                colors = ButtonDefaults.buttonColors(colOrange),
+                shape = RoundedCornerShape(8),
+            ) {
+                Text(
+                    text = "UTFORDRINGER",
+                    fontSize = 25.sp,
+                )
+            }*/
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Button (
+                    onClick = onCustomizePage,
+                    colors = ButtonDefaults.buttonColors(colOrange),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                        .shadow(elevation = 0.dp,
+                            ambientColor = Color.Black,
+                            spotColor = Color.Black),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.construction),
+                        contentDescription = "Customize Page",
+                        modifier = Modifier.size(size = 30.dp),
+                        tint = Color.White
+                    )
+                }
+
+                /*Button (
+                    onClick = onNextPage,
+                    colors = ButtonDefaults.buttonColors(colOrange),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                        .shadow(elevation = 0.dp,
+                            ambientColor = Color.Black,
+                            spotColor = Color.Black),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.construction),
+                        contentDescription = "Weather Icon",
+                        modifier = Modifier.size(size = 30.dp),
+                        tint = Color.White
+                    )
+                }
+
+                Button (
+                    onClick = onNextPage,
+                    shape = CircleShape,
+                    colors = ButtonDefaults.buttonColors(colOrange),
+                    modifier = Modifier
+                        .padding(horizontal = 10.dp, vertical = 8.dp)
+                        .shadow(elevation = 0.dp,
+                            ambientColor = Color.Black,
+                            spotColor = Color.Black),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.construction),
+                        contentDescription = "",
+                        modifier = Modifier.size(size = 30.dp),
+                        tint = Color.White,
+                    )
+                }*/
+            }
         }
     }
 }
