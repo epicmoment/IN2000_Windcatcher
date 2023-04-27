@@ -15,20 +15,35 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
+import org.osmdroid.api.IMapController
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 
 class ThrowViewModel(
     val locationName: String,
     var selectedLocation: GeoPoint,
-    val mapViewState: DisableMapView,
+    val markerFactory: () -> Marker,
+    val mapOverlay: MutableList<Overlay>,
+    val mapController: IMapController,
+    updateOnMoveMap: (() -> Unit) -> Unit,
+    val setInteraction: (Boolean) -> Unit,
     val weatherRepository: DataRepository,
     val planeRepository: PlaneRepository
 ): ViewModel() {
+    // TODO
+    // I'm making a lot of new ViewModel objects that should be made somewhere else here
     private val planeLogic = PlaneLogic(planeRepository)
     val planeState = planeLogic.planeState
-    val startPos: GeoPoint = selectedLocation
+
+    var planeFlying: Job = Job()
+
+    var flyingState = false
+
+    private val startPos: GeoPoint = selectedLocation
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
+
     var weather: Weather = Weather()
     private var _highScore: MutableStateFlow<HighScore> =
         MutableStateFlow(HighScore())
@@ -36,13 +51,25 @@ class ThrowViewModel(
     private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
 
     init {
-        drawStartMarker(mapViewState, startPos)
-        mapViewState.updateOnMoveMap {
-            throwScreenState.update{ThrowScreenState.MovingMap}
-        }
+        updateOnMoveMap{ throwScreenState.update{ThrowScreenState.MovingMap} }
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
+        }
+        mapOverlay.clear()
+        FlightPathRepository.flightPaths.forEach { path ->
+            var previous: GeoPoint? = null
+            path.second.forEach { point ->
+                if (previous != null) {
+                    drawPlanePath(mapOverlay, previous!!, point)
+                }
+                previous = point
+            }
+            drawGoalMarker(markerFactory, mapOverlay, path.second[0], path.second[path.second.lastIndex], false)
+        }
+
+        ThrowPointList.throwPoints.forEach {
+            drawStartMarker(markerFactory, mapOverlay, it.value, it.key)
         }
         updateHighScoreState()
     }
@@ -72,18 +99,20 @@ class ThrowViewModel(
         )
 
         previousPlanePos = startPos
-        mapViewState.controller.setCenter(startPos)
+        mapController.setCenter(startPos)
 
         // Start the coroutine that updates the plane every second
-        viewModelScope.launch{
-              // Locks map
-            mapViewState.setInteraction(false)
+        planeFlying = viewModelScope.launch{
+            //planeLogic.throwPlane(100.0, 98.0, selectedLocation)
+            flyingState = true
+            // Locks map
+            setInteraction(false)
 
             while (planeIsFlying()) {
                 planeLogic.update(weather)
                 nextPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
                 // Animate the map
-                mapViewState.controller.animateTo(nextPlanePos)
+                mapController.animateTo(nextPlanePos)
 
                 // Call the weather for the next position
                 CoroutineScope(Dispatchers.IO).launch {
@@ -98,7 +127,7 @@ class ThrowViewModel(
                 // TODO // Await the answer for the weather call // Seems to not be needed
 
                 // Draws the plane path
-                drawPlanePath(mapViewState, previousPlanePos, nextPlanePos)
+                drawPlanePath(mapOverlay, previousPlanePos, nextPlanePos)
                 // Saves flight path point
                 flightPath.add(nextPlanePos)
 
@@ -107,20 +136,25 @@ class ThrowViewModel(
             }
 
             planeLogic.update(weather)
-            val newHS = updateHighScore(startPos, previousPlanePos, flightPath)
+            val distance = (startPos.distanceToAsDouble(previousPlanePos)/1000).toInt()
+            val newHS = updateHighScore(distance, flightPath)
             // Draws goal flag
-            drawGoalMarker(mapViewState, startPos, previousPlanePos, newHS)
+            drawGoalMarker(markerFactory, mapOverlay, startPos, previousPlanePos, newHS)
 
+            FlightPathRepository.flightPaths.add(Pair(distance, flightPath))
 
+            flyingState = false
             // Unlock map
-            mapViewState.setInteraction(true)
+            setInteraction(true)
 
             throwScreenState.update{ThrowScreenState.MovingMap}
         }
     }
 
-    private fun updateHighScore(startPos: GeoPoint, goalPos: GeoPoint, flightPath: List<GeoPoint>): Boolean {
-        val distance = (startPos.distanceToAsDouble(goalPos)/1000).toInt()
+    private fun updateHighScore(
+        distance: Int,
+        flightPath: List<GeoPoint>
+    ): Boolean {
         if (highScore.value.distance == null || distance > highScore.value.distance!!) {
             CoroutineScope(Dispatchers.IO).launch {
                 weatherRepository.updateHighScore(

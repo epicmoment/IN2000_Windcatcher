@@ -11,12 +11,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
-import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -24,12 +23,14 @@ import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,
     locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
+    onBack: () -> Unit
 ) {
     // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
@@ -43,7 +44,18 @@ fun ThrowScreen(
         appContainer.throwViewModelFactory.newViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
-            mapViewState = mapViewState
+            mapViewState = mapViewState,
+            { Marker(mapViewState) },
+            mapViewState.overlays,
+            mapViewState.controller,
+            { inputUpdate: () -> Unit
+                -> mapViewState.updateOnMoveMap {
+                inputUpdate()
+            }
+            },
+            { interactionEnabled: Boolean
+                -> mapViewState.setInteraction(interactionEnabled)
+            },
         )
     }
     val highscore = throwViewModel.highScore.collectAsState()
