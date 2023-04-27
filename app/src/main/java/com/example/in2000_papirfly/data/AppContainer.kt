@@ -4,9 +4,9 @@ import android.content.Context
 import com.example.in2000_papirfly.data.database.PapirflyDatabase
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
-import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 
-class AppContainer {
+
+class AppContainer(database: PapirflyDatabase) {
 
     // Repositories
     val weatherRepository = WeatherRepositoryMVP()
