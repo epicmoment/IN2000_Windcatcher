@@ -7,7 +7,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.*
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.*
@@ -18,7 +18,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,15 +27,14 @@ import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
-import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 
 @SuppressLint("DiscouragedApi")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThrowScreen(
     modifier: Modifier = Modifier,
@@ -46,10 +44,17 @@ fun ThrowScreen(
     onBack: () -> Unit
 ) {
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
-    var skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val skipPartiallyExpanded by remember { mutableStateOf(false) }
     val mapViewState = rememberMapViewWithLifecycle()
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    val rowState = rememberLazyListState()
+
+    val animateRow = { position: Int ->
+        scope.launch {
+            rowState.animateScrollToItem(position)
+        }
+    }
 
     // merge stuff
     val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
@@ -57,33 +62,14 @@ fun ThrowScreen(
         appContainer.throwViewModelFactory.newViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
-            mapViewState = mapViewState
+            mapViewState = mapViewState,
+            openBottomSheet = { position: Int ->
+                openBottomSheet = true
+                animateRow(position)
+            }
         )
     }
-    // merge stuff end
 
-    /*
-    // TODO
-    // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
-    val throwViewModel = remember{
-        ThrowViewModel(
-            locationName,
-            selectedLocation,
-//            mapViewState,
-            { Marker(mapViewState) },
-            mapViewState.overlays,
-            mapViewState.controller,
-            { inputUpdate: () -> Unit
-                -> mapViewState.updateOnMoveMap {
-                inputUpdate()
-                }
-            },
-            { interactionEnabled: Boolean
-                -> mapViewState.setInteraction(interactionEnabled)
-            },
-        )
-    }
-    */
     val throwPointWeather: List<Weather> = throwViewModel.throwPointWeather
     val highScore = throwViewModel.highScore.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
@@ -129,22 +115,12 @@ fun ThrowScreen(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
 
         Button(
-//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
             enabled = !throwViewModel.flyingState,
             onClick = {
                 throwViewModel.throwPlane()
             }
         ){
             Text("Throw")
-        }
-
-        //TODO remove
-        Button(
-            onClick = {
-                openBottomSheet = !openBottomSheet
-            }
-        ){
-            Text("Test")
         }
 
         var sliderPosition by remember { mutableStateOf(0f) }
@@ -180,7 +156,7 @@ fun ThrowScreen(
 //                    Text("Hide Bottom Sheet")
 //                }
 //            }
-            LazyRow {
+            LazyRow(state = rowState) {
                 items(throwPointWeather.size) {
                     val location = throwPointWeather[it]
                     Card(
@@ -192,8 +168,14 @@ fun ThrowScreen(
 //
 //                            },
                         onClick = {
-                            mapViewState.controller.animateTo(ThrowPointList.throwPoints[throwPointWeather[it].namePos])
-
+                            scope.launch {
+                                rowState.animateScrollToItem(it)
+                            }
+                            val newLocation = ThrowPointList.throwPoints[throwPointWeather[it].namePos]
+                            throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
+//                            mapViewState.controller.zoomTo(12.0)
+                            mapViewState.controller.animateTo(newLocation)
+                            throwViewModel.moveLocation(newLocation!!, throwPointWeather[it].namePos!!)
                         }
                     ) {
                         Text(

@@ -1,11 +1,8 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
-import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.delay
@@ -17,13 +14,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import org.osmdroid.api.IMapController
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 
 class ThrowViewModel(
-    val locationName: String,
+    var locationName: String,
     var selectedLocation: GeoPoint,
-    val markerFactory: () -> Marker,
+    val markerFactory: () -> ThrowPositionMarker,
     val mapOverlay: MutableList<Overlay>,
     val mapController: IMapController,
     updateOnMoveMap: (() -> Unit) -> Unit,
@@ -35,10 +31,9 @@ class ThrowViewModel(
     val planeState = planeLogic.planeState
 
     var planeFlying: Job = Job()
-
     var flyingState = false
 
-    private val startPos: GeoPoint = selectedLocation
+    private var startPos: GeoPoint = selectedLocation
     var previousPlanePos: GeoPoint = selectedLocation
     var nextPlanePos: GeoPoint = selectedLocation
 
@@ -56,6 +51,7 @@ class ThrowViewModel(
 
     init {
         updateOnMoveMap{ throwScreenState.update{ ThrowScreenState.MovingMap } }
+        mapController.setZoom(12.0)
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
@@ -73,7 +69,19 @@ class ThrowViewModel(
         }
 
         ThrowPointList.throwPoints.forEach {
-            drawStartMarker(markerFactory, mapOverlay, it.value, it.key)
+            drawStartMarker(markerFactory, { moveLocation(it.value, it.key) }, mapOverlay, it.value, it.key)
+        }
+        updateHighScoreState()
+    }
+
+    fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
+        selectedLocation = newLocation
+        locationName = newLocationName
+        startPos = selectedLocation
+        previousPlanePos = selectedLocation
+        nextPlanePos = selectedLocation
+        CoroutineScope(Dispatchers.IO).launch {
+            weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
         updateHighScoreState()
     }
@@ -231,12 +239,18 @@ class ThrowViewModelFactory(
         locationName: String,
         selectedLocation: GeoPoint,
         mapViewState: DisableMapView,
+        openBottomSheet: (Int) -> Unit,
 
     ): ThrowViewModel{
         return ThrowViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
-            markerFactory = { Marker(mapViewState) },
+            markerFactory = {
+                ThrowPositionMarker(
+                    mapViewState,
+                    openBottomSheet
+                )
+            },
             mapOverlay = mapViewState.overlays,
             mapController = mapViewState.controller,
             updateOnMoveMap = { inputUpdate: () -> Unit
