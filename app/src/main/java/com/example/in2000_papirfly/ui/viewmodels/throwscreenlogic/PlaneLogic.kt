@@ -43,7 +43,8 @@ class PlaneLogic(
         if (!plane.flying){
             planeRepository.update(
                 plane.copy(
-                    speed = 0.0
+                    speed = 0.0,
+                    height = planeStartHeight
                 )
             )
             return

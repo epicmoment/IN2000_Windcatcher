@@ -1,10 +1,7 @@
 package com.example.in2000_papirfly.ui.screens
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -53,7 +50,13 @@ fun NavScreen(
             )
             ThrowScreen(
                 selectedLocation = pos,
-                locationName = screenState.value.locationName
+                locationName = screenState.value.locationName,
+                onBack = {
+                    navController.popBackStack(
+                        route = "PositionScreen",
+                        inclusive = false
+                    )
+                }
             )
 
         }

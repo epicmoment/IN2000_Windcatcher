@@ -1,13 +1,12 @@
 package com.example.in2000_papirfly.ui.screens
 
 
+import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
@@ -24,12 +23,14 @@ import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun ThrowScreen(
     selectedLocation : GeoPoint,
     locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
+    onBack: () -> Unit
 ) {
     // fun Map View() {
     val mapViewState = rememberMapViewWithLifecycle()
@@ -38,6 +39,7 @@ fun ThrowScreen(
         Modifier
     ) { mapView -> onLoad?.invoke(mapView) }
 
+    // merge stuff
     val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
@@ -46,7 +48,39 @@ fun ThrowScreen(
             mapViewState = mapViewState
         )
     }
-    val highscore = throwViewModel.highScore.collectAsState()
+    // merge stuff end
+
+    // TODO
+    // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
+    val throwViewModel = remember{
+        ThrowViewModel(
+            locationName,
+            selectedLocation,
+//            mapViewState,
+            { Marker(mapViewState) },
+            mapViewState.overlays,
+            mapViewState.controller,
+            { inputUpdate: () -> Unit
+                -> mapViewState.updateOnMoveMap {
+                inputUpdate()
+                }
+            },
+            { interactionEnabled: Boolean
+                -> mapViewState.setInteraction(interactionEnabled)
+            },
+            planeRepository = planeRepository,
+            weatherRepository = weatherRepository,
+        )
+    }
+
+    BackHandler {
+        Log.d("ThrowScreen", "Back press detected")
+        throwViewModel.planeFlying.cancel()
+        planeRepository.update(Plane())
+        onBack()
+    }
+
+    val highScore = throwViewModel.highScore.collectAsState()
 
     val throwScreenState = throwViewModel.getThrowScreenState()
 
@@ -74,14 +108,15 @@ fun ThrowScreen(
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-        Text(text = "Local highscore at ${highscore.value.locationName}: ${highscore.value.distance}km")
+        Text(text = "Local highscore at ${highScore.value.locationName}: ${highScore.value.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
 
 
         Button(
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+            enabled = !throwViewModel.flyingState,
             onClick = {
                 throwViewModel.throwPlane()
             }
@@ -97,7 +132,8 @@ fun ThrowScreen(
                 throwViewModel.changeAngle(value)
                 sliderPosition = value
             },
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+            enabled = !throwViewModel.flyingState
         )
     }
 }
