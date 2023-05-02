@@ -18,11 +18,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
@@ -41,8 +43,6 @@ fun ThrowScreen(
     selectedLocation : GeoPoint,
     locationName: String,
     onLoad: ((map: MapView) -> Unit)? = null,
-    weatherRepository: DataRepository,
-    planeRepository: PlaneRepository,
     onBack: () -> Unit
 ) {
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
@@ -51,27 +51,39 @@ fun ThrowScreen(
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
 
+    // merge stuff
+    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
+    val throwViewModel = remember {
+        appContainer.throwViewModelFactory.newViewModel(
+            locationName = locationName,
+            selectedLocation = selectedLocation,
+            mapViewState = mapViewState
+        )
+    }
+    // merge stuff end
+
+    /*
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{
         ThrowViewModel(
             locationName,
             selectedLocation,
+//            mapViewState,
             { Marker(mapViewState) },
             mapViewState.overlays,
             mapViewState.controller,
             { inputUpdate: () -> Unit
                 -> mapViewState.updateOnMoveMap {
                 inputUpdate()
-            }
+                }
             },
             { interactionEnabled: Boolean
                 -> mapViewState.setInteraction(interactionEnabled)
             },
-            planeRepository = planeRepository,
-            weatherRepository = weatherRepository,
         )
     }
+    */
     val throwPointWeather: List<Weather> = throwViewModel.throwPointWeather
     val highScore = throwViewModel.highScore.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
@@ -79,7 +91,7 @@ fun ThrowScreen(
     BackHandler {
         Log.d("ThrowScreen", "Back press detected")
         throwViewModel.planeFlying.cancel()
-        planeRepository.update(Plane())
+        throwViewModel.resetPlane()
         onBack()
     }
     // Map composable

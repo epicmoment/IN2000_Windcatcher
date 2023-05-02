@@ -1,8 +1,11 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.delay
@@ -26,10 +29,8 @@ class ThrowViewModel(
     updateOnMoveMap: (() -> Unit) -> Unit,
     val setInteraction: (Boolean) -> Unit,
     val weatherRepository: DataRepository,
-    val planeRepository: PlaneRepository,
+    val planeRepository: PlaneRepository
 ): ViewModel() {
-    // TODO
-    // I'm making a lot of new ViewModel objects that should be made somewhere else here
     private val planeLogic = PlaneLogic(planeRepository)
     val planeState = planeLogic.planeState
 
@@ -45,7 +46,8 @@ class ThrowViewModel(
     private var _highScore: MutableStateFlow<HighScore> =
         MutableStateFlow(HighScore())
     var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
-    private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
+    private val throwScreenState = MutableStateFlow<ThrowScreenState>(
+        ThrowScreenState.Throwing)
 
     private var _throwWeatherState: MutableStateFlow<ThrowPointWeatherState> =
         MutableStateFlow(ThrowPointWeatherState(weatherRepository.getThrowPointWeatherList()))
@@ -53,7 +55,7 @@ class ThrowViewModel(
     val throwPointWeather = throwWeatherState.value.weather
 
     init {
-        updateOnMoveMap{ throwScreenState.update{ThrowScreenState.MovingMap} }
+        updateOnMoveMap{ throwScreenState.update{ ThrowScreenState.MovingMap } }
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
@@ -105,7 +107,6 @@ class ThrowViewModel(
 
         // Start the coroutine that updates the plane every second
         planeFlying = viewModelScope.launch{
-            //planeLogic.throwPlane(100.0, 98.0, selectedLocation)
             flyingState = true
             // Locks map
             setInteraction(false)
@@ -149,7 +150,7 @@ class ThrowViewModel(
             // Unlock map
             setInteraction(true)
 
-            throwScreenState.update{ThrowScreenState.MovingMap}
+            throwScreenState.update{ ThrowScreenState.MovingMap}
         }
     }
 
@@ -169,6 +170,10 @@ class ThrowViewModel(
             return true
         }
         return false
+    }
+
+    fun resetPlane(){
+        planeRepository.update(Plane())
     }
 
     fun changeAngle(value: Float){
@@ -215,6 +220,36 @@ class ThrowViewModel(
         // Should use selected location
 //        return getWeather("Oslo").windSpeed
         return 0.0
+    }
+}
+
+class ThrowViewModelFactory(
+    val weatherRepository: DataRepository,
+    val planeRepository: PlaneRepository
+){
+    fun newViewModel(
+        locationName: String,
+        selectedLocation: GeoPoint,
+        mapViewState: DisableMapView,
+
+    ): ThrowViewModel{
+        return ThrowViewModel(
+            locationName = locationName,
+            selectedLocation = selectedLocation,
+            markerFactory = { Marker(mapViewState) },
+            mapOverlay = mapViewState.overlays,
+            mapController = mapViewState.controller,
+            updateOnMoveMap = { inputUpdate: () -> Unit
+                -> mapViewState.updateOnMoveMap {
+                    inputUpdate()
+                }
+            },
+            setInteraction = { interactionEnabled: Boolean
+                -> mapViewState.setInteraction(interactionEnabled)
+            },
+            planeRepository = planeRepository,
+            weatherRepository = weatherRepository
+        )
     }
 }
 
