@@ -5,6 +5,9 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -15,15 +18,14 @@ import androidx.compose.ui.res.painterResource
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.PapirflyApplication
-import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.ui.composables.PaperButton
+import com.example.in2000_papirfly.ui.composables.PaperFrame
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
-import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 
 @Composable
 fun ThrowScreen(
@@ -112,16 +114,14 @@ fun ThrowScreen(
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
 
-
-        Button(
-//            enabled = !throwViewModel.planeState.collectAsState().value.flying,
-            enabled = !throwViewModel.flyingState,
+        PaperButton(
             onClick = {
                 throwViewModel.throwPlane()
-            }
-        ){
-            Text("Throw")
-        }
+            },
+            enabled = !throwViewModel.flyingState,
+            text = "Throw",
+            size = 100
+        )
 
         var sliderPosition by remember { mutableStateOf(0f) }
 
@@ -135,6 +135,9 @@ fun ThrowScreen(
             enabled = !throwViewModel.flyingState
         )
     }
+
+    PaperFrame()
+
 }
 
 @Composable
