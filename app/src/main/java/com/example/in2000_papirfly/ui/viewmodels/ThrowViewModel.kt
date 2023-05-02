@@ -47,6 +47,11 @@ class ThrowViewModel(
     var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
     private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
 
+    private var _throwWeatherState: MutableStateFlow<ThrowPointWeatherState> =
+        MutableStateFlow(ThrowPointWeatherState(weatherRepository.getThrowPointWeatherList()))
+    var throwWeatherState: StateFlow<ThrowPointWeatherState> = _throwWeatherState.asStateFlow()
+    val throwPointWeather = throwWeatherState.value.weather
+
     init {
         updateOnMoveMap{ throwScreenState.update{ThrowScreenState.MovingMap} }
         // Get the weather at the start location
@@ -212,6 +217,10 @@ class ThrowViewModel(
         return 0.0
     }
 }
+
+data class ThrowPointWeatherState(
+    val weather: List<Weather>
+)
 
 sealed interface ThrowScreenState{
 
