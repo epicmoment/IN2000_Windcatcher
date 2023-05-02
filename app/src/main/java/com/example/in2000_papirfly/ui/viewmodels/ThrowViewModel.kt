@@ -1,8 +1,11 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
+import android.provider.SyncStateContract.Helpers.update
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import kotlinx.coroutines.delay
@@ -43,10 +46,11 @@ class ThrowViewModel(
     private var _highScore: MutableStateFlow<HighScore> =
         MutableStateFlow(HighScore())
     var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
-    private val throwScreenState = MutableStateFlow<ThrowScreenState>(ThrowScreenState.Throwing)
+    private val throwScreenState = MutableStateFlow<ThrowScreenState>(
+        ThrowScreenState.Throwing)
 
     init {
-        updateOnMoveMap{ throwScreenState.update{ThrowScreenState.MovingMap} }
+        updateOnMoveMap{ throwScreenState.update{ ThrowScreenState.MovingMap } }
         // Get the weather at the start location
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
@@ -141,7 +145,7 @@ class ThrowViewModel(
             // Unlock map
             setInteraction(true)
 
-            throwScreenState.update{ThrowScreenState.MovingMap}
+            throwScreenState.update{ ThrowScreenState.MovingMap}
         }
     }
 
@@ -161,6 +165,10 @@ class ThrowViewModel(
             return true
         }
         return false
+    }
+
+    fun resetPlane(){
+        planeRepository.update(Plane())
     }
 
     fun changeAngle(value: Float){
@@ -218,13 +226,24 @@ class ThrowViewModelFactory(
         locationName: String,
         selectedLocation: GeoPoint,
         mapViewState: DisableMapView,
+
     ): ThrowViewModel{
         return ThrowViewModel(
-            locationName,
-            selectedLocation,
-            mapViewState,
-            weatherRepository,
-            planeRepository
+            locationName = locationName,
+            selectedLocation = selectedLocation,
+            markerFactory = { Marker(mapViewState) },
+            mapOverlay = mapViewState.overlays,
+            mapController = mapViewState.controller,
+            updateOnMoveMap = { inputUpdate: () -> Unit
+                -> mapViewState.updateOnMoveMap {
+                    inputUpdate()
+                }
+            },
+            setInteraction = { interactionEnabled: Boolean
+                -> mapViewState.setInteraction(interactionEnabled)
+            },
+            planeRepository = planeRepository,
+            weatherRepository = weatherRepository
         )
     }
 }

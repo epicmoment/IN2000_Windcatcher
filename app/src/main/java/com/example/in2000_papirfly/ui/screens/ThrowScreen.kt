@@ -50,13 +50,13 @@ fun ThrowScreen(
     }
     // merge stuff end
 
+    /*
     // TODO
     // I'm making a new ThrowViewModel object here that should be made somewhere else and injected
     val throwViewModel = remember{
         ThrowViewModel(
             locationName,
             selectedLocation,
-//            mapViewState,
             { Marker(mapViewState) },
             mapViewState.overlays,
             mapViewState.controller,
@@ -68,15 +68,14 @@ fun ThrowScreen(
             { interactionEnabled: Boolean
                 -> mapViewState.setInteraction(interactionEnabled)
             },
-            planeRepository = planeRepository,
-            weatherRepository = weatherRepository,
         )
     }
+    */
 
     BackHandler {
         Log.d("ThrowScreen", "Back press detected")
         throwViewModel.planeFlying.cancel()
-        planeRepository.update(Plane())
+        throwViewModel.resetPlane()
         onBack()
     }
 
