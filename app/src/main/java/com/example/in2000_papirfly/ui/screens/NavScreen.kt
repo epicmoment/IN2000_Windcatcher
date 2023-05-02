@@ -18,13 +18,7 @@ fun NavScreen(
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
-
-    val planeRepository = PlaneRepository()     // TODO // Burde bli flyttet, dependency injection
-
     val navController = rememberNavController()
-
-    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
-    val repository = appContainer.dataRepository
 
      NavHost(
         navController = navController,
@@ -44,7 +38,7 @@ fun NavScreen(
                 onNextPage = { newLocation, locationName ->
                     viewModel.setLocation(newLocation, locationName)
                     navController.navigate("ThrowScreen")
-                },
+                }
             )
 
         }
@@ -57,8 +51,6 @@ fun NavScreen(
             ThrowScreen(
                 selectedLocation = pos,
                 locationName = screenState.value.locationName,
-                weatherRepository = repository,
-                planeRepository = planeRepository,
                 onBack = {
                     navController.popBackStack(
                         route = "PositionScreen",
