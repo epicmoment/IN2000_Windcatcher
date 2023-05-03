@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -86,10 +85,19 @@ fun CustomizationScreen (
 
                     Column() {
 
-                        AttachmentButton(isSelected = customizeState.value.selectedSlot == 1) { viewModel.setSlot(1) }
-                        AttachmentButton(isSelected = customizeState.value.selectedSlot == 2) { viewModel.setSlot(2) }
-                        AttachmentButton(isSelected = customizeState.value.selectedSlot == 3) { viewModel.setSlot(3) }
-                        AttachmentButton(isSelected = customizeState.value.selectedSlot == 4) { viewModel.setSlot(4) }
+                        for (i in 0..3) {
+
+                            val slotAttachment = loadoutState.value.slots[i]
+                            AttachmentSlot(
+                                isSelected = customizeState.value.selectedSlot == i,
+                                attachment = if (slotAttachment != null) {
+                                    Attachments.list[0][slotAttachment]
+                                } else {
+                                    null
+                                }
+                            ) { viewModel.setSlot(i) }
+
+                        }
 
                     }
 
@@ -123,10 +131,10 @@ fun CustomizationScreen (
 
                         Text(
                             text = when (customizeState.value.selectedSlot) {
-                                1 -> "PAPIRTYPE"
-                                2 -> "KATEGORI 2"
-                                3 -> "KATEGORI 3"
-                                else -> "KATEGORI 4"
+                                0 -> "PAPIRTYPE"
+                                1 -> "NESE"
+                                2 -> "VINGER"
+                                else -> "HALEFINNE"
                             },
                             color = Color.White,
                             fontFamily = FontFamily.SansSerif,
@@ -145,34 +153,35 @@ fun CustomizationScreen (
                     ) {
 
                         items(
-                            count = Attachments.list[customizeState.value.selectedSlot - 1].size
+                            count = Attachments.list[customizeState.value.selectedSlot].size
                         ) {
 
                             Box(
                                 modifier = Modifier.padding(0.dp)
                             ) {
+
                                 AttachmentCard(
-                                    attachment = Attachments.list[customizeState.value.selectedSlot - 1][it],
-                                    isSelected = when (customizeState.value.selectedSlot) {
-                                        1 -> it == loadoutState.value.slot1attachment
-                                        2 -> it == loadoutState.value.slot2attachment
-                                        3 -> it == loadoutState.value.slot3attachment
-                                        else -> it == loadoutState.value.slot4attachment
-                                    },
+                                    attachment = Attachments.list[customizeState.value.selectedSlot][it],
+                                    isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
                                     onClickEquip = {
-                                        viewModel.equipAttachment(customizeState.value.selectedSlot, it)
+
+                                        if (loadoutState.value.slots[customizeState.value.selectedSlot] == it) {
+                                            viewModel.equipAttachment(customizeState.value.selectedSlot, 0)
+                                        } else {
+                                            viewModel.equipAttachment(customizeState.value.selectedSlot, it)
+                                        }
+
                                     }
+
                                 )
 
                             }
 
                         }
 
-
                     }
 
-
-                }
+            }
 
             }
 
@@ -200,7 +209,7 @@ fun CustomizationScreen (
                         color = Color.White,
                         fontFamily = FontFamily.SansSerif,
                         fontSize = 36.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
 
                 }
@@ -214,13 +223,14 @@ fun CustomizationScreen (
 }
 
 @Composable
-fun AttachmentButton(isSelected : Boolean, onClickSetSlot : () -> Unit) {
+fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot : () -> Unit) {
 
     Box(
         modifier = Modifier
             .padding(6.dp)
     ) {
         Box(
+            contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(65.dp)
                 .clip(RoundedCornerShape(14.dp))
@@ -232,7 +242,17 @@ fun AttachmentButton(isSelected : Boolean, onClickSetSlot : () -> Unit) {
                     }
                 )
                 .clickable(onClick = onClickSetSlot)
-        )
+        ) {
+
+            if (attachment != null) {
+                Image(
+                    painter = painterResource(id = attachment.icon),
+                    contentDescription = "Ikon",
+                    modifier = Modifier.fillMaxSize(0.8f)
+                )
+            }
+
+        }
 
     }
     
@@ -266,7 +286,7 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
                     .fillMaxWidth(0.20f)
             ){
                 Image(
-                    painter = painterResource(id = R.drawable.paperplane2),
+                    painter = painterResource(id = attachment.icon),
                     contentDescription = "Attachment Icon",
                     modifier = Modifier.fillMaxSize(0.85f)
                 )
