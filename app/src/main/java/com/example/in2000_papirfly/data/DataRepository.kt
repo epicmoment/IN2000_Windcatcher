@@ -121,6 +121,7 @@ class DataRepository(database: PapirflyDatabase) {
                     hSDistance = distance
                 )
             )
+            flightDao.deleteFLightPath(location)
             path.forEach {
                 flightDao.insert(
                     FlightPathPoint(
