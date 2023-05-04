@@ -19,6 +19,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import androidx.compose.ui.graphics.Color
+import com.example.in2000_papirfly.data.ThrowPointList
 import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
@@ -46,6 +47,31 @@ class DisableMapView @JvmOverloads constructor(
         isInteractionEnabled = isEnabled
     }
 }
+
+class ThrowPositionMarker constructor(
+mapView: MapView, val openBottomSheet: (Int) -> Unit
+) : Marker(mapView) {
+
+    var moveLocation = {}
+    var rowPosition = 0
+    override fun onMarkerClickDefault(marker: Marker?, mapView: MapView?): Boolean {
+        moveLocation()
+        openBottomSheet(rowPosition)
+        mapView!!.controller.animateTo(mPosition, 12.0, 1000)
+        showInfoWindow()
+//        return super.onMarkerClickDefault(marker, mapView)
+        return true
+    }
+
+    fun setInfoFromViewModel(moveLocation: () -> Unit, rowPosition: Int) {
+        this.moveLocation = moveLocation
+        this.rowPosition = rowPosition
+    }
+}
+
+class HighScoreMarker(mapView: MapView, val throwLocation: String): Marker(mapView)
+
+class PolyLineWithThrowLocation(val throwLocation: String): Polyline()
 
 // OSMDroid as composable based on:
 // gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
@@ -78,7 +104,6 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
 
     mapView.maxZoomLevel = 12.0
     mapView.minZoomLevel = 8.0
-    mapView.controller.setZoom(18.0)
 
     //    val filter = androidx.compose.ui.graphics.ColorFilter
     //    mapView.overlayManager.tilesOverlay.setColorFilter(filter.lighting(Color.Gray, Color.Black).asAndroidColorFilter())
@@ -94,8 +119,30 @@ fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destinatio
     mapOverlay.add(polyline)
 }
 
-fun drawStartMarker(markerFactory: () -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String) {
-    val marker = markerFactory()
+fun drawHighScorePath(mapOverlay: MutableList<Overlay>, points: List<GeoPoint>, throwLocation: String) {
+    val polyline = PolyLineWithThrowLocation(throwLocation) //TODO
+    polyline.outlinePaint.color = Color.Yellow.hashCode()
+    polyline.setPoints(points)
+    mapOverlay.add(polyline)
+}
+
+fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String) {
+    mapOverlay.forEach {overlay ->
+        if (overlay is PolyLineWithThrowLocation) {
+            if (overlay.throwLocation == throwLocation) {
+                mapOverlay.remove(overlay)
+            }
+        } else if (overlay is HighScoreMarker) {
+            if (overlay.throwLocation == throwLocation) {
+                mapOverlay.remove(overlay)
+            }
+        }
+    }
+}
+
+fun drawStartMarker(markerFactory: () -> ThrowPositionMarker, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String) {
+    val marker: ThrowPositionMarker = markerFactory()
+    marker.setInfoFromViewModel(moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
     // This way of getting context works somehow???
     marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.baseline_push_pin_green_48)
