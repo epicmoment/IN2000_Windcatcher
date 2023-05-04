@@ -23,14 +23,20 @@ data class FlightModifier(
 
     /** How much the air pressure effects the drop rate of the plane.
      *
-     * Negative for positive effect of high air pressure, positive for positive effect of low air pressure
+     * Positive for gaining height in high air pressure, negative gaining height in low air pressure
      */
     val airPressureEffect: Double = 0.0,
 
     /** How much the rainfall effects the drop rate of the plane.
      *
-     * Positive for higher drop rate, and negative for gaining height */
+     * Positive for higher drop rate, and negative for gaining height in rain*/
     val rainEffect: Double = 0.0,
+
+    /**
+     * Positive for gaining height in temperature above 0 and losing height in temperatures below 0.
+     * Negative for losing height in temperature above 0 and gaining height in temperatures below 0.
+     */
+    val temperatureEffect: Double = 0.0,
 
     // Ideas here are:
     // rainDropRateEffect

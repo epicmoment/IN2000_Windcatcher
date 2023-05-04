@@ -115,10 +115,12 @@ class PlaneLogic(
         val airPressure = weather.airPressure
         val rain = weather.rain
 
-
         var newDropRate = 0.0
         newDropRate += calculateAirPressureDropRate(airPressure, flightModifier)
         newDropRate += calculateRainDropRate(rain, flightModifier)
+        val temperatureDropRate = calculateTemperatureDropRate(weather.temperature, flightModifier)
+        println("temperature drop rate: $temperatureDropRate")
+        newDropRate += calculateTemperatureDropRate(weather.temperature, flightModifier)
         println("New drop rate: $newDropRate")
 
         return round(defaultDropRate + newDropRate)
@@ -137,7 +139,7 @@ class PlaneLogic(
 
         val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
 
-        return airPressureDropRate * flightModifier.airPressureEffect
+        return airPressureDropRate * -flightModifier.airPressureEffect
     }
 
     /**
@@ -148,6 +150,20 @@ class PlaneLogic(
         val rainMax = 78.5
 
         return rain / rainMax * defaultDropRate * flightModifier.rainEffect
+    }
+
+    fun calculateTemperatureDropRate(temperature: Double, flightModifier: FlightModifier): Double{
+        // Consider changing this to use a system of target temperature, range and effect
+        val temperatureMax = 35.6
+        val temperatureMin = -51.4
+
+        val temp = if (temperature.absoluteValue > 0){
+            temperature / temperatureMax
+        } else{
+            temperature / temperatureMin
+        }
+
+        return temp * defaultDropRate * -flightModifier.temperatureEffect
     }
 
 
