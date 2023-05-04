@@ -12,6 +12,7 @@ import kotlin.math.*
  * */
 class PlaneLogic(
     val planeRepository : PlaneRepository,
+    val loadoutRepository: LoadoutRepository,
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState

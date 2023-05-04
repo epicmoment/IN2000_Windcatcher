@@ -6,9 +6,8 @@ import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.in2000_papirfly.PapirflyApplication
-import com.example.in2000_papirfly.data.CustomizationScreenUIState
-import com.example.in2000_papirfly.data.LoadoutRepository
-import com.example.in2000_papirfly.data.WeatherRepositoryMVP
+import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.addAttachments
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class CustomizationViewModel (
     val loadoutRepository: LoadoutRepository,
+    val planeRepository: PlaneRepository,
 ) : ViewModel() {
 
     private val _customizeState = MutableStateFlow(CustomizationScreenUIState())
@@ -39,6 +39,7 @@ class CustomizationViewModel (
     fun equipAttachment(slot : Int, attachmentID : Int?) {
 
         loadoutRepository.equipAttachment(slot, attachmentID)
+        addAttachments(planeRepository = planeRepository, loadoutRepository = loadoutRepository)
 
     }
 
@@ -55,6 +56,7 @@ class CustomizationViewModel (
 
                 return CustomizationViewModel(
                     (application as PapirflyApplication).appContainer.loadoutRepository,
+                    (application as PapirflyApplication).appContainer.planeRepository,
                 ) as T
             }
         }
