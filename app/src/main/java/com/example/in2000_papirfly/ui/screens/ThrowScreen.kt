@@ -6,8 +6,10 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.*
@@ -16,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -27,11 +30,13 @@ import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import org.osmdroid.util.GeoPoint
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
+import io.ktor.util.reflect.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
 
 @SuppressLint("DiscouragedApi")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +76,9 @@ fun ThrowScreen(
     }
 
     val throwPointWeather: List<Weather> = throwViewModel.throwPointWeather
-    val highScore = throwViewModel.highScore.collectAsState()
+//    val highScore = throwViewModel.highScore.collectAsState()
+    val highScores = throwViewModel.throwPointHighScores.collectAsState()
+    val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
 
     BackHandler {
@@ -88,6 +95,7 @@ fun ThrowScreen(
 
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
+    mapViewState.controller.setZoom(12.0)
 
     // Wind arrow
     Image(
@@ -109,7 +117,7 @@ fun ThrowScreen(
         Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
         Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
         Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-        Text(text = "Local highscore at ${highScore.value.locationName}: ${highScore.value.distance}km")
+//        Text(text = "Local highscore at ${highScore.value.locationName}: ${highScore.value.distance}km")
 
         Text(
             text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
@@ -140,6 +148,7 @@ fun ThrowScreen(
         ModalBottomSheet(
             onDismissRequest = { openBottomSheet = false },
             sheetState = bottomSheetState,
+
         ) {
 //            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
 //                Button(
@@ -164,9 +173,6 @@ fun ThrowScreen(
                         modifier = modifier
                             .fillMaxWidth()
                             .padding(15.dp),
-//                            .clickable {
-//
-//                            },
                         onClick = {
                             scope.launch {
                                 rowState.animateScrollToItem(it)
@@ -174,7 +180,7 @@ fun ThrowScreen(
                             val newLocation = ThrowPointList.throwPoints[throwPointWeather[it].namePos]
                             throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
 //                            mapViewState.controller.zoomTo(12.0)
-                            mapViewState.controller.animateTo(newLocation)
+                            mapViewState.controller.animateTo(newLocation, 12.0, 1000)
                             throwViewModel.moveLocation(newLocation!!, throwPointWeather[it].namePos!!)
                         }
                     ) {
@@ -227,6 +233,48 @@ fun ThrowScreen(
                                     .rotate(location.windAngle.toFloat() + 90.toFloat()),
                                 contentDescription = "Vindretning",
                             )
+                        }
+                        // High score banner
+                        Row(
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp, vertical = 8.dp),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text("Highscore: ${highScores.value[location.namePos]!!.distance}km")
+
+                            Button (
+//                                modifier = Modifier.shadow(
+//                                    elevation = 10.dp,
+//                                    ambientColor = Color.Black,
+//                                    spotColor = Color.Black
+//                                ),
+                                enabled = highScores.value[location.namePos]!!.distance != 0,
+                                onClick = {
+                                    if (!highScoreOnMap.value[location.namePos]!!) {
+                                        drawHighScorePath(mapViewState.overlays, highScores.value[location.namePos]!!.flightPath!!, location.namePos!!)
+                                        drawGoalMarker(
+                                            { HighScoreMarker(mapViewState, location.namePos) },
+                                            mapViewState.overlays,
+                                            highScores.value[location.namePos]!!.flightPath!![0],
+                                            highScores.value[location.namePos]!!.flightPath!!.last(),
+                                            true
+                                        )
+                                    } else {
+                                        removeHighScorePath(mapViewState.overlays, location.namePos!!)
+                                        mapViewState.invalidate()
+                                    }
+                                    throwViewModel.updateHighScoreShownState(location.namePos)
+                                    Log.d("HighScore", "HighScore shown? ${highScoreOnMap.value[location.namePos]!!}")
+                                },
+                                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                                shape = RoundedCornerShape(10),
+                            ) {
+                                Text(
+                                    text = if (!highScoreOnMap.value[location.namePos]!!) "Vis highscore" else "Skjul highscore",
+                                    fontSize = 10.sp,
+                                )
+                            }
                         }
                     }
                 }

@@ -69,6 +69,10 @@ mapView: MapView, val openBottomSheet: (Int) -> Unit
     }
 }
 
+class HighScoreMarker(mapView: MapView, val throwLocation: String): Marker(mapView)
+
+class PolyLineWithThrowLocation(val throwLocation: String): Polyline()
+
 // OSMDroid as composable based on:
 // gist.github.com/ArnyminerZ/418683e3ef43ccf1268f9f62940441b1
 @Composable
@@ -113,6 +117,27 @@ fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destinatio
     polyline.outlinePaint.color = Color.Red.hashCode()
     polyline.setPoints(points)
     mapOverlay.add(polyline)
+}
+
+fun drawHighScorePath(mapOverlay: MutableList<Overlay>, points: List<GeoPoint>, throwLocation: String) {
+    val polyline = PolyLineWithThrowLocation(throwLocation) //TODO
+    polyline.outlinePaint.color = Color.Yellow.hashCode()
+    polyline.setPoints(points)
+    mapOverlay.add(polyline)
+}
+
+fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String) {
+    mapOverlay.forEach {overlay ->
+        if (overlay is PolyLineWithThrowLocation) {
+            if (overlay.throwLocation == throwLocation) {
+                mapOverlay.remove(overlay)
+            }
+        } else if (overlay is HighScoreMarker) {
+            if (overlay.throwLocation == throwLocation) {
+                mapOverlay.remove(overlay)
+            }
+        }
+    }
 }
 
 fun drawStartMarker(markerFactory: () -> ThrowPositionMarker, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String) {

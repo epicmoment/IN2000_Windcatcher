@@ -104,7 +104,7 @@ class DataRepository(database: PapirflyDatabase) {
         return HighScore(
             locationName,
             throwPoint.hSDate,
-            throwPoint.hSDistance,
+            throwPoint.hSDistance ?: 0,
             flightPathPoints
         )
     }
