@@ -14,9 +14,23 @@ data class Plane(
     val height : Double = 100.0
 )
 
+/**
+ * This class is used in PlaneLogic when the effects of the weather is calculated, and are usually a number between 0 and 1
+ */
 data class FlightModifier(
-    // This class is used in PlaneLogic when the effects of the weather is calculated, and are usually a number between 0 and 1
-    val windEffect: Double = 0.5
+    /** How much effect the wind vector har on the plane's vector (both angle and speed) */
+    val windEffect: Double = 0.5,
+
+    /** How much the air pressure effects the drop rate of the plane.
+     *
+     * Negative for positive effect of high air pressure, positive for positive effect of low air pressure
+     */
+    val airPressureEffect: Double = 0.0,
+
+    /** How much the rainfall effects the drop rate of the plane.
+     *
+     * Positive for higher drop rate, and negative for gaining height */
+    val rainEffect: Double = 0.0,
 
     // Ideas here are:
     // rainDropRateEffect
