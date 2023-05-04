@@ -174,14 +174,21 @@ fun ThrowScreen(
                             .fillMaxWidth()
                             .padding(15.dp),
                         onClick = {
-                            scope.launch {
-                                rowState.animateScrollToItem(it)
+                            if (throwPointWeather[it].namePos == throwViewModel.locationName) {
+                                openBottomSheet = false
+                            } else {
+                                scope.launch {
+                                    rowState.animateScrollToItem(it)
+                                }
+                                val newLocation =
+                                    ThrowPointList.throwPoints[throwPointWeather[it].namePos]
+                                throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
+                                mapViewState.controller.animateTo(newLocation, 12.0, 1000)
+                                throwViewModel.moveLocation(
+                                    newLocation!!,
+                                    throwPointWeather[it].namePos!!
+                                )
                             }
-                            val newLocation = ThrowPointList.throwPoints[throwPointWeather[it].namePos]
-                            throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
-//                            mapViewState.controller.zoomTo(12.0)
-                            mapViewState.controller.animateTo(newLocation, 12.0, 1000)
-                            throwViewModel.moveLocation(newLocation!!, throwPointWeather[it].namePos!!)
                         }
                     ) {
                         Text(
