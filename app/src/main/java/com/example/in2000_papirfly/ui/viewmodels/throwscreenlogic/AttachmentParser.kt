@@ -1,10 +1,11 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
-import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
 
+/**
+ * Updates the plane in the PlaneRepository to have a FlightModifier that is the result of all the
+ * attachments on the plane.
+ */
 fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutRepository){
     val loadout = loadoutRepository.loadoutState.value
     val flightModifiers: MutableList<FlightModifier> = mutableListOf()
@@ -20,7 +21,7 @@ fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutR
 
 
     // Fin
-    
+
 
     var finalFlightModifier = FlightModifier()
     for (flightModifier in flightModifiers){
@@ -35,6 +36,10 @@ fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutR
     )
 }
 
+/**
+ * Returns a FlightModifier where each effect gets the value of the sum of flightModifier1's and
+ * flightModifier2's respective effect values.
+ */
 fun combineFlightModifiers(flightModifier1: FlightModifier, flightModifier2: FlightModifier): FlightModifier{
     // This should be done differently so you can expand the system by only adding values to the FlightModifier class
 
