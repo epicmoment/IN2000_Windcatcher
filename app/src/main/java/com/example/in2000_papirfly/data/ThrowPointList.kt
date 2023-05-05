@@ -6,7 +6,7 @@ object ThrowPointList {
 
     val throwPoints =
         mapOf(
-            Pair("Bergen", GeoPoint(60.3803, 5.3568)),
+            Pair("Bergen", GeoPoint(60.4, 5.3)),
             Pair("Dombås", GeoPoint(62.0751, 9.1260)),
             Pair("Drammen", GeoPoint(59.7439, 10.2049)),
             Pair("Galdhøpiggen", GeoPoint(61.63630, 8.31289)),

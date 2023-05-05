@@ -27,7 +27,8 @@ fun NavScreen(
 
          composable(route = "MainScreen") {
             MainScreen(
-                onNextPage = { navController.navigate("PositionScreen") },
+//                onNextPage = { navController.navigate("PositionScreen") },
+                onNextPage = { navController.navigate("ThrowScreen") },
                 onCustomizePage = { navController.navigate("CustomizationScreen")}
             )
          }

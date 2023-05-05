@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -75,8 +76,7 @@ fun ThrowScreen(
         )
     }
 
-    val throwPointWeather: List<Weather> = throwViewModel.throwPointWeather
-//    val highScore = throwViewModel.highScore.collectAsState()
+    val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
     val highScores = throwViewModel.throwPointHighScores.collectAsState()
     val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
@@ -148,7 +148,6 @@ fun ThrowScreen(
         ModalBottomSheet(
             onDismissRequest = { openBottomSheet = false },
             sheetState = bottomSheetState,
-
         ) {
 //            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
 //                Button(
@@ -248,6 +247,7 @@ fun ThrowScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Log.d("BugHunt", "${location.namePos}, ${highScores.value[location.namePos]}")
                             Text("Highscore: ${highScores.value[location.namePos]!!.distance}km")
 
                             Button (
@@ -272,7 +272,6 @@ fun ThrowScreen(
                                         mapViewState.invalidate()
                                     }
                                     throwViewModel.updateHighScoreShownState(location.namePos)
-                                    Log.d("HighScore", "HighScore shown? ${highScoreOnMap.value[location.namePos]!!}")
                                 },
                                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                                 shape = RoundedCornerShape(10),

@@ -47,13 +47,11 @@ class DataRepository(database: PapirflyDatabase) {
         )
     }
 
-     fun getThrowPointWeatherList(): List<Weather> {
+     suspend fun getThrowPointWeatherList(): List<Weather> {
          val list = mutableListOf<Weather>()
-         CoroutineScope(Dispatchers.IO).launch {
              throwPoints.forEach {
-                 list += getWeatherAt(it.key)
+                 list += getWeatherAtPoint(it.value)
              }
-         }
          return list
      }
 
