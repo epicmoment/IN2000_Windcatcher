@@ -9,7 +9,8 @@ data class Plane(
     val flightModifier: FlightModifier = FlightModifier(),
     val pos : List<Double> = listOf(59.943325914913615, 10.717908529673489),
     val flying : Boolean = false,
-    val angle : Double = 0.0,  // given in degrees
+    /** Given in degrees */
+    val angle : Double = 0.0,
     val speed : Double = 0.0,
     val height : Double = 100.0
 )
@@ -19,7 +20,7 @@ data class Plane(
  */
 data class FlightModifier(
     /** How much effect the wind vector har on the plane's vector (both angle and speed) */
-    val windEffect: Double = 0.5,
+    val windEffect: Double = 0.0,
 
     /** How much the air pressure effects the drop rate of the plane.
      *
@@ -39,10 +40,10 @@ data class FlightModifier(
     val temperatureEffect: Double = 0.0,
 
     // Ideas here are:
-    // rainDropRateEffect
     // sunDropRateEffect
     // sideWindEffect
     // tailwindEffect
     // headwindEffect
-
-)
+){
+    //val effects = listOf<Double>(windEffect, airPressureEffect, rainEffect, temperatureEffect)
+}

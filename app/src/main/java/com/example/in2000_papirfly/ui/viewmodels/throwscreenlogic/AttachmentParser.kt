@@ -7,30 +7,41 @@ import com.example.in2000_papirfly.data.*
 
 fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutRepository){
     val loadout = loadoutRepository.loadoutState.value
+    val flightModifiers: MutableList<FlightModifier> = mutableListOf()
 
-    // todo // endre Attachment-klassen til å inneholde et FlightModifier objekt vi kan bruke?
-
-    // Paper types
+    // Paper
     val attachmentIndex = loadout.slot1attachment ?: 0
-    val attachmentName = Attachments.list[0][attachmentIndex].name
+    flightModifiers.add(Attachments.list[0][attachmentIndex].flightModifier )
 
-    var flightModifier = when{
-        attachmentName == "Skrivepapir" -> {
-            FlightModifier(
-                rainEffect = 0.5,
-                windEffect = 0.75,
-            )
-        }
-        attachmentName == "Fotopapir" -> FlightModifier(
-            windEffect = 0.0
-        )
-        else -> FlightModifier()
+    // Nose
+
+
+    // Wing
+
+
+    // Fin
+    
+
+    var finalFlightModifier = FlightModifier()
+    for (flightModifier in flightModifiers){
+        finalFlightModifier = combineFlightModifiers(finalFlightModifier, flightModifier)
     }
 
     val plane = planeRepository.planeState.value
     planeRepository.update(
         plane.copy(
-            flightModifier = flightModifier
+            flightModifier = finalFlightModifier
         )
     )
+}
+
+fun combineFlightModifiers(flightModifier1: FlightModifier, flightModifier2: FlightModifier): FlightModifier{
+    // This should be done differently so you can expand the system by only adding values to the FlightModifier class
+
+    val windEffect = flightModifier1.windEffect + flightModifier2.windEffect
+    val airPressureEffect = flightModifier1.airPressureEffect + flightModifier2.airPressureEffect
+    val rainEffect = flightModifier1.rainEffect + flightModifier2.rainEffect
+    val temperatureEffect = flightModifier1.temperatureEffect + flightModifier2.temperatureEffect
+
+    return FlightModifier(windEffect, airPressureEffect, rainEffect, temperatureEffect)
 }
