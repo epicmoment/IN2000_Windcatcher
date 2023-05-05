@@ -62,7 +62,6 @@ mapView: MapView, val openBottomSheet: (Int) -> Unit
         openBottomSheet(rowPosition)
         mapView!!.controller.animateTo(mPosition, 12.0, 1000)
         showInfoWindow()
-//        return super.onMarkerClickDefault(marker, mapView)
         return true
     }
 
@@ -144,7 +143,7 @@ fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String)
     }
 }
 
-fun drawStartMarker(markerFactory: (type: String) -> Marker, updateWeather: () -> Unit, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String) {
+fun drawStartMarker(markerFactory: (type: String) -> Marker, updateWeather: () -> Unit, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String): ThrowPositionMarker {
     val marker: ThrowPositionMarker = markerFactory("Start") as ThrowPositionMarker
     marker.setInfoFromViewModel(updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
@@ -153,9 +152,11 @@ fun drawStartMarker(markerFactory: (type: String) -> Marker, updateWeather: () -
     marker.title = locationName
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapOverlay.add(marker)
+
+    return marker
 }
 
-fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean) {
+fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean): Marker {
     val marker = markerFactory("Goal")
 
     marker.position = markerPos
@@ -167,6 +168,8 @@ fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableL
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapOverlay.add(marker)
     marker.showInfoWindow()
+
+    return marker
 }
 
 @Composable

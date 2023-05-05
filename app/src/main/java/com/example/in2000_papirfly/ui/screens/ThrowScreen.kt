@@ -5,9 +5,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -37,7 +34,6 @@ import io.ktor.util.reflect.*
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.Marker
 
 @SuppressLint("DiscouragedApi")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -247,7 +243,6 @@ fun ThrowScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Log.d("BugHunt", "${location.namePos}, ${highScores.value[location.namePos]}")
                             Text("Highscore: ${highScores.value[location.namePos]!!.distance}km")
 
                             Button (
@@ -261,7 +256,7 @@ fun ThrowScreen(
                                     if (!highScoreOnMap.value[location.namePos]!!) {
                                         drawHighScorePath(mapViewState.overlays, highScores.value[location.namePos]!!.flightPath!!, location.namePos!!)
                                         drawGoalMarker(
-                                            { HighScoreMarker(mapViewState, location.namePos) },
+                                            { HighScoreMarker(mapViewState, location.namePos!!) },
                                             mapViewState.overlays,
                                             highScores.value[location.namePos]!!.flightPath!![0],
                                             highScores.value[location.namePos]!!.flightPath!!.last(),
@@ -271,7 +266,7 @@ fun ThrowScreen(
                                         removeHighScorePath(mapViewState.overlays, location.namePos!!)
                                         mapViewState.invalidate()
                                     }
-                                    throwViewModel.updateHighScoreShownState(location.namePos)
+                                    throwViewModel.updateHighScoreShownState(location.namePos!!)
                                 },
                                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                                 shape = RoundedCornerShape(10),
