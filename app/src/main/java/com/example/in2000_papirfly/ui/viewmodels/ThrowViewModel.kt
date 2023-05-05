@@ -171,6 +171,7 @@ class ThrowViewModel(
 
     fun resetPlane(){
         planeRepository.update(Plane())
+        addAttachments(planeRepository, loadoutRepository)
     }
 
     fun changeAngle(value: Float){
