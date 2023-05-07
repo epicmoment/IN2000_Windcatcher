@@ -88,14 +88,13 @@ fun CustomizationScreen (
                         for (i in 0..3) {
 
                             val slotAttachment = loadoutState.value.slots[i]
+
                             AttachmentSlot(
                                 isSelected = customizeState.value.selectedSlot == i,
-                                attachment = if (slotAttachment != null) {
-                                    Attachments.list[0][slotAttachment]
-                                } else {
-                                    null
-                                }
-                            ) { viewModel.setSlot(i) }
+                                attachment = Attachments.list[0][slotAttachment]
+                            ) {
+                                viewModel.setSlot(i)
+                            }
 
                         }
 
