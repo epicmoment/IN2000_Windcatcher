@@ -57,7 +57,7 @@ class ThrowViewModel(
         MutableStateFlow(getHighScoreShownStates())
     val highScoresOnMapState = _highScoresOnMapState.asStateFlow()
 
-    val allMarkers = emptyList<Marker>().toMutableList()
+    private val allMarkers = emptyList<Marker>().toMutableList()
 
     init {
         updateOnMoveMap{ throwScreenState.update{ ThrowScreenState.MovingMap } }
@@ -123,6 +123,7 @@ class ThrowViewModel(
     }
 
     fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
+        throwScreenState.update { ThrowScreenState.MovingMap }
         selectedLocation = newLocation
         locationName = newLocationName
         startPos = selectedLocation
@@ -132,10 +133,24 @@ class ThrowViewModel(
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
         updateHighScores()
+        mapOverlay.forEach {
+            if (it is ThrowPositionMarker && it.title == locationName) {
+                it.showInfoWindow()
+            }
+        }
+        // TODO something weird is happening here
+        CoroutineScope(Dispatchers.Default).launch {
+            delay(1000)
+            throwScreenState.update{ ThrowScreenState.Throwing }
+        }
     }
 
     fun getThrowScreenState(): StateFlow<ThrowScreenState>{
         return throwScreenState.asStateFlow()
+    }
+
+    fun setThrowScreenStateMovingMap() {
+        throwScreenState.update { ThrowScreenState.MovingMap }
     }
 
     fun throwPlane(){

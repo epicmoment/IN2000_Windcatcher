@@ -4,47 +4,45 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.PapirflyApplication
+import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
-import org.osmdroid.util.GeoPoint
 import io.ktor.util.reflect.*
+import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 import java.lang.Math.*
 import kotlin.math.atan2
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import org.osmdroid.views.MapView
 
 @SuppressLint("DiscouragedApi")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,10 +81,26 @@ fun ThrowScreen(
         )
     }
 
+    val toggleMarkerInfoWindow = {
+        throwViewModel.setThrowScreenStateMovingMap()
+        mapViewState.overlays.forEach {
+            if (it is ThrowPositionMarker && it.title == throwViewModel.locationName) {
+                if (it.isInfoWindowOpen) {
+                    it.closeInfoWindow()
+                } else {
+                    it.showInfoWindow()
+                    openBottomSheet = true
+                    animateRow(it.rowPosition)
+                }
+                return@forEach
+            }
+        }
+    }
+
     val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
     val highScores = throwViewModel.throwPointHighScores.collectAsState()
     val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
-    val throwScreenState = throwViewModel.getThrowScreenState()
+    val throwScreenState = throwViewModel.getThrowScreenState().collectAsState().value
     val planeState = throwViewModel.planeState.collectAsState().value
 
     BackHandler {
@@ -113,9 +127,9 @@ fun ThrowScreen(
         planeVisible = showPlane(throwScreenState)
     )
 
-    Column() {
+    Column {
         Text(
-            text = "LOCAL HIGHSCORE: ${highScores.value[locationName]!!.distance}km",
+            text = "LOCAL HIGHSCORE: ${highScores.value[throwViewModel.locationName]!!.distance}km",
             fontSize = 25.sp,
             fontWeight = FontWeight.Bold
         )
@@ -143,59 +157,39 @@ fun ThrowScreen(
             painter = painterResource(id = R.drawable.up_arrow__1_),
             contentDescription = "TODO",
             modifier = Modifier
-                    //TODO Update this when snapping to position
+                //TODO Update this when snapping to position
                 .rotate((throwViewModel.weather.windAngle + 180).toFloat())
                 .size(80.dp)
         )
 
         // Circular Slider
-        if (planeState.height > 99.9) {
+        // TODO snap to middle of screen, maybe not in column?
+        if (throwScreenState == ThrowScreenState.Throwing) {
             CircularSlider(
                 throwViewModel,
+                toggleMarkerInfoWindow,
             )
-        }
-        if (planeState.height < 99.9){
+        } else {
             Spacer(modifier = Modifier.height(250.dp))
         }
 
-        if(planeState.height > 99.9) {
+        if(throwScreenState != ThrowScreenState.Flying) {
             Button(
                 modifier = Modifier.shadow(
                     elevation = 10.dp,
                     ambientColor = Color.Black,
                     spotColor = Color.Black
                 ),
-                //enabled = !throwViewModel.planeState.collectAsState().value.flying,
                 onClick = {
-                    throwViewModel.throwPlane()
+                    if (throwScreenState == ThrowScreenState.Throwing) throwViewModel.throwPlane()
+                    else throwViewModel.changeAngle(0.toFloat())
                 },
                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                 shape = RoundedCornerShape(10),
             ){
                     Text(
-                        text = "KAST",
+                        text = if (throwScreenState == ThrowScreenState.Throwing) "KAST" else "KAST IGJEN",
                         fontSize = 35.sp,)
-                }
-            }
-            if (planeState.height == 0.toDouble()){
-                Button(
-                    modifier = Modifier.shadow(
-                        elevation = 10.dp,
-                        ambientColor = Color.Black,
-                        spotColor = Color.Black
-                    ),
-                    //enabled = !throwViewModel.planeState.collectAsState().value.flying,
-                    onClick = {
-                        throwViewModel.changeAngle(0.toFloat())
-                        //throwViewModel.setPlaneStart()
-                    },
-                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
-                    shape = RoundedCornerShape(10),
-                ) {
-                    Text(
-                        text = "KAST IGJEN",
-                        fontSize = 35.sp,
-                    )
                 }
             }
         }
@@ -205,7 +199,10 @@ fun ThrowScreen(
         ModalBottomSheet(
             modifier = Modifier
                 .fillMaxWidth(),
-            onDismissRequest = { openBottomSheet = false },
+            onDismissRequest = {
+                openBottomSheet = false
+                toggleMarkerInfoWindow()
+            },
             sheetState = bottomSheetState,
         ) {
             LazyRow(state = rowState) {
@@ -337,8 +334,8 @@ fun ThrowScreen(
 }
 
 @Composable
-fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
-    val value = when (throwScreenState.collectAsState().value){
+fun showPlane(throwScreenState: ThrowScreenState): Boolean{
+    val value = when (throwScreenState){
         is ThrowScreenState.Throwing -> true
         is ThrowScreenState.Flying -> true
         is ThrowScreenState.MovingMap -> false
@@ -351,6 +348,7 @@ fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
 @Composable
 fun CircularSlider(
     throwViewModel: ThrowViewModel,
+    openMarker: () -> Unit
 ) {
     var radius by remember {
         mutableStateOf(0f)
@@ -375,7 +373,9 @@ fun CircularSlider(
     ) {
         Canvas(
             modifier = Modifier
-                .size(180.dp * 2f)
+                .size(170.dp * 2f)
+//                .border(10.dp, Color(0xFF000000))
+                .padding(20.dp)
                 .pointerInput(Unit) {
                     detectDragGestures { change, dragAmount ->
                         handleCenter += dragAmount
@@ -397,26 +397,38 @@ fun CircularSlider(
 
                             throwViewModel.changeAngle(angleForPlane)
                         },
+                        onPress = { offset ->
+                            handleCenter = Offset.Zero + offset
+                            angle = getRotationAngle(handleCenter, shapeCenter)
+
+                            val angleForPlane = angle.toFloat() + 90
+
+                            throwViewModel.changeAngle(angleForPlane)
+                        }
                     )
                 }
-                .padding(50.dp)
         ) {
             shapeCenter = center
 
-            radius = size.minDimension / 2
+            radius = (size.minDimension / 2) - 50
 
             val x = (shapeCenter.x + cos(toRadians(angle)) * radius).toFloat()
             val y = (shapeCenter.y + sin(toRadians(angle)) * radius).toFloat()
 
             handleCenter = Offset(x, y)
+//            handleCenter = calculateOffsetFromAngleAndDistance(shapeCenter, angle, radius)
 
             drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
             drawCircle(color = com.example.in2000_papirfly.ui.theme.colOrange, center = handleCenter, radius = 50f)
         }
 
         Box(modifier = Modifier
-            .size(120.dp * 2f)
-            .clickable(false, onClick = {}),
+            .size(50.dp * 2f)
+            .clickable(true, onClick = {
+                    Log.d("OpenMarker", "Click detected.")
+                    openMarker()
+                }
+            ),
             contentAlignment = Alignment.Center) {
         }
     }
