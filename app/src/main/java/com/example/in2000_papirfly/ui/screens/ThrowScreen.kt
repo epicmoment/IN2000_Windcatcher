@@ -10,7 +10,6 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,7 +21,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -89,6 +87,7 @@ fun ThrowScreen(
     val highScores = throwViewModel.throwPointHighScores.collectAsState()
     val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
+    val planeState = throwViewModel.planeState.collectAsState().value
 
     BackHandler {
         Log.d("ThrowScreen", "Back press detected")
@@ -122,12 +121,12 @@ fun ThrowScreen(
         )
 
         Text(
-            text = "Plane speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}",
+            text = "Plane speed: ${"%.2f".format(planeState.speed.toFloat())}",
             fontSize = 15.sp
         )
 
         Text(
-            text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}",
+            text = "Height: ${"%.0f".format(planeState.height)}",
             fontSize = 15.sp
         )
     }
@@ -144,21 +143,22 @@ fun ThrowScreen(
             painter = painterResource(id = R.drawable.up_arrow__1_),
             contentDescription = "TODO",
             modifier = Modifier
+                    //TODO Update this when snapping to position
                 .rotate((throwViewModel.weather.windAngle + 180).toFloat())
                 .size(80.dp)
         )
 
         // Circular Slider
-        if (throwViewModel.planeState.collectAsState().value.height > 99.9) {
+        if (planeState.height > 99.9) {
             CircularSlider(
                 throwViewModel,
             )
         }
-        if (throwViewModel.planeState.collectAsState().value.height < 99.9){
+        if (planeState.height < 99.9){
             Spacer(modifier = Modifier.height(250.dp))
         }
 
-        if(throwViewModel.planeState.collectAsState().value.height > 99.9) {
+        if(planeState.height > 99.9) {
             Button(
                 modifier = Modifier.shadow(
                     elevation = 10.dp,
@@ -177,7 +177,7 @@ fun ThrowScreen(
                         fontSize = 35.sp,)
                 }
             }
-            if (throwViewModel.planeState.collectAsState().value.height == 0.toDouble()){
+            if (planeState.height == 0.toDouble()){
                 Button(
                     modifier = Modifier.shadow(
                         elevation = 10.dp,
@@ -200,7 +200,7 @@ fun ThrowScreen(
             }
         }
 
-//    Sheet content
+    // Navigation and high score sheet
     if (openBottomSheet) {
         ModalBottomSheet(
             modifier = Modifier
@@ -301,11 +301,6 @@ fun ThrowScreen(
                             )
 
                             Button (
-//                                modifier = Modifier.shadow(
-//                                    elevation = 10.dp,
-//                                    ambientColor = Color.Black,
-//                                    spotColor = Color.Black
-//                                ),
                                 modifier = Modifier
                                     .size(180.dp, 45.dp),
                                 enabled = highScores.value[location.namePos]!!.distance != 0,
