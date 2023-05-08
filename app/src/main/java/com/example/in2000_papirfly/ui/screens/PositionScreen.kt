@@ -24,7 +24,6 @@ import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModel
 import io.ktor.http.*
 import org.osmdroid.util.GeoPoint
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PositionScreen(
     modifier: Modifier = Modifier,

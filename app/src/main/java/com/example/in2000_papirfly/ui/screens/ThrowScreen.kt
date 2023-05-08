@@ -8,7 +8,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
@@ -82,8 +85,7 @@ fun ThrowScreen(
         )
     }
 
-    val throwPointWeather: List<Weather> = throwViewModel.throwPointWeather
-//    val highScore = throwViewModel.highScore.collectAsState()
+    val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
     val highScores = throwViewModel.throwPointHighScores.collectAsState()
     val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
     val throwScreenState = throwViewModel.getThrowScreenState()
@@ -94,10 +96,11 @@ fun ThrowScreen(
         throwViewModel.resetPlane()
         onBack()
     }
+
     // Map composable
     AndroidView(
         { mapViewState },
-        Modifier,
+        Modifier.border(1.dp, Color(0xFF000000))
     ) { mapView -> onLoad?.invoke(mapView) }
 
     // This fixes the map glitching
@@ -200,25 +203,11 @@ fun ThrowScreen(
 //    Sheet content
     if (openBottomSheet) {
         ModalBottomSheet(
+            modifier = Modifier
+                .fillMaxWidth(),
             onDismissRequest = { openBottomSheet = false },
             sheetState = bottomSheetState,
-
         ) {
-//            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-//                Button(
-//                    // Note: If you provide logic outside of onDismissRequest to remove the sheet,
-//                    // you must additionally handle intended state cleanup, if any.
-//                    onClick = {
-//                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-//                            if (!bottomSheetState.isVisible) {
-//                                openBottomSheet = false
-//                            }
-//                        }
-//                    }
-//                ) {
-//                    Text("Hide Bottom Sheet")
-//                }
-//            }
             LazyRow(state = rowState) {
                 items(throwPointWeather.size) {
                     val location = throwPointWeather[it]
@@ -226,7 +215,8 @@ fun ThrowScreen(
                         shape = MaterialTheme.shapes.medium,
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(15.dp),
+                            .padding(15.dp)
+                            .size(width = 380.dp, height = 200.dp),
                         onClick = {
                             if (throwPointWeather[it].namePos == throwViewModel.locationName) {
                                 openBottomSheet = false
@@ -297,12 +287,18 @@ fun ThrowScreen(
                         }
                         // High score banner
                         Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text("Highscore: ${highScores.value[location.namePos]!!.distance}km")
+                            Text(
+                                modifier = Modifier
+                                    .padding(end = 10.dp),
+                                text = "Highscore: ${highScores.value[location.namePos]!!.distance}km",
+                                fontSize = 16.sp
+                            )
 
                             Button (
 //                                modifier = Modifier.shadow(
@@ -310,12 +306,14 @@ fun ThrowScreen(
 //                                    ambientColor = Color.Black,
 //                                    spotColor = Color.Black
 //                                ),
+                                modifier = Modifier
+                                    .size(180.dp, 45.dp),
                                 enabled = highScores.value[location.namePos]!!.distance != 0,
                                 onClick = {
                                     if (!highScoreOnMap.value[location.namePos]!!) {
                                         drawHighScorePath(mapViewState.overlays, highScores.value[location.namePos]!!.flightPath!!, location.namePos!!)
                                         drawGoalMarker(
-                                            { HighScoreMarker(mapViewState, location.namePos) },
+                                            { HighScoreMarker(mapViewState, location.namePos!!) },
                                             mapViewState.overlays,
                                             highScores.value[location.namePos]!!.flightPath!![0],
                                             highScores.value[location.namePos]!!.flightPath!!.last(),
@@ -325,15 +323,14 @@ fun ThrowScreen(
                                         removeHighScorePath(mapViewState.overlays, location.namePos!!)
                                         mapViewState.invalidate()
                                     }
-                                    throwViewModel.updateHighScoreShownState(location.namePos)
-                                    Log.d("HighScore", "HighScore shown? ${highScoreOnMap.value[location.namePos]!!}")
+                                    throwViewModel.updateHighScoreShownState(location.namePos!!)
                                 },
                                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                                 shape = RoundedCornerShape(10),
                             ) {
                                 Text(
                                     text = if (!highScoreOnMap.value[location.namePos]!!) "Vis highscore" else "Skjul highscore",
-                                    fontSize = 10.sp,
+                                    fontSize = 16.sp,
                                 )
                             }
                         }
@@ -343,6 +340,7 @@ fun ThrowScreen(
         }
     }
 }
+
 @Composable
 fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
     val value = when (throwScreenState.collectAsState().value){
@@ -351,7 +349,6 @@ fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
         is ThrowScreenState.MovingMap -> false
     }
     return value
-
 }
 
 //Code tatt fra stackoverflow

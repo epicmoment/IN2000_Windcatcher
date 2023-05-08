@@ -6,11 +6,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import org.osmdroid.util.GeoPoint
-import androidx.compose.ui.platform.LocalContext
-import com.example.in2000_papirfly.PapirflyApplication
 
 @Composable
 fun NavScreen(
@@ -27,7 +24,8 @@ fun NavScreen(
 
          composable(route = "MainScreen") {
             MainScreen(
-                onNextPage = { navController.navigate("PositionScreen") },
+//                onNextPage = { navController.navigate("PositionScreen") },
+                onNextPage = { navController.navigate("ThrowScreen") },
                 onCustomizePage = { navController.navigate("CustomizationScreen")}
             )
          }
@@ -53,7 +51,7 @@ fun NavScreen(
                 locationName = screenState.value.locationName,
                 onBack = {
                     navController.popBackStack(
-                        route = "PositionScreen",
+                        route = "MainScreen",
                         inclusive = false
                     )
                 }
