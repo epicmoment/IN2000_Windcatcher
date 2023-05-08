@@ -24,11 +24,11 @@ fun NavScreen(
         navController = navController,
         startDestination = "MainScreen"
     ) {
-
          composable(route = "MainScreen") {
             MainScreen(
                 onNextPage = { navController.navigate("PositionScreen") },
-                onCustomizePage = { navController.navigate("CustomizationScreen")}
+                onCustomizePage = { navController.navigate("CustomizationScreen")},
+                onLogScreenPage = { navController.navigate("LogScreen")}
             )
          }
 
@@ -42,6 +42,12 @@ fun NavScreen(
             )
 
         }
+
+         composable(route = "LogScreen") {
+             TempLogScreen(
+                 onBack = { navController.popBackStack("MainScreen", false)}
+             )
+         }
 
         composable(route = "ThrowScreen") {
             val pos = GeoPoint(
