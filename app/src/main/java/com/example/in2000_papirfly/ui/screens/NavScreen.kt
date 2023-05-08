@@ -1,10 +1,7 @@
 package com.example.in2000_papirfly.ui.screens
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -21,14 +18,7 @@ fun NavScreen(
 ) {
 
     val screenState = viewModel.screenState.collectAsState()
-
-//    val repository : WeatherRepositoryMVP = viewModel()
-    val planeRepository = PlaneRepository()     // TODO // Burde bli flyttet, dependency injection
-
     val navController = rememberNavController()
-
-    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
-    val repository = appContainer.dataRepository
 
      NavHost(
         navController = navController,
@@ -48,7 +38,7 @@ fun NavScreen(
                 onNextPage = { newLocation, locationName ->
                     viewModel.setLocation(newLocation, locationName)
                     navController.navigate("ThrowScreen")
-                },
+                }
             )
 
         }
@@ -61,11 +51,12 @@ fun NavScreen(
             ThrowScreen(
                 selectedLocation = pos,
                 locationName = screenState.value.locationName,
-                getWeather = { location: String ->
-                    repository.getWeatherAt(location)
-                },
-                weatherRepository = repository,
-                planeRepository = planeRepository
+                onBack = {
+                    navController.popBackStack(
+                        route = "PositionScreen",
+                        inclusive = false
+                    )
+                }
             )
 
         }

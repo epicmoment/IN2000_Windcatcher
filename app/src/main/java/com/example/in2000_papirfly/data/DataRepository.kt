@@ -7,7 +7,10 @@ import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 import com.example.in2000_papirfly.data.database.entities.WeatherTile
 import com.example.in2000_papirfly.network.getLocationforecastData
 import com.example.in2000_papirfly.network.getNowcastData
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
@@ -101,7 +104,7 @@ class DataRepository(database: PapirflyDatabase) {
         return HighScore(
             locationName,
             throwPoint.hSDate,
-            throwPoint.hSDistance,
+            throwPoint.hSDistance ?: 0,
             flightPathPoints
         )
     }
@@ -118,6 +121,7 @@ class DataRepository(database: PapirflyDatabase) {
                     hSDistance = distance
                 )
             )
+            flightDao.deleteFLightPath(location)
             path.forEach {
                 flightDao.insert(
                     FlightPathPoint(
@@ -143,7 +147,11 @@ class DataRepository(database: PapirflyDatabase) {
      * **WARNING**: This function cannot be called from the main thread! Please notice that a
      * viewModelScope-Coroutine always runs on the main thread, and is thus not able to call
      * this function by itself. Runblocking will also not work from the main thread.
-     * For best results, use CoroutineScope(Dispatchers.IO).launch { ... }
+     * For best results, use **CoroutineScope(Dispatchers.IO).launch { ... }**
+     *
+     * @param point The GeoPoint for where you want to get weather data
+     *
+     * @return A Weather object with the latest weather data for the given point
      */
     suspend fun getWeatherAtPoint(point: GeoPoint): Weather {
 
