@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.CustomizationScreenUIState
 import com.example.in2000_papirfly.data.LoadoutRepository
@@ -34,11 +35,16 @@ class CustomizationViewModel (
             }
 
         }
+
     }
 
-    fun equipAttachment(slot : Int, attachmentID : Int?) {
+    fun equipAttachment(slot : Int, attachmentID : Int) {
 
-        loadoutRepository.equipAttachment(slot, attachmentID)
+        viewModelScope.launch {
+
+            loadoutRepository.equipAttachment(slot, attachmentID)
+
+        }
 
     }
 
