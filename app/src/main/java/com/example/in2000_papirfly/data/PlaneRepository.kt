@@ -14,6 +14,16 @@ class PlaneRepository(){
 
     fun update(newPlane : Plane){
         _planeState.update { _ -> newPlane }
+
+        /*
+        val plane = if (newPlane.pos[0] == Double.NaN || newPlane.pos[1] == Double.NaN){
+           newPlane.copy(pos = listOf(0.0, 0.0))
+        } else {
+            newPlane
+        }
+        _planeState.update { _ -> plane }
+
+         */
     }
 
     fun getCurrentPlane(): Plane{

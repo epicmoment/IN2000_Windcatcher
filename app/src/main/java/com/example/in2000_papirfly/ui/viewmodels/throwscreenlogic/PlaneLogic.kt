@@ -1,8 +1,9 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import com.example.in2000_papirfly.data.*
-import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**
@@ -16,7 +17,7 @@ class PlaneLogic(
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState
-    private val slowRate = 0.8
+    private val defaultSlowRate = 0.2
     private val planeStartHeight = 100.0
     private val defaultDropRate = 0.1 * planeStartHeight
     private val maxPlaneStartSpeed = 20.0
@@ -34,11 +35,10 @@ class PlaneLogic(
      * is multiplied by a constant, distanceMultiplier (probably valued at 1000)
      */
     suspend fun update(weather: Weather){
-        println("airPressure" + weather.airPressure)
 
         // Set up
         val plane = planeRepository.planeState.value
-
+        Log.d("PlaneLogic.plane.pos", planeState.value.pos.toString())
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
             planeRepository.update(
@@ -49,11 +49,16 @@ class PlaneLogic(
             )
             return
         }
+        Log.d("PlaneLogic.plane.pos after !plane.flying", planeState.value.pos.toString())
+
 
         // Calculate the modified trajectory of the plane
-        val currentPlaneVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
+        val currentPlaneVector = calculateVector(plane.angle, plane.speed - calculateSpeedLoss(plane.flightModifier, plane.speed) )
         val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
+        Log.d("making new plane pos", "")
+        Log.d("currentPlaneVector", currentPlaneVector.toString())
+        Log.d("affectedPlaneVector", affectedPlaneVector.toString())
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
             vectorLength(affectedPlaneVector) * distanceMultiplier,
@@ -76,6 +81,8 @@ class PlaneLogic(
                 flying = flying
             )
         )
+        Log.d("PlaneLogic.plane.pos after everything", planeRepository.planeState.value.pos.toString())
+
     }
 
 
@@ -113,18 +120,13 @@ class PlaneLogic(
      */
     private fun calculateDropRate(speed: Double, weather: Weather): Double{
         val flightModifier = planeState.value.flightModifier
-        val airPressure = weather.airPressure
-        val rain = weather.rain
 
         var newDropRate = 0.0
-        newDropRate += calculateAirPressureDropRate(airPressure, flightModifier)
-        newDropRate += calculateRainDropRate(rain, flightModifier)
-        val temperatureDropRate = calculateTemperatureDropRate(weather.temperature, flightModifier)
-        println("temperature drop rate: $temperatureDropRate")
+        newDropRate += calculateAirPressureDropRate(weather.airPressure, flightModifier)
+        newDropRate += calculateRainDropRate(weather.rain, flightModifier)
         newDropRate += calculateTemperatureDropRate(weather.temperature, flightModifier)
-        println("New drop rate: $newDropRate")
 
-        return round(defaultDropRate + newDropRate)
+        return round((flightModifier.weight * defaultDropRate) + newDropRate)
     }
 
     /**
@@ -168,9 +170,9 @@ class PlaneLogic(
     }
 
 
-    private fun calculateSlowRate(): Double{
+    private fun calculateSpeedLoss(flightModifier: FlightModifier, speed: Double): Double{
         // should take plane modifiers into account
-        return slowRate
+        return defaultSlowRate * flightModifier.slowRateEffect * speed
     }
 
     // Wind

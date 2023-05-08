@@ -39,6 +39,10 @@ data class FlightModifier(
      */
     val temperatureEffect: Double = 0.0,
 
+    val weight: Double = 0.25,
+
+    val slowRateEffect: Double = 0.25,
+
     // Ideas here are:
     // sunDropRateEffect
     // sideWindEffect
