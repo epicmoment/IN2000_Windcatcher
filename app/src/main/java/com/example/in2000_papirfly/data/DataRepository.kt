@@ -104,7 +104,7 @@ class DataRepository(database: PapirflyDatabase) {
         return HighScore(
             locationName,
             throwPoint.hSDate,
-            throwPoint.hSDistance,
+            throwPoint.hSDistance ?: 0,
             flightPathPoints
         )
     }
@@ -121,6 +121,7 @@ class DataRepository(database: PapirflyDatabase) {
                     hSDistance = distance
                 )
             )
+            flightDao.deleteFLightPath(location)
             path.forEach {
                 flightDao.insert(
                     FlightPathPoint(

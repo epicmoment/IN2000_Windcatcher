@@ -11,16 +11,16 @@ class LoadoutRepository {
     private val _loadoutState = MutableStateFlow(Loadout())
     val loadoutState : StateFlow<Loadout> = _loadoutState.asStateFlow()
 
-    fun equipAttachment(slot : Int, attachmentID : Int?) {
+    fun equipAttachment(slot : Int, attachmentID : Int) {
+
+        val list2 = loadoutState.value.slots.toMutableList()
+        list2[slot] = attachmentID
 
         _loadoutState.update {
 
-            when (slot) {
-                1 -> it.copy(slot1attachment = attachmentID)
-                2 -> it.copy(slot2attachment = attachmentID)
-                3 -> it.copy(slot3attachment = attachmentID)
-                else -> it.copy(slot4attachment = attachmentID)
-            }
+            it.copy(
+                slots = list2.toList()
+            )
 
         }
 

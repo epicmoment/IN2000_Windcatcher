@@ -1,7 +1,6 @@
 package com.example.in2000_papirfly.network
 
 import android.util.Log
-import com.example.in2000_papirfly.data.LocationforecastData
 import com.example.in2000_papirfly.data.NowcastData
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -51,6 +50,7 @@ suspend fun getNowcastData(lat: Double, lon: Double): NowcastData {
             headers {
                 append("X-Gravitee-Api-Key", "c473e19e-965e-4c53-8408-5c4cb9622403")
             }
+            // TODO handle timeouts
         }
 
     } catch (cause: Throwable) {
