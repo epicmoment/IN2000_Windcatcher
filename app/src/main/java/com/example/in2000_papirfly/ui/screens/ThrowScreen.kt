@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -83,10 +84,11 @@ fun ThrowScreen(
         throwViewModel.resetPlane()
         onBack()
     }
+
     // Map composable
     AndroidView(
         { mapViewState },
-        Modifier,
+        Modifier.border(1.dp, Color(0xFF000000))
     ) { mapView -> onLoad?.invoke(mapView) }
 
     // This fixes the map glitching
@@ -142,24 +144,11 @@ fun ThrowScreen(
 //    Sheet content
     if (openBottomSheet) {
         ModalBottomSheet(
+            modifier = Modifier
+                .fillMaxWidth(),
             onDismissRequest = { openBottomSheet = false },
             sheetState = bottomSheetState,
         ) {
-//            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-//                Button(
-//                    // Note: If you provide logic outside of onDismissRequest to remove the sheet,
-//                    // you must additionally handle intended state cleanup, if any.
-//                    onClick = {
-//                        scope.launch { bottomSheetState.hide() }.invokeOnCompletion {
-//                            if (!bottomSheetState.isVisible) {
-//                                openBottomSheet = false
-//                            }
-//                        }
-//                    }
-//                ) {
-//                    Text("Hide Bottom Sheet")
-//                }
-//            }
             LazyRow(state = rowState) {
                 items(throwPointWeather.size) {
                     val location = throwPointWeather[it]
@@ -167,7 +156,8 @@ fun ThrowScreen(
                         shape = MaterialTheme.shapes.medium,
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(15.dp),
+                            .padding(15.dp)
+                            .size(width = 380.dp, height = 200.dp),
                         onClick = {
                             if (throwPointWeather[it].namePos == throwViewModel.locationName) {
                                 openBottomSheet = false
@@ -238,12 +228,18 @@ fun ThrowScreen(
                         }
                         // High score banner
                         Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text("Highscore: ${highScores.value[location.namePos]!!.distance}km")
+                            Text(
+                                modifier = Modifier
+                                    .padding(end = 10.dp),
+                                text = "Highscore: ${highScores.value[location.namePos]!!.distance}km",
+                                fontSize = 16.sp
+                            )
 
                             Button (
 //                                modifier = Modifier.shadow(
@@ -251,6 +247,8 @@ fun ThrowScreen(
 //                                    ambientColor = Color.Black,
 //                                    spotColor = Color.Black
 //                                ),
+                                modifier = Modifier
+                                    .size(180.dp, 45.dp),
                                 enabled = highScores.value[location.namePos]!!.distance != 0,
                                 onClick = {
                                     if (!highScoreOnMap.value[location.namePos]!!) {
@@ -273,7 +271,7 @@ fun ThrowScreen(
                             ) {
                                 Text(
                                     text = if (!highScoreOnMap.value[location.namePos]!!) "Vis highscore" else "Skjul highscore",
-                                    fontSize = 10.sp,
+                                    fontSize = 16.sp,
                                 )
                             }
                         }
