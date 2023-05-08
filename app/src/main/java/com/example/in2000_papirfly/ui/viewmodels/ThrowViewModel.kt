@@ -144,7 +144,7 @@ class ThrowViewModel(
     fun changeAngle(value: Float){
         throwScreenState.update{ThrowScreenState.Throwing}
         val plane = planeState.value
-        planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        planeRepository.update(plane.copy(angle = value.toDouble()))
         previousPlanePos = startPos
     }
 

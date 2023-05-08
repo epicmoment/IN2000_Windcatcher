@@ -1,21 +1,29 @@
 package com.example.in2000_papirfly.ui.screens
 
-
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
 import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.plane.WeatherRepository
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -23,6 +31,8 @@ import org.osmdroid.util.GeoPoint
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.rememberMapViewWithLifecycle
 import kotlinx.coroutines.flow.StateFlow
 import org.osmdroid.views.MapView
+import java.lang.Math.*
+import kotlin.math.atan2
 
 @Composable
 fun ThrowScreen(
@@ -59,15 +69,6 @@ fun ThrowScreen(
     // This fixes the map glitching
     mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
 
-    // Wind arrow
-    Image(
-        painter = painterResource(id = R.drawable.arrow01),
-        contentDescription = "TODO",
-        modifier = Modifier
-            .rotate((throwViewModel.weather.windAngle + 180).toFloat())
-            .scale(0.2f)
-    )
-
     // Paper plane
     PlaneComposable(
         planeSize = throwViewModel.getPlaneScale(),
@@ -75,39 +76,92 @@ fun ThrowScreen(
         planeVisible = showPlane(throwScreenState)
     )
 
-
-    Column {
-        Text(text = "Wind angle: ${throwViewModel.getWindAngle().toFloat()} - speed: ${"%.2f".format(throwViewModel.getWindSpeed().toFloat())}")
-        Text(text = "Plane angle: ${throwViewModel.planeState.collectAsState().value.angle.toFloat()} - speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}")
-        Text(text = "Plane pos: \n${throwViewModel.planeState.collectAsState().value.pos[0].toFloat()}\n${throwViewModel.planeState.collectAsState().value.pos[1].toFloat()}")
-        Text(text = "Local highscore at ${highscore.value.locationName}: ${highscore.value.distance}km")
+    Column() {
+        Text(
+            text = "LOCAL HIGHSCORE: ${highscore.value.distance}km",
+            fontSize = 25.sp,
+            fontWeight = FontWeight.Bold
+        )
 
         Text(
-            text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}")
+            text = "Plane speed: ${"%.2f".format(throwViewModel.planeState.collectAsState().value.speed.toFloat())}",
+            fontSize = 15.sp
+        )
 
-
-        Button(
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
-            onClick = {
-                throwViewModel.throwPlane()
-            }
-        ){
-            Text("Throw")
-        }
-
-        var sliderPosition by remember { mutableStateOf(0f) }
-
-        Slider(
-            value = sliderPosition,
-            onValueChange = {value ->
-                throwViewModel.changeAngle(value)
-                sliderPosition = value
-            },
-            enabled = !throwViewModel.planeState.collectAsState().value.flying,
+        Text(
+            text = "Height: ${"%.0f".format(throwViewModel.planeState.collectAsState().value.height)}",
+            fontSize = 15.sp
         )
     }
-}
 
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceEvenly,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(1.dp)
+    ) {
+        // Wind arrow
+        Image(
+            painter = painterResource(id = R.drawable.up_arrow__1_),
+            contentDescription = "TODO",
+            modifier = Modifier
+                .rotate((throwViewModel.weather.windAngle + 180).toFloat())
+                .size(80.dp)
+        )
+
+        // Circular Slider
+        if (throwViewModel.planeState.collectAsState().value.height > 99.9) {
+            CircularSlider(
+                throwViewModel,
+            )
+        }
+        if (throwViewModel.planeState.collectAsState().value.height < 99.9){
+            Spacer(modifier = Modifier.height(250.dp))
+        }
+
+        if(throwViewModel.planeState.collectAsState().value.height > 99.9) {
+            Button(
+                modifier = Modifier.shadow(
+                    elevation = 10.dp,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black
+                ),
+                //enabled = !throwViewModel.planeState.collectAsState().value.flying,
+                onClick = {
+                    throwViewModel.throwPlane()
+                },
+                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                shape = RoundedCornerShape(10),
+            ){
+                    Text(
+                        text = "KAST",
+                        fontSize = 35.sp,)
+                }
+            }
+            if (throwViewModel.planeState.collectAsState().value.height == 0.toDouble()){
+                Button(
+                    modifier = Modifier.shadow(
+                        elevation = 10.dp,
+                        ambientColor = Color.Black,
+                        spotColor = Color.Black
+                    ),
+                    //enabled = !throwViewModel.planeState.collectAsState().value.flying,
+                    onClick = {
+                        throwViewModel.changeAngle(0.toFloat())
+                        //throwViewModel.setPlaneStart()
+                    },
+                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                    shape = RoundedCornerShape(10),
+                ) {
+                    Text(
+                        text = "KAST IGJEN",
+                        fontSize = 35.sp,
+                    )
+                }
+            }
+        }
+}
 @Composable
 fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
     val value = when (throwScreenState.collectAsState().value){
@@ -116,4 +170,92 @@ fun showPlane(throwScreenState: StateFlow<ThrowScreenState>): Boolean{
         is ThrowScreenState.MovingMap -> false
     }
     return value
+}
+
+//Code tatt fra stackoverflow
+//Rafsanjani answered Dec 20, 2021 at 16:02
+@Composable
+fun CircularSlider(
+    throwViewModel: ThrowViewModel,
+) {
+    var radius by remember {
+        mutableStateOf(0f)
+    }
+
+    var shapeCenter by remember {
+        mutableStateOf(Offset.Zero)
+    }
+
+    var handleCenter by remember {
+        mutableStateOf(Offset.Zero)
+    }
+
+    var angle by remember {
+        mutableStateOf(270.0)
+    }
+
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(180.dp * 2f)
+    ) {
+        Canvas(
+            modifier = Modifier
+                .size(180.dp * 2f)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        handleCenter += dragAmount
+                        angle = getRotationAngle(handleCenter, shapeCenter)
+
+                        val angleForPlane = angle.toFloat() + 90
+
+                        throwViewModel.changeAngle(angleForPlane)
+                        change.consume()
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            handleCenter = Offset.Zero + offset
+                            angle = getRotationAngle(handleCenter, shapeCenter)
+
+                            val angleForPlane = angle.toFloat() + 90
+
+                            throwViewModel.changeAngle(angleForPlane)
+                        },
+                    )
+                }
+                .padding(50.dp)
+        ) {
+            shapeCenter = center
+
+            radius = size.minDimension / 2
+
+            val x = (shapeCenter.x + cos(toRadians(angle)) * radius).toFloat()
+            val y = (shapeCenter.y + sin(toRadians(angle)) * radius).toFloat()
+
+            handleCenter = Offset(x, y)
+
+            drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
+            drawCircle(color = com.example.in2000_papirfly.ui.theme.colOrange, center = handleCenter, radius = 50f)
+        }
+
+        Box(modifier = Modifier
+            .size(120.dp * 2f)
+            .clickable(false, onClick = {}),
+            contentAlignment = Alignment.Center) {
+        }
+    }
+}
+
+private fun getRotationAngle(currentPosition: Offset, center: Offset): Double {
+    val (dx, dy) = currentPosition - center
+    val theta = atan2(dy, dx).toDouble()
+
+    var angle = toDegrees(theta)
+
+    if (angle < 0) {
+        angle += 360.0
+    }
+    return angle
 }

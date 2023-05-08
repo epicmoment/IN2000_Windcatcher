@@ -52,8 +52,9 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                 shape = RoundedCornerShape(10),
             ) {
                 Text(
-                    text = "KAST",
+                    text = "START",
                     fontSize = 40.sp,
+                    color = Color.White
                 )
             }
 
