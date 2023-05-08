@@ -25,7 +25,7 @@ fun PlaneComposable(planeSize: Float, planeState: StateFlow<Plane>, planeVisible
         val plane = planeState.collectAsState().value
         var alpha = if (planeVisible) 1.0f else 0.0f
         Image(
-            painter = painterResource(id = R.drawable.plane01),
+            painter = painterResource(id = R.drawable.paperplane),
             contentDescription = "TODO",
             modifier = Modifier
                 .rotate((plane.angle).toFloat())

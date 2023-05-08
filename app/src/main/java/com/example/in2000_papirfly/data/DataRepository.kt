@@ -28,35 +28,18 @@ class DataRepository(database: PapirflyDatabase) {
         }
     }
 
-    /**
-     * This function returns a Weather-object with live weather data for the given location
-     */
-    fun getWeatherAt(locationName: String): Weather {
-
-        Log.d("Repo", "Fetching info for throw point at \"$locationName\"")
-        val point = throwDao.getThrowPointInfo(locationName)!!
-        val tile = tileDao.getTileAt(point.tileX, point.tileY)!!
-        return Weather(
-            windSpeed = tile.windSpeed,
-            windAngle = tile.windDirection,
-            airPressure = tile.airPressure,
-            rain = tile.precipitation,
-            temperature = tile.temperature,
-            icon = tile.icon,
-            namePos = locationName
-        )
-    }
-
-     fun getThrowPointWeatherList(): List<Weather> {
+     suspend fun getThrowPointWeatherList(): List<Weather> {
          val list = mutableListOf<Weather>()
-         CoroutineScope(Dispatchers.IO).launch {
-             throwPoints.forEach {
-                 list += getWeatherAt(it.key)
-             }
+         throwPoints.forEach {
+             Log.d("Repo", "Fetching info for throw point at \"${it.key}\"")
+             val weatherAtPoint = getWeatherAtPoint(it.value)
+             weatherAtPoint.namePos = it.key
+             list += weatherAtPoint
          }
          return list
      }
 
+    // TODO remove when PositionScreen is removed completely
     fun getThrowGeoPoint(locationName: String): GeoPoint {
         return throwPoints[locationName]!!
     }

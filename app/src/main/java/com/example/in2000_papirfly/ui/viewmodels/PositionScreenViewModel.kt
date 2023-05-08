@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.DataRepository
 import com.example.in2000_papirfly.data.PositionScreenUiState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +16,7 @@ import kotlinx.coroutines.launch
 class PositionScreenViewModel(val repo: DataRepository): ViewModel() {
 
     private var _posScrUiState: MutableStateFlow<PositionScreenUiState> =
-        MutableStateFlow(PositionScreenUiState(repo.getThrowPointWeatherList()))
+        MutableStateFlow(PositionScreenUiState(emptyList()))
     var posScrUiState: StateFlow<PositionScreenUiState> = _posScrUiState.asStateFlow()
 
     init {
@@ -22,7 +24,7 @@ class PositionScreenViewModel(val repo: DataRepository): ViewModel() {
     }
 
     private fun posScreenView() {
-        viewModelScope.launch {
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val throwPointWeatherList = repo.getThrowPointWeatherList()
                 _posScrUiState.update { currentState ->

@@ -14,12 +14,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.*
 import org.osmdroid.api.IMapController
 import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 
 class ThrowViewModel(
     var locationName: String,
     var selectedLocation: GeoPoint,
-    val markerFactory: () -> ThrowPositionMarker,
+    val markerFactory: (type: String) -> Marker,
     val mapOverlay: MutableList<Overlay>,
     val mapController: IMapController,
     updateOnMoveMap: (() -> Unit) -> Unit,
@@ -40,33 +41,37 @@ class ThrowViewModel(
     var nextPlanePos: GeoPoint = selectedLocation
 
     var weather: Weather = Weather()
-    private var _highScore: MutableStateFlow<HighScore> =
-        MutableStateFlow(HighScore())
-//    var highScore: StateFlow<HighScore> = _highScore.asStateFlow()
     private val throwScreenState = MutableStateFlow<ThrowScreenState>(
         ThrowScreenState.Throwing)
 
+    // Fetches and caches weather for all throw points
     private var _throwWeatherState: MutableStateFlow<ThrowPointWeatherState> =
-        MutableStateFlow(ThrowPointWeatherState(weatherRepository.getThrowPointWeatherList()))
+        MutableStateFlow(ThrowPointWeatherState(emptyThrowPointWeatherList()))
     var throwWeatherState: StateFlow<ThrowPointWeatherState> = _throwWeatherState.asStateFlow()
-    val throwPointWeather = throwWeatherState.value.weather
 
+    // Fetches and caches all high scores found in database
     private var _throwPointHighScores: MutableStateFlow<MutableMap<String, HighScore>> =
-        MutableStateFlow(getAllHighScores())
+        MutableStateFlow(emptyHighScoreMap())
     val throwPointHighScores: StateFlow<MutableMap<String, HighScore>> = _throwPointHighScores.asStateFlow()
-//    val highScores = throwPointHighScores.value
 
-    val _highScoresOnMapState: MutableStateFlow<MutableMap<String, Boolean>> =
+    // Caches if a specific high score is shown on the map or not
+    private val _highScoresOnMapState: MutableStateFlow<MutableMap<String, Boolean>> =
         MutableStateFlow(getHighScoreShownStates())
     val highScoresOnMapState = _highScoresOnMapState.asStateFlow()
+
+    val allMarkers = emptyList<Marker>().toMutableList()
 
     init {
         updateOnMoveMap{ throwScreenState.update{ ThrowScreenState.MovingMap } }
         mapController.setZoom(12.0)
+
         // Get the weather at the start location
+        // TODO this could be fetched from throwWeatherState if we populate it before 'weather'
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
+
+        // Clears all overlays from the map, and then draws every cached flight path
         mapOverlay.clear()
         FlightPathRepository.flightPaths.forEach { path ->
             var previous: GeoPoint? = null
@@ -76,17 +81,47 @@ class ThrowViewModel(
                 }
                 previous = point
             }
-            drawGoalMarker(markerFactory, mapOverlay, path.second[0], path.second[path.second.lastIndex], false)
+            allMarkers.add(drawGoalMarker(markerFactory, mapOverlay, path.second[0], path.second[path.second.lastIndex], false))
         }
-
+        // Places every throw point
         ThrowPointList.throwPoints.forEach {
-            drawStartMarker(markerFactory, { moveLocation(it.value, it.key) }, mapOverlay, it.value, it.key)
+            allMarkers.add(drawStartMarker(markerFactory, { updateThrowPointWeather() }, { moveLocation(it.value, it.key) }, mapOverlay, it.value, it.key))
         }
         updateHighScores()
-//        getAllHighScores()
+        updateThrowPointWeather()
+    }
 
-        //TODO deprecated maybe
-//        updateHighScoreValue()
+    private fun redrawMapMarkers() {
+        for (marker in allMarkers) {
+            mapOverlay.remove(marker)
+            mapOverlay.add(marker)
+        }
+    }
+
+    /**
+     * This method produces a map where the keys are the names of the throw point locations,
+     * and the values are all empty 'HighScore'-objects.
+     *
+     * @return The mutable map as described above
+     */
+    private fun emptyHighScoreMap(): MutableMap<String, HighScore> {
+        val map = emptyMap<String, HighScore>().toMutableMap()
+        ThrowPointList.throwPoints.forEach {
+            map[it.key] = HighScore(locationName = it.key)
+        }
+        return map
+    }
+
+    private fun emptyThrowPointWeatherList(): List<Weather> {
+        val weather = emptyList<Weather>().toMutableList()
+        ThrowPointList.throwPoints.forEach {
+            weather.add(
+                Weather(
+                    namePos = it.key
+                )
+            )
+        }
+        return weather
     }
 
     fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
@@ -98,7 +133,6 @@ class ThrowViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
-//        updateHighScoreValue()
         updateHighScores()
     }
 
@@ -130,7 +164,7 @@ class ThrowViewModel(
         mapController.setCenter(startPos)
 
         // Start the coroutine that updates the plane every second
-        planeFlying = viewModelScope.launch{
+        planeFlying = viewModelScope.launch {
             flyingState = true
             // Locks map
             setInteraction(false)
@@ -166,7 +200,9 @@ class ThrowViewModel(
             val distance = (startPos.distanceToAsDouble(previousPlanePos)/1000).toInt()
             val newHS = updateHighScore(distance, flightPath)
             // Draws goal flag
-            drawGoalMarker(markerFactory, mapOverlay, startPos, previousPlanePos, newHS)
+            allMarkers.add(drawGoalMarker(markerFactory, mapOverlay, startPos, previousPlanePos, newHS))
+            // Shifts all markers in front of flight paths
+            redrawMapMarkers()
 
             FlightPathRepository.flightPaths.add(Pair(distance, flightPath))
 
@@ -194,20 +230,6 @@ class ThrowViewModel(
         return false
     }
 
-    private fun updateHighScoreValue() {
-        CoroutineScope(Dispatchers.IO).launch {
-
-            val newHS = weatherRepository.getHighScore(locationName)
-            _highScore.update {
-                it.copy(
-                    date = newHS.date,
-                    distance = newHS.distance,
-                    flightPath = newHS.flightPath
-                )
-            }
-        }
-    }
-
     fun updateHighScoreShownState(location: String) {
         CoroutineScope(Dispatchers.IO).launch {
             val copy = mutableMapOf<String, Boolean>()
@@ -223,7 +245,7 @@ class ThrowViewModel(
     /**
      * Initializes a map that keeps track of whether the high score is shown for a spesific point
      */
-    fun getHighScoreShownStates(): MutableMap<String, Boolean> {
+    private fun getHighScoreShownStates(): MutableMap<String, Boolean> {
         val highScoreShownStates = emptyMap<String, Boolean>().toMutableMap()
         ThrowPointList.throwPoints.forEach {
             highScoreShownStates[it.key] = false
@@ -231,20 +253,22 @@ class ThrowViewModel(
         return highScoreShownStates
     }
 
-    private fun getAllHighScores(): MutableMap<String, HighScore> {
-        val highScores: MutableMap<String, HighScore> = emptyMap<String, HighScore>().toMutableMap()
-        CoroutineScope(Dispatchers.IO).launch {
-            ThrowPointList.throwPoints.forEach {
-                highScores[it.key] = weatherRepository.getHighScore(it.key)
-            }
-        }
-        return highScores
-    }
-
     private fun updateHighScores() {
         CoroutineScope(Dispatchers.IO).launch {
             _throwPointHighScores.update {
-                getAllHighScores()
+                it.forEach { (k, v) ->
+                    it[k] = weatherRepository.getHighScore(k)
+                }
+                return@update it
+            }
+        }
+    }
+
+    private fun updateThrowPointWeather() {
+        CoroutineScope(Dispatchers.IO).launch {
+            val newWeather = weatherRepository.getThrowPointWeatherList()
+            _throwWeatherState.update {
+                return@update ThrowPointWeatherState(newWeather)
             }
         }
     }
@@ -257,7 +281,7 @@ class ThrowViewModel(
     fun changeAngle(value: Float){
         throwScreenState.update{ThrowScreenState.Throwing}
         val plane = planeState.value
-        planeRepository.update(plane.copy(angle = value.toDouble() * 360))
+        planeRepository.update(plane.copy(angle = value.toDouble()))
         previousPlanePos = startPos
     }
 
@@ -299,11 +323,15 @@ class ThrowViewModelFactory(
         return ThrowViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
-            markerFactory = {
-                ThrowPositionMarker(
-                    mapViewState,
-                    openBottomSheet
-                )
+            markerFactory = { type ->
+                if (type == "Start") {
+                    return@ThrowViewModel ThrowPositionMarker(
+                        mapViewState,
+                        openBottomSheet
+                    )
+                } else {
+                    return@ThrowViewModel Marker(mapViewState)
+                }
             },
             mapOverlay = mapViewState.overlays,
             mapController = mapViewState.controller,
