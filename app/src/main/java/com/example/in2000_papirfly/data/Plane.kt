@@ -19,7 +19,7 @@ data class Plane(
  * This class is used in PlaneLogic when the effects of the weather is calculated, and are usually a number between 0 and 1
  */
 data class FlightModifier(
-    /** How much effect the wind vector har on the plane's vector (both angle and speed) */
+    /** How much effect the wind vector has on the plane's vector (both angle and speed) */
     val windEffect: Double = 0.0,
 
     /** How much the air pressure effects the drop rate of the plane.
@@ -39,8 +39,16 @@ data class FlightModifier(
      */
     val temperatureEffect: Double = 0.0,
 
+    /**
+     * Affects how much the plane drops every update. Used as a general balancing value
+     * Default value is 0.25 (0.25 per Attachment makes 1 for the whole plane.
+     */
     val weight: Double = 0.25,
 
+    /**
+     * Affects how much speed the plane loses every update.
+     * Default value is 0.25 (0.25 per Attachment makes 1 for the whole plane.
+     */
     val slowRateEffect: Double = 0.25,
 
     // Ideas here are:

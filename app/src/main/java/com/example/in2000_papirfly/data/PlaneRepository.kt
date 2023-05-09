@@ -2,6 +2,7 @@ package com.example.in2000_papirfly.data
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.addAttachments
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -159,6 +159,8 @@ class ThrowViewModel(
                 flying = true
             )
         )
+        // Make sure the selected attachments are applied
+        addAttachments(planeRepository, loadoutRepository)
 
         previousPlanePos = startPos
         mapController.setCenter(startPos)

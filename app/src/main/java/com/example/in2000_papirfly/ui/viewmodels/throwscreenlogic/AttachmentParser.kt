@@ -29,12 +29,15 @@ fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutR
     */
     
     // Add all flight modifiers in the attached attachments
+    // TODO
+    // Problem of too long flights seem to happen here, it only picks up the first flightmodifier it seems
     for ((i, index ) in loadout.slots.withIndex()){
+        Log.d("i", i.toString())
+        Log.d("index", index.toString())
         flightModifiers.add(Attachments.list[i][index].flightModifier )
     }
 
-
-    var finalFlightModifier = FlightModifier()
+    var finalFlightModifier = FlightModifier(weight = 0.0, slowRateEffect = 0.0)  // Setting weight and slowRateEffect to 0.0 here so we don't get 5 x 0.25 for these values
     for (flightModifier in flightModifiers){
         finalFlightModifier = combineFlightModifiers(finalFlightModifier, flightModifier)
     }
@@ -45,6 +48,8 @@ fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutR
             flightModifier = finalFlightModifier
         )
     )
+
+    Log.d("weight", finalFlightModifier.weight.toString())
 }
 
 /**
@@ -58,6 +63,8 @@ fun combineFlightModifiers(flightModifier1: FlightModifier, flightModifier2: Fli
     val airPressureEffect = flightModifier1.airPressureEffect + flightModifier2.airPressureEffect
     val rainEffect = flightModifier1.rainEffect + flightModifier2.rainEffect
     val temperatureEffect = flightModifier1.temperatureEffect + flightModifier2.temperatureEffect
+    val weight = flightModifier1.weight + flightModifier2.weight
+    val slowRateEffect = flightModifier1.slowRateEffect + flightModifier2.slowRateEffect
 
-    return FlightModifier(windEffect, airPressureEffect, rainEffect, temperatureEffect)
+    return FlightModifier(windEffect, airPressureEffect, rainEffect, temperatureEffect, weight, slowRateEffect)
 }

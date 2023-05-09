@@ -150,7 +150,8 @@ class PlaneLogic(
      * https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder
      */
     fun calculateRainDropRate(rain: Double, flightModifier: FlightModifier): Double{
-        val rainMax = 78.5
+        //val rainMax = 78.5
+        val rainMax = 10.0
 
         return rain / rainMax * defaultDropRate * flightModifier.rainEffect
     }

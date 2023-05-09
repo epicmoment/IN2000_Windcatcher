@@ -78,17 +78,20 @@ object Attachments {
 
             Attachment(
                 name = "Ingen Halefinne",
-                description = "All motvind påvirker flyet."
+                description = "All motvind påvirker flyet.",
+                flightModifier = FlightModifier(windEffect = 0.5)
             ),
 
             Attachment(
                 name = "Liten Halefinne",
-                description = "Flyet påvirkes mindre av motvind, men er litt tyngre."
+                description = "Flyet påvirkes mindre av motvind, men er litt tyngre.",
+                flightModifier = FlightModifier(windEffect = 0.25, weight = 0.5)
             ),
 
             Attachment(
                 name = "Stor Halefinne",
-                description = "Flyet påvirkes veldig lite av motvind, men er vesentlig tyngre."
+                description = "Flyet påvirkes veldig lite av motvind, men er vesentlig tyngre.",
+                flightModifier = FlightModifier(windEffect = 0.1, weight = 0.75)
             )
 
         )
