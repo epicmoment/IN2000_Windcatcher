@@ -19,7 +19,7 @@ import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.ui.theme.colOrange
 
 @Composable
-fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit, onLogScreenPage : () -> Unit) {
+fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
 
     Box(
         modifier = Modifier
@@ -54,11 +54,11 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit, onLogScree
                 Text(
                     text = "KAST",
                     fontSize = 40.sp,
-                    color = Color.White
+                    //color = Color.White
                 )
             }
 
-            Button (
+            /*Button (
                 modifier = Modifier.shadow(
                     elevation = 10.dp,
                     ambientColor = Color.Black,
@@ -73,7 +73,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit, onLogScree
                     fontSize = 25.sp,
                     color = Color.White
                 )
-            }
+            }*/
 
             Row(
                 horizontalArrangement = Arrangement.Center,
