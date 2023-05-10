@@ -12,6 +12,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,6 +50,8 @@ fun ThrowScreen(
     modifier: Modifier = Modifier,
     selectedLocation : GeoPoint,
     locationName: String,
+    changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
+    onCustomizePage: () -> Unit,
     onLoad: ((map: MapView) -> Unit)? = null,
     onBack: () -> Unit
 ) {
@@ -64,7 +67,6 @@ fun ThrowScreen(
         }
     }
 
-    // merge stuff
     val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
@@ -73,7 +75,8 @@ fun ThrowScreen(
             mapViewState = mapViewState,
             openBottomSheet = { position: Int ->
                 animateRow(position)
-            }
+            },
+            changeLocation = changeLocation
         )
     }
 
@@ -124,12 +127,6 @@ fun ThrowScreen(
             .fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-//        Text(
-//            text = "LOCAL HIGHSCORE: ${highScores.value[throwViewModel.locationName]!!.distance}km",
-//            fontSize = 25.sp,
-//            fontWeight = FontWeight.Bold
-//        )
-
         Text(
             text = "Plane speed: ${"%.2f".format(planeState.speed.toFloat())}",
             fontSize = 15.sp,
@@ -162,26 +159,25 @@ fun ThrowScreen(
             .padding(1.dp)
     ) {
 
-        Spacer(modifier = Modifier.height(80.dp))
+        Spacer(modifier = Modifier.height(180.dp))
 
         // Circular Slider
-        // TODO snap to middle of screen, maybe not in column?
         if (throwScreenState == ThrowScreenState.Throwing) {
             CircularSlider(
                 throwViewModel,
                 toggleMarkerInfoWindow,
             )
         } else {
-            Spacer(modifier = Modifier.height(250.dp))
+            Spacer(modifier = Modifier.height(360.dp))
         }
 
-        // Throw button - only shown if user is moving on the map or about to throw
-        if(throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
+        // Buttons - only shown if user is moving on the map or about to throw
+        if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
             Button(
                 modifier = Modifier.shadow(
                     elevation = 10.dp,
                     ambientColor = Color.Black,
-                    spotColor = Color.Black
+                    spotColor = Color.Black,
                 ),
                 onClick = {
                     // Throws the plane
@@ -191,15 +187,76 @@ fun ThrowScreen(
                 },
                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                 shape = RoundedCornerShape(10),
-            ){
-                    Text(
-                        text = if (throwScreenState == ThrowScreenState.Throwing) "KAST" else "KLAR",
-                        fontSize = 35.sp,
-                        color = com.example.in2000_papirfly.ui.theme.md_theme_dark_onPrimary
+            ) {
+                Text(
+                    text = if (throwScreenState == ThrowScreenState.Throwing) "KAST" else "KLAR",
+                    fontSize = 35.sp,
+                    color = Color.White
+                )
+            }
+
+            Row() {
+                // Opens position drawer
+                Button(
+                    onClick = {
+                        scope.launch {
+                            rowState.animateScrollToItem(
+                                ThrowPointList.throwPoints.keys.indexOf(
+                                    throwViewModel.locationName
+                                )
+                            )
+                        }
+                        throwViewModel.setThrowScreenState(ThrowScreenState.ChoosingPosition)
+                    },
+                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 10.dp,
+                            vertical = 8.dp
+                        )
+                        .shadow(
+                            elevation = 0.dp,
+                            ambientColor = Color.Black,
+                            spotColor = Color.Black
+                        )
+                ) {
+                    Icon(
+                        painter = painterResource(
+                            id = R.drawable.partlycloudy_day
+                        ),
+                        contentDescription = "See current weather and choose position",
+                        modifier = Modifier
+                            .size(30.dp),
+                        tint = Color.White
+                    )
+                }
+                // Goes to customization screen
+                Button (
+                    onClick = onCustomizePage,
+                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .padding(
+                            horizontal = 10.dp,
+                            vertical = 8.dp
+                        )
+                        .shadow(
+                            elevation = 0.dp,
+                            ambientColor = Color.Black,
+                            spotColor = Color.Black
+                        ),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.construction),
+                        contentDescription = "Customize Page",
+                        modifier = Modifier.size(size = 30.dp),
+                        tint = Color.White
                     )
                 }
             }
         }
+    }
 
     // Navigation and high score sheet
     if (throwScreenState == ThrowScreenState.ChoosingPosition) {
@@ -250,6 +307,8 @@ fun ThrowScreen(
                                     newLocation!!,
                                     throwPointWeather[it].namePos!!
                                 )
+                                // Sets the Screen State location to the new location
+                                changeLocation(newLocation, throwPointWeather[it].namePos!!)
                             }
                         }
                     ) {

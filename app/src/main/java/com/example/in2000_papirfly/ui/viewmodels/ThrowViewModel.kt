@@ -20,6 +20,7 @@ import org.osmdroid.views.overlay.Overlay
 class ThrowViewModel(
     var locationName: String,
     var selectedLocation: GeoPoint,
+    val changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
     val markerFactory: (type: String) -> Marker,
     val mapOverlay: MutableList<Overlay>,
     val mapController: IMapController,
@@ -62,6 +63,9 @@ class ThrowViewModel(
         updateOnMoveMap{ if (getThrowScreenState().value !is ThrowScreenState.MovingMap) setThrowScreenState(ThrowScreenState.MovingMap) }
         mapController.setZoom(12.0)
 
+        // Fetches updated weather data for all throw points
+        updateThrowPointWeather()
+
         // Get the weather at the start location
         // TODO this could be fetched from throwWeatherState if we populate it before 'weather'
         CoroutineScope(Dispatchers.IO).launch {
@@ -90,7 +94,10 @@ class ThrowViewModel(
                         setThrowScreenState(ThrowScreenState.ChoosingPosition)
                     },
                     updateWeather = { updateThrowPointWeather() },
-                    moveLocation = { moveLocation(it.value, it.key) },
+                    moveLocation = {
+                        moveLocation(it.value, it.key)
+
+                    },
                     mapOverlay = mapOverlay,
                     startPos = it.value,
                     locationName = it.key,
@@ -101,7 +108,6 @@ class ThrowViewModel(
             }
         }
         updateHighScores()
-        updateThrowPointWeather()
     }
 
     private fun redrawMapMarkers() {
@@ -143,6 +149,7 @@ class ThrowViewModel(
         startPos = selectedLocation
         previousPlanePos = selectedLocation
         nextPlanePos = selectedLocation
+        changeLocation(selectedLocation, locationName)
         CoroutineScope(Dispatchers.IO).launch {
             weather = weatherRepository.getWeatherAtPoint(selectedLocation)
         }
@@ -163,7 +170,7 @@ class ThrowViewModel(
         throwScreenState.update { state }
     }
 
-    fun throwPlane(){
+    fun throwPlane() {
         //  TODO // Calculate or get the angle and speed the plane should be launched at
         val speed = 10.0
         val planeStartHeight = 100.0
@@ -297,7 +304,7 @@ class ThrowViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val newWeather = weatherRepository.getThrowPointWeatherList()
             _throwWeatherState.update {
-                return@update ThrowPointWeatherState(newWeather)
+                ThrowPointWeatherState(newWeather)
             }
         }
     }
@@ -350,11 +357,13 @@ class ThrowViewModelFactory(
         selectedLocation: GeoPoint,
         mapViewState: DisableMapView,
         openBottomSheet: (Int) -> Unit,
+        changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
 
     ): ThrowViewModel{
         return ThrowViewModel(
             locationName = locationName,
             selectedLocation = selectedLocation,
+            changeLocation = changeLocation,
             markerFactory = { type ->
                 if (type == "Start") {
                     return@ThrowViewModel ThrowPositionMarker(

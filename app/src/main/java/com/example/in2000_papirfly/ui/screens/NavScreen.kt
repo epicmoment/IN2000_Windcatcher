@@ -24,31 +24,22 @@ fun NavScreen(
 
          composable(route = "MainScreen") {
             MainScreen(
-//                onNextPage = { navController.navigate("PositionScreen") },
                 onNextPage = { navController.navigate("ThrowScreen") },
-                onCustomizePage = { navController.navigate("CustomizationScreen")}
+                onCustomizePage = { navController.navigate("CustomizationScreen") }
             )
          }
 
-         composable(route = "PositionScreen") {
-
-            PositionScreen(
-                onNextPage = { newLocation, locationName ->
-                    viewModel.setLocation(newLocation, locationName)
-                    navController.navigate("ThrowScreen")
-                }
-            )
-
-        }
-
         composable(route = "ThrowScreen") {
-            val pos = GeoPoint(
-                screenState.value.location.latitude,
-                screenState.value.location.longitude
-            )
             ThrowScreen(
-                selectedLocation = pos,
+                selectedLocation = screenState.value.location,
                 locationName = screenState.value.locationName,
+                changeLocation = {
+                        locationPoint: GeoPoint, locationName: String ->
+                            viewModel.setLocation(
+                                locationPoint, locationName
+                            )
+                        },
+                onCustomizePage = { navController.navigate("CustomizationScreen") },
                 onBack = {
                     navController.popBackStack(
                         route = "MainScreen",
@@ -56,20 +47,17 @@ fun NavScreen(
                     )
                 }
             )
-
         }
 
          composable(route = "CustomizationScreen") {
              CustomizationScreen(
                  onNextPage = {
                      navController.popBackStack(
-                         route = "MainScreen",
-                         inclusive = false
+                         route = "CustomizationScreen",
+                         inclusive = true
                      )
                  }
              )
          }
-
     }
-
 }

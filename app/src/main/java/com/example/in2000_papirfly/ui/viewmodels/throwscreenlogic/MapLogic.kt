@@ -146,7 +146,15 @@ fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String)
     }
 }
 
-fun drawStartMarker(markerFactory: (type: String) -> Marker, setThrowScreenState: () -> Unit, updateWeather: () -> Unit, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String): ThrowPositionMarker {
+fun drawStartMarker(
+    markerFactory: (type: String) -> Marker,
+    setThrowScreenState: () -> Unit,
+    updateWeather: () -> Unit,
+    moveLocation: () -> Unit,
+    mapOverlay: MutableList<Overlay>,
+    startPos: GeoPoint, locationName: String
+): ThrowPositionMarker {
+
     val marker: ThrowPositionMarker = markerFactory("Start") as ThrowPositionMarker
     marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos

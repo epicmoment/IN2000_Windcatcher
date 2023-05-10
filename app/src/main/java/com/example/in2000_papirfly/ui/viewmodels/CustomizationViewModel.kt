@@ -1,15 +1,11 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.*
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.CustomizationScreenUIState
 import com.example.in2000_papirfly.data.LoadoutRepository
-import com.example.in2000_papirfly.data.WeatherRepositoryMVP
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

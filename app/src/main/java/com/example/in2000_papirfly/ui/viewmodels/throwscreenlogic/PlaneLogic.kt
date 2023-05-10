@@ -2,10 +2,7 @@ package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
 import androidx.lifecycle.ViewModel
 import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.data.Plane
 import com.example.in2000_papirfly.data.Weather
-import com.example.in2000_papirfly.data.WeatherRepositoryMVP
-import kotlinx.coroutines.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**

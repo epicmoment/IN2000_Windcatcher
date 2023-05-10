@@ -11,6 +11,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
@@ -21,6 +23,7 @@ class DataRepository(database: PapirflyDatabase) {
     private val tileDao = database.weatherTileDao()
     private val flightDao = database.flightPathDao()
     private val throwPoints = ThrowPointList.throwPoints
+    private val lock = Mutex()
 
     init {
         CoroutineScope(Dispatchers.IO).launch {
@@ -28,20 +31,24 @@ class DataRepository(database: PapirflyDatabase) {
         }
     }
 
-     suspend fun getThrowPointWeatherList(): List<Weather> {
-         val list = mutableListOf<Weather>()
-         throwPoints.forEach {
-             Log.d("Repo", "Fetching info for throw point at \"${it.key}\"")
-             val weatherAtPoint = getWeatherAtPoint(it.value)
-             weatherAtPoint.namePos = it.key
-             list += weatherAtPoint
-         }
-         return list
-     }
-
-    // TODO remove when PositionScreen is removed completely
-    fun getThrowGeoPoint(locationName: String): GeoPoint {
-        return throwPoints[locationName]!!
+    /**
+     *  Method that returns a list containing weather data for all throw points.
+     *  The method uses a lock for synchronization between threads to prevent excessive API calls
+     *  in cases where the API is slow to respond.
+     *
+     *  @return A List object with weather data for every throw point
+     */
+    suspend fun getThrowPointWeatherList(): List<Weather> {
+        lock.withLock {
+            val list = mutableListOf<Weather>()
+            throwPoints.forEach {
+                Log.d("Repo", "Fetching info for throw point at \"${it.key}\"")
+                val weatherAtPoint = getWeatherAtPoint(it.value)
+                weatherAtPoint.namePos = it.key
+                list += weatherAtPoint
+            }
+            return list
+        }
     }
 
     // TODO: Show a loading screen during population of database to prevent potential crash
