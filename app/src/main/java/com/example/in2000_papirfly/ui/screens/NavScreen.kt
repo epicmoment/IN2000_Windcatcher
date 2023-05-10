@@ -21,7 +21,6 @@ fun NavScreen(
         navController = navController,
         startDestination = "MainScreen"
     ) {
-
          composable(route = "MainScreen") {
             MainScreen(
                 onNextPage = { navController.navigate("ThrowScreen") },

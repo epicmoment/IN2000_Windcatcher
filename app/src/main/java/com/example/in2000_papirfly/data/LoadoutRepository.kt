@@ -26,4 +26,8 @@ class LoadoutRepository {
 
     }
 
+    fun getAttachmentInSlot(slot : Int) : Attachment {
+        return Attachments.list[slot][loadoutState.value.slots[slot]]
+    }
+
 }

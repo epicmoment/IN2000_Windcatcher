@@ -164,11 +164,13 @@ fun CustomizationScreen (
                                     isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
                                     onClickEquip = {
 
-                                        if (loadoutState.value.slots[customizeState.value.selectedSlot] == it) {
+                                        // Deselection
+                                        /*if (loadoutState.value.slots[customizeState.value.selectedSlot] == it) {
                                             viewModel.equipAttachment(customizeState.value.selectedSlot, 0)
                                         } else {
                                             viewModel.equipAttachment(customizeState.value.selectedSlot, it)
-                                        }
+                                        }*/
+                                        viewModel.equipAttachment(customizeState.value.selectedSlot, it)
 
                                     }
 

@@ -64,13 +64,14 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                     ambientColor = Color.Black,
                     spotColor = Color.Black
                 ),
-                onClick = onNextPage,
+                onClick = onLogScreenPage,
                 colors = ButtonDefaults.buttonColors(colOrange),
                 shape = RoundedCornerShape(8),
             ) {
                 Text(
-                    text = "UTFORDRINGER",
+                    text = "LOG :)",
                     fontSize = 25.sp,
+                    color = Color.White
                 )
             }*/
 

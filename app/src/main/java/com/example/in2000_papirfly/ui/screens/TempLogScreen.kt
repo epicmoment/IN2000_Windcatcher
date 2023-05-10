@@ -1,26 +1,32 @@
 package com.example.in2000_papirfly.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TempLogScreen () {
+fun TempLogScreen ( onBack : () -> Unit) {
 
-
-    /*Box(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color(180, 180, 180))
+            .clickable { onBack() }
     )
 
 
@@ -29,45 +35,146 @@ fun TempLogScreen () {
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
-        sheetPeekHeight = 128.dp,
+        sheetPeekHeight = 180.dp,
+        sheetContainerColor = Color(0, 20, 50, 100),
         sheetContent = {
-            Box(
-                Modifier
+
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
                     .fillMaxWidth()
-                    .height(128.dp),
-                contentAlignment = Alignment.Center
+                    .fillMaxHeight(0.6f)
             ) {
-                Text("Swipe up to expand sheet")
-            }
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(64.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Sheet content")
-                Spacer(Modifier.height(20.dp))
-                Button(
-                    onClick = {
-                        scope.launch { scaffoldState.bottomSheetState.partialExpand() }
-                    }
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
                 ) {
-                    Text("Click to collapse sheet")
+
+                    items(10) {
+
+                        Box (
+                            modifier = Modifier.clickable {
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.partialExpand()
+                                }
+                            }
+                        ) {
+                            PathEntryCard(
+                                i = it,
+                                showTopLine = it > 0,
+                                showBottomLine = it < 9
+                            )
+                        }
+
+                    }
+
                 }
+
+                Spacer(
+                    modifier = Modifier.height(30.dp)
+                )
+
             }
-        }) { innerPadding ->
-        Box(Modifier.padding(innerPadding)) {
-            Text("Scaffold Content")
+
+        }
+
+    ) { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxHeight()
+                .background(Color(100, 200, 140))
+        ) {
+            Text("Map her")
         }
     }
 
-    */
-
 }
 
-
-@Preview
 @Composable
-fun LogScreenPreview() {
-    TempLogScreen()
+fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
+
+    // Paddingbeholder
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(65.dp)
+    ) {
+
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxSize()
+        ){
+
+            // Sirkelholder
+            Box (
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .width(40.dp)
+            ) {
+
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                    // Top Line
+                    Box (
+                        modifier = Modifier
+                            .fillMaxHeight(0.5f)
+                            .width(7.dp)
+                            .background(
+                                if (showTopLine) {colOrange} else {Color.Transparent}
+                            )
+                    )
+
+                    // Bottom Line
+                    Box (
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .width(7.dp)
+                            .background(
+                                if (showBottomLine) {colOrange} else {Color.Transparent}
+                            )
+                    )
+                }
+
+                // Sirkel
+                Canvas(
+                    modifier = Modifier.size(25.dp),
+                    onDraw = {
+                        drawCircle(
+                            radius = 35f,
+                            color = colOrange
+                        )
+                        drawCircle(
+                            radius = 20f,
+                            color = Color.White
+                        )
+                    }
+                )
+
+            }
+
+            // Informasjonskort
+            Box (
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(colBlack)
+            ) {
+
+                Text(i.toString())
+
+            }
+
+        }
+
+    }
+
 }
