@@ -17,7 +17,6 @@ import kotlinx.coroutines.launch
 
 class CustomizationViewModel (
     val loadoutRepository: LoadoutRepository,
-    val planeRepository: PlaneRepository,
 ) : ViewModel() {
 
     private val _customizeState = MutableStateFlow(CustomizationScreenUIState())
@@ -42,7 +41,6 @@ class CustomizationViewModel (
         viewModelScope.launch {
 
             loadoutRepository.equipAttachment(slot, attachmentID)
-            addAttachments(planeRepository = planeRepository, loadoutRepository = loadoutRepository)
         }
 
     }
@@ -60,7 +58,6 @@ class CustomizationViewModel (
 
                 return CustomizationViewModel(
                     (application as PapirflyApplication).appContainer.loadoutRepository,
-                    (application as PapirflyApplication).appContainer.planeRepository,
                 ) as T
             }
         }
