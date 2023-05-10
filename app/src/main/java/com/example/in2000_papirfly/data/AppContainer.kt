@@ -18,7 +18,8 @@ class AppContainer(database: PapirflyDatabase) {
     val customizationViewModelFactory = CustomizationViewModel.Factory
     val throwViewModelFactory = ThrowViewModelFactory(
         weatherRepository = dataRepository,
-        planeRepository = planeRepository
+        planeRepository = planeRepository,
+        loadoutRepository = loadoutRepository,
     )
     val positionScreenViewModelFactory = PositionScreenViewModelFactory(dataRepository)
 

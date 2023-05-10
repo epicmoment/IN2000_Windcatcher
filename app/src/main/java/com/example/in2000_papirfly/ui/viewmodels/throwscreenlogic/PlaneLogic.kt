@@ -1,8 +1,9 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
-import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.*
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**
@@ -12,12 +13,13 @@ import kotlin.math.*
  * */
 class PlaneLogic(
     val planeRepository : PlaneRepository,
+    val loadoutRepository: LoadoutRepository,
 ) : ViewModel() {
 
     val planeState = planeRepository.planeState
-    private val dropRate = 0.9
-    private val slowRate = 0.8
+    private val defaultSlowRate = 0.2
     private val planeStartHeight = 100.0
+    private val defaultDropRate = 0.1 * planeStartHeight
     private val maxPlaneStartSpeed = 20.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
@@ -33,9 +35,10 @@ class PlaneLogic(
      * is multiplied by a constant, distanceMultiplier (probably valued at 1000)
      */
     suspend fun update(weather: Weather){
+
         // Set up
         val plane = planeRepository.planeState.value
-
+        Log.d("PlaneLogic.plane.pos", planeState.value.pos.toString())
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
             planeRepository.update(
@@ -46,11 +49,16 @@ class PlaneLogic(
             )
             return
         }
+        Log.d("PlaneLogic.plane.pos after !plane.flying", planeState.value.pos.toString())
+
 
         // Calculate the modified trajectory of the plane
-        val currentPlaneVector = calculateVector(plane.angle, plane.speed * calculateSlowRate() )
+        val currentPlaneVector = calculateVector(plane.angle, plane.speed - calculateSpeedLoss(plane.flightModifier, plane.speed) )
         val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
+        Log.d("making new plane pos", "")
+        Log.d("currentPlaneVector", currentPlaneVector.toString())
+        Log.d("affectedPlaneVector", affectedPlaneVector.toString())
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
             vectorLength(affectedPlaneVector) * distanceMultiplier,
@@ -60,7 +68,7 @@ class PlaneLogic(
         // Calculate new plane stats
         val newPlaneAngle = calculateAngle(affectedPlaneVector)
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
-        val newHeight = plane.height - calculateDropRate(plane.speed)
+        val newHeight = plane.height - calculateDropRate(plane.speed, weather)
         val flying = newHeight > groundedThreshold
 
         // Update planeState with the calculated changes
@@ -73,6 +81,8 @@ class PlaneLogic(
                 flying = flying
             )
         )
+        Log.d("PlaneLogic.plane.pos after everything", planeRepository.planeState.value.pos.toString())
+
     }
 
 
@@ -97,39 +107,73 @@ class PlaneLogic(
         val affectedWindVector = multiplyVector(windVector, calculateWindEffect())
         var newPlaneVector = addVectors(currentPlaneVector, affectedWindVector)
 
-        // Adjust for rain
-            // Add stuff here
-
-        // Adjust for air pressure
-            // Add stuff here
-
-        // Adjust for whatever
-            // Add stuff here
-
         return newPlaneVector
     }
 
     /**
-     * Calculates a drop rate in meters that is subtracted in the update-method.
+     * Calculates a drop rate in meters that is subtracted in the update-method that is called every
+     * step of the plane's flight.
      * Should use available relevant FlightModifiers.
+     * Should be a double in the range 0.0 - 1.0 if it should never gain height
      *
      * **Adding functionality:** Any functionality that affects the drop rate goes here.
      */
-    private fun calculateDropRate(speed: Double): Double{
-        // Should calculate how much or little the plane height should decrease
-        // Should be a double in the range 0.0 - 1.0 if it should never gain height
+    private fun calculateDropRate(speed: Double, weather: Weather): Double{
+        val flightModifier = planeState.value.flightModifier
 
-        // TEMP //
-        // Currently only affected by plane speed
-        // if speed is low drop rate is high
-        //return sqrt(1 - ((speed / maxPlaneStartSpeed) - 1).pow(2))    // I like the idea of this, but I think it might not be as fun. Could be a plane type that functions like this
-        return round((1 - dropRate) * planeStartHeight)
+        var newDropRate = 0.0
+        newDropRate += calculateAirPressureDropRate(weather.airPressure, flightModifier)
+        newDropRate += calculateRainDropRate(weather.rain, flightModifier)
+        newDropRate += calculateTemperatureDropRate(weather.temperature, flightModifier)
+
+        return round((flightModifier.weight * defaultDropRate) + newDropRate)
+    }
+
+    /**
+     * The extremes are based on these values:
+     * https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder
+     */
+    fun calculateAirPressureDropRate(airPressure: Double, flightModifier: FlightModifier): Double{
+        // Setting up standard values
+        val airPressureMin = 937.1    // Lowest air pressure value we usually get
+        val airPressureMax = 1061.3   // Highest air pressure value we usually get
+        val airPressureRange = (airPressureMax - airPressureMin) / 2    // The range of values that the air pressure can change in a positive and negative direction
+        val airPressureNormal = airPressureMin + airPressureRange
+
+        val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
+
+        return airPressureDropRate * -flightModifier.airPressureEffect
+    }
+
+    /**
+     * The extremes are based on these values:
+     * https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder
+     */
+    fun calculateRainDropRate(rain: Double, flightModifier: FlightModifier): Double{
+        //val rainMax = 78.5
+        val rainMax = 10.0
+
+        return rain / rainMax * defaultDropRate * flightModifier.rainEffect
+    }
+
+    fun calculateTemperatureDropRate(temperature: Double, flightModifier: FlightModifier): Double{
+        // Consider changing this to use a system of target temperature, range and effect
+        val temperatureMax = 35.6
+        val temperatureMin = -51.4
+
+        val temp = if (temperature.absoluteValue > 0){
+            temperature / temperatureMax
+        } else{
+            temperature / temperatureMin
+        }
+
+        return temp * defaultDropRate * -flightModifier.temperatureEffect
     }
 
 
-    private fun calculateSlowRate(): Double{
+    private fun calculateSpeedLoss(flightModifier: FlightModifier, speed: Double): Double{
         // should take plane modifiers into account
-        return slowRate
+        return defaultSlowRate * flightModifier.slowRateEffect * speed
     }
 
     // Wind

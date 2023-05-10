@@ -27,9 +27,11 @@ class ThrowViewModel(
     updateOnMoveMap: (() -> Unit) -> Unit,
     val setInteraction: (Boolean) -> Unit,
     val weatherRepository: DataRepository,
-    val planeRepository: PlaneRepository
+    val planeRepository: PlaneRepository,
+    val loadoutRepository: LoadoutRepository,
 ): ViewModel() {
-    private val planeLogic = PlaneLogic(planeRepository)
+
+    private val planeLogic = PlaneLogic(planeRepository, loadoutRepository)
     val planeState = planeLogic.planeState
 
     var planeFlying: Job = Job()
@@ -188,6 +190,8 @@ class ThrowViewModel(
                 flying = true
             )
         )
+        // Make sure the selected attachments are applied
+        addAttachments(planeRepository, loadoutRepository)
 
         previousPlanePos = startPos
         mapController.setCenter(startPos)
@@ -311,6 +315,7 @@ class ThrowViewModel(
 
     fun resetPlane(){
         planeRepository.update(Plane())
+        addAttachments(planeRepository, loadoutRepository)
     }
 
     fun changeAngle(value: Float){
@@ -350,7 +355,8 @@ class ThrowViewModel(
 
 class ThrowViewModelFactory(
     val weatherRepository: DataRepository,
-    val planeRepository: PlaneRepository
+    val planeRepository: PlaneRepository,
+    val loadoutRepository: LoadoutRepository,
 ){
     fun newViewModel(
         locationName: String,
@@ -385,7 +391,8 @@ class ThrowViewModelFactory(
                 -> mapViewState.setInteraction(interactionEnabled)
             },
             planeRepository = planeRepository,
-            weatherRepository = weatherRepository
+            weatherRepository = weatherRepository,
+            loadoutRepository = loadoutRepository,
         )
     }
 }
