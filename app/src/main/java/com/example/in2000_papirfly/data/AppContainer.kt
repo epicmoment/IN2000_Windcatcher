@@ -9,7 +9,6 @@ import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModelFactory
 class AppContainer(database: PapirflyDatabase) {
 
     // Repositories
-    val weatherRepository = WeatherRepositoryMVP()
     val loadoutRepository = LoadoutRepository()
     val dataRepository = DataRepository(database)
     val planeRepository = PlaneRepository()
@@ -19,7 +18,8 @@ class AppContainer(database: PapirflyDatabase) {
     val customizationViewModelFactory = CustomizationViewModel.Factory
     val throwViewModelFactory = ThrowViewModelFactory(
         weatherRepository = dataRepository,
-        planeRepository = planeRepository
+        planeRepository = planeRepository,
+        loadoutRepository = loadoutRepository,
     )
     val positionScreenViewModelFactory = PositionScreenViewModelFactory(dataRepository)
 
