@@ -19,7 +19,6 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asAndroidColorFilter
 import com.example.in2000_papirfly.data.ThrowPointList
 import org.osmdroid.views.overlay.Overlay
 
@@ -53,19 +52,23 @@ class ThrowPositionMarker constructor(
 mapView: MapView, val openBottomSheet: (Int) -> Unit
 ) : Marker(mapView) {
 
+    var setThrowScreenState = {}
     var updateWeather = {}
     var moveLocation = {}
     var rowPosition = 0
-    override fun onMarkerClickDefault(marker: Marker?, mapView: MapView?): Boolean {
-        moveLocation()
+
+    public override fun onMarkerClickDefault(marker: Marker?, mapView: MapView?): Boolean {
         updateWeather()
+        setThrowScreenState()
+        moveLocation()
         openBottomSheet(rowPosition)
         mapView!!.controller.animateTo(mPosition, 12.0, 1000)
         showInfoWindow()
         return true
     }
 
-    fun setInfoFromViewModel(updateWeather: () -> Unit, moveLocation: () -> Unit, rowPosition: Int) {
+    fun setInfoFromViewModel(setThrowScreenState: () -> Unit, updateWeather: () -> Unit, moveLocation: () -> Unit, rowPosition: Int) {
+        this.setThrowScreenState = setThrowScreenState
         this.updateWeather = updateWeather
         this.moveLocation = moveLocation
         this.rowPosition = rowPosition
@@ -143,9 +146,17 @@ fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String)
     }
 }
 
-fun drawStartMarker(markerFactory: (type: String) -> Marker, updateWeather: () -> Unit, moveLocation: () -> Unit, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, locationName: String): ThrowPositionMarker {
+fun drawStartMarker(
+    markerFactory: (type: String) -> Marker,
+    setThrowScreenState: () -> Unit,
+    updateWeather: () -> Unit,
+    moveLocation: () -> Unit,
+    mapOverlay: MutableList<Overlay>,
+    startPos: GeoPoint, locationName: String
+): ThrowPositionMarker {
+
     val marker: ThrowPositionMarker = markerFactory("Start") as ThrowPositionMarker
-    marker.setInfoFromViewModel(updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
+    marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
     // This way of getting context works somehow???
     marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.baseline_push_pin_green_48)
