@@ -10,17 +10,20 @@ object Attachments {
             Attachment(
                 name = "Skrivepapir",
                 description = "Helt vanlig papir. Passer fint til mange typer vær.",
-                icon = R.drawable.paperplane2
+                icon = R.drawable.paperplane2,
+                flightModifier = FlightModifier(windEffect = 0.75, rainEffect = 1.0, slowRateEffect = 1.0),
             ),
             Attachment(
                 name = "Fotopapir",
                 description = "Tung papirtype som tåler regn bra, men flyr dårlig i sol.",
-                icon = R.drawable.paperplane2
+                icon = R.drawable.paperplane2,
+                flightModifier = FlightModifier(windEffect = 0.25, weight = 1.0)
             ),
             Attachment(
                 name = "Bakepapir",
                 description = "Lett papirtype som flyr bra i sol, men tåler regn dårlig.",
-                icon = R.drawable.paperplane2
+                icon = R.drawable.paperplane2,
+                flightModifier = FlightModifier(rainEffect = 1.0, temperatureEffect = 1.0)
             )
         ),
 
@@ -29,17 +32,20 @@ object Attachments {
 
             Attachment(
                 name = "Medium Nese",
-                description = "Helt vanlig nese."
+                description = "Helt vanlig nese.",
+                flightModifier = FlightModifier(slowRateEffect = 1.0)
             ),
 
             Attachment(
                 name = "Spiss Nese",
-                description = "Kan fly raskere, men mister lettere høyde"
+                description = "Kan fly raskere, men mister lettere høyde",
+                flightModifier = FlightModifier(weight = 0.5, slowRateEffect = 0.2)
             ),
 
             Attachment(
                 name = "Butt Nese",
-                description = "Mister mindre høyde, men flyr tregere"
+                description = "Mister mindre høyde, men flyr tregere",
+                flightModifier = FlightModifier(weight = 0.1, slowRateEffect = 1.0)
 
             )
 
@@ -55,12 +61,14 @@ object Attachments {
 
             Attachment(
                 name = "Smale Vinger",
-                description = "Luftrykkgreier? Idk"
+                description = "Luftrykkgreier? Idk",
+                flightModifier = FlightModifier(airPressureEffect = 1.0, temperatureEffect = -0.5)
             ),
 
             Attachment(
                 name = "Brede vinger",
-                description = "Lufttrykkgreir? Idk"
+                description = "Lufttrykkgreir? Idk",
+                flightModifier = FlightModifier(airPressureEffect = -1.0, temperatureEffect = 0.5)
             )
 
         ),
@@ -70,27 +78,29 @@ object Attachments {
 
             Attachment(
                 name = "Ingen Halefinne",
-                description = "All motvind påvirker flyet."
+                description = "All motvind påvirker flyet.",
+                flightModifier = FlightModifier(windEffect = 0.5)
             ),
 
             Attachment(
                 name = "Liten Halefinne",
-                description = "Flyet påvirkes mindre av motvind, men er litt tyngre."
+                description = "Flyet påvirkes mindre av motvind, men er litt tyngre.",
+                flightModifier = FlightModifier(windEffect = 0.25, weight = 0.5)
             ),
 
             Attachment(
                 name = "Stor Halefinne",
-                description = "Flyet påvirkes veldig lite av motvind, men er vesentlig tyngre."
+                description = "Flyet påvirkes veldig lite av motvind, men er vesentlig tyngre.",
+                flightModifier = FlightModifier(windEffect = 0.1, weight = 0.75)
             )
 
         )
-
     )
-
 }
 
 data class Attachment (
     val name : String,
     val description : String,
-    val icon : Int = R.drawable.paperplane2
+    val icon : Int = R.drawable.paperplane2,
+    val flightModifier: FlightModifier = FlightModifier(),
 )
