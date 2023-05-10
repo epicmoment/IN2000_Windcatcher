@@ -10,27 +10,8 @@ import com.example.in2000_papirfly.data.*
 fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutRepository){
     val loadout = loadoutRepository.loadoutState.value
     val flightModifiers: MutableList<FlightModifier> = mutableListOf()
-
-    /*
-    // Paper
-    var attachmentIndex = loadout.slots[0]
-    flightModifiers.add(Attachments.list[0][attachmentIndex].flightModifier )
-
-    // Nose
-    attachmentIndex = loadout.slots[1]
-    flightModifiers.add(Attachments.list[0][attachmentIndex].flightModifier )
-
-
-    // Wing
-
-
-    // Fin
-
-    */
     
     // Add all flight modifiers in the attached attachments
-    // TODO
-    // Problem of too long flights seem to happen here, it only picks up the first flightmodifier it seems
     for ((i, index ) in loadout.slots.withIndex()){
         Log.d("i", i.toString())
         Log.d("index", index.toString())
