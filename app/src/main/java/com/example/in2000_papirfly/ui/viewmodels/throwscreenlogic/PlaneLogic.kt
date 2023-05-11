@@ -3,7 +3,15 @@ package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 import android.util.Log
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.helpers.Vector
+import com.example.in2000_papirfly.helpers.Vector.Companion.addVectors
+import com.example.in2000_papirfly.helpers.Vector.Companion.calculateAngle
+import com.example.in2000_papirfly.helpers.Vector.Companion.calculateVector
+import com.example.in2000_papirfly.helpers.Vector.Companion.multiplyVector
+import com.example.in2000_papirfly.helpers.Vector.Companion.vectorLength
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**
@@ -20,7 +28,6 @@ class PlaneLogic(
     private val defaultSlowRate = 0.2
     private val planeStartHeight = 100.0
     private val defaultDropRate = 0.1 * planeStartHeight
-    private val maxPlaneStartSpeed = 20.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
     val updateFrequency: Long = 1000
@@ -34,11 +41,10 @@ class PlaneLogic(
      * Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
      * is multiplied by a constant, distanceMultiplier (probably valued at 1000)
      */
-    suspend fun update(weather: Weather){
-
+    fun update(weather: Weather){
         // Set up
         val plane = planeRepository.planeState.value
-        Log.d("PlaneLogic.plane.pos", planeState.value.pos.toString())
+
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
             planeRepository.update(
@@ -49,16 +55,11 @@ class PlaneLogic(
             )
             return
         }
-        Log.d("PlaneLogic.plane.pos after !plane.flying", planeState.value.pos.toString())
-
 
         // Calculate the modified trajectory of the plane
         val currentPlaneVector = calculateVector(plane.angle, plane.speed - calculateSpeedLoss(plane.flightModifier, plane.speed) )
         val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
-        Log.d("making new plane pos", "")
-        Log.d("currentPlaneVector", currentPlaneVector.toString())
-        Log.d("affectedPlaneVector", affectedPlaneVector.toString())
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
             vectorLength(affectedPlaneVector) * distanceMultiplier,
@@ -81,8 +82,6 @@ class PlaneLogic(
                 flying = flying
             )
         )
-        Log.d("PlaneLogic.plane.pos after everything", planeRepository.planeState.value.pos.toString())
-
     }
 
 
@@ -92,22 +91,17 @@ class PlaneLogic(
         return planeScale
     }
 
-    fun planeIsFlying(): Boolean{
-        return planeRepository.planeState.value.height > 0.1
-    }
-
     /** Calculates a new plane vector based on the available modifiers.
      * The new vector represents the new angle and speed.
      *
      * **Adding functionality:** Functionality that affects plane angle or speed should added here.
      **/
-    private fun calculateNewPlaneVector(currentPlaneVector: List<Double>, weather: Weather): List<Double>{
+    private fun calculateNewPlaneVector(currentPlaneVector: Vector, weather: Weather): Vector {
         // Adjust for wind-effect
         val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
         val affectedWindVector = multiplyVector(windVector, calculateWindEffect())
-        var newPlaneVector = addVectors(currentPlaneVector, affectedWindVector)
 
-        return newPlaneVector
+        return addVectors(currentPlaneVector, affectedWindVector)
     }
 
     /**
@@ -179,45 +173,5 @@ class PlaneLogic(
     // Wind
     fun calculateWindEffect(): Double{
         return planeState.value.flightModifier.windEffect
-    }
-
-
-    // Help methods
-
-    // This vector stuff should probably be extracted
-    fun calculateVector(angle: Double, magnitude: Double): List<Double>{
-        val radianAngle = Math.toRadians(angle)
-        val x = magnitude * cos(radianAngle)
-        val y = magnitude * cos(Math.toRadians(90.0) - radianAngle)
-        return listOf(x, y)
-    }
-
-    fun calculateAngle(vector1: List<Double>, vector2: List<Double> = zeroDegreeAngle): Double{
-        // returns the angle of a vector given in degrees
-        var newAngle =  Math.toDegrees( acos(dotProduct(vector1, vector2) / (vectorLength(vector1) * vectorLength(vector2))) )
-        if (vector1[1] < 0){
-            newAngle = 360.0 - newAngle
-        }
-        return newAngle
-    }
-
-    fun dotProduct(vector1: List<Double>, vector2: List<Double>): Double{
-        return (vector1[0] * vector2[0]) + (vector1[1] * vector2[1])
-    }
-
-    fun vectorLength(vector: List<Double>): Double{
-        return sqrt(vector[0].pow(2) + vector[1].pow(2))
-    }
-
-    fun addVectors(vector1 : List<Double>, vector2 : List<Double>): List<Double>{
-        return listOf(vector1[0] + vector2[0], vector1[1] + vector2[1])
-    }
-
-    fun subtractVectors(vector1: List<Double>, vector2: List<Double>): List<Double>{
-        return listOf(vector1[0] - vector2[0], vector1[1] - vector2[1])
-    }
-
-    fun multiplyVector(vector1: List<Double>, x: Double): List<Double>{
-        return listOf(vector1[0] * x, vector1[1] * x)
     }
 }
