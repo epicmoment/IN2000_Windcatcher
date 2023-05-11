@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.helpers
 
+import android.util.Log
 import kotlin.math.acos
 import kotlin.math.cos
 import kotlin.math.pow
@@ -8,7 +9,7 @@ import kotlin.math.sqrt
 class Vector(
     val x: Double,
     val y: Double,
-){
+): Comparable<Vector> {
     constructor(values: List<Double>): this(values[0], values[1])
 
     operator fun get(index: Int): Double{
@@ -17,6 +18,21 @@ class Vector(
         }
         return y
     }
+
+    override fun compareTo(other: Vector): Int{
+        if (x == other.x && y == other.y){
+            return 1
+        }
+        return 0
+    }
+
+    fun equals(other: Vector): Boolean {
+        if (x == other.x && y == other.y){
+            return true
+        }
+        return false
+    }
+
     companion object {
 
         val zeroDegreeAngle: Vector = Vector(1.0, 0.0)
@@ -38,7 +54,7 @@ class Vector(
         }
 
         fun dotProduct(vector1: Vector, vector2: Vector): Double{
-            return (vector1.x * vector2.y) + (vector1.x * vector2.y)
+            return (vector1.x * vector2.x) + (vector1.x * vector2.y)
         }
 
         fun vectorLength(vector: Vector): Double{

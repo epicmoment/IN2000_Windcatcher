@@ -16,6 +16,7 @@ class VectorTests {
         val vector45 = Vector(0.7071067811865476,0.7071067811865476)
 
         val check01 = calculateVector(45.0, 1.0)
+        assert(vector45.equals(check01))
         assertEquals(vector45.x, check01.x)
         assertEquals(vector45.y, check01.y)
     }
@@ -58,6 +59,9 @@ class VectorTests {
     fun test_subtractVectors(){
         val vector1 = Vector(2.0, 1.0)
         val vector2 = Vector(1.0, 1.0)
-        assertEquals(Vector(1.0, 0.0), subtractVectors(vector1, vector2))
+
+        val correct01 = Vector(1.0, 0.0)
+        val check01 = subtractVectors(vector1, vector2)
+        assert(correct01.equals(check01))
     }
 }
