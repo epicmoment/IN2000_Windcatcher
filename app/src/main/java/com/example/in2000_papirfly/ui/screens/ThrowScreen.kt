@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -18,14 +19,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -60,6 +64,10 @@ fun ThrowScreen(
     val scope = rememberCoroutineScope()
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     val rowState = rememberLazyListState()
+
+    val context = LocalContext.current.applicationContext
+    val resources = context.resources
+    val packageName = context.packageName
 
     val animateRow = { position: Int ->
         scope.launch {
@@ -128,59 +136,145 @@ fun ThrowScreen(
         planeVisible = showPlane(throwScreenState)
     )
 
-    // Top info panel. Might not be needed
-    // TODO make text visible in dark mode
-    Column(
+    // Flight info box
+    Box(
         modifier = Modifier
-            .fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxWidth()
+            .height(180.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "Plane speed: ${"%.2f".format(planeState.speed.toFloat())}",
-            fontSize = 15.sp,
-            color = com.example.in2000_papirfly.ui.theme.md_theme_dark_onPrimary,
-        )
-
-        Text(
-            text = "Height: ${"%.0f".format(planeState.height)}",
-            fontSize = 15.sp,
-            color = com.example.in2000_papirfly.ui.theme.md_theme_dark_onPrimary,
-        )
-
-        // Wind arrow
-        Image(
-            painter = painterResource(id = R.drawable.up_arrow__1_),
-            contentDescription = "TODO",
+        val id = resources.getIdentifier(throwViewModel.weather.icon, "drawable", packageName)
+        Box(
             modifier = Modifier
-                .padding(top = 20.dp)
-                .rotate((throwViewModel.weather.windAngle + 180).toFloat())
-                .size(80.dp)
-        )
+                .fillMaxSize(0.8f)
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color(0, 0, 0, 100)),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Top,
+//                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Box(
+//                    modifier = Modifier
+//                        .fillMaxSize()
+                ) {
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(90.dp),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        Icon(
+                            painter = painterResource(id = id),
+                            contentDescription = "Weather Icon",
+                            modifier = modifier
+                                .padding(start = 12.dp)
+                                .size(size = 80.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(90.dp),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        Image(
+                            painter = painterResource(id = R.drawable.up_arrow__1_),
+                            contentDescription = "Weather direction arrow",
+                            modifier = Modifier
+                                .rotate((throwViewModel.weather.windAngle + 180).toFloat())
+                                .size(80.dp),
+                            colorFilter = ColorFilter.tint(Color.White)
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(90.dp),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        var airPressureDescription = "L"
+                        var airPressureColor = Color.Red
+
+                        if (throwViewModel.weather.airPressure > 1013) {
+                            airPressureDescription = "H"
+                            airPressureColor = Color.Blue
+                        }
+
+                        Text(
+                            modifier = Modifier
+                                .padding(end = 40.dp),
+                            text = airPressureDescription,
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = airPressureColor
+                        )
+                    }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        modifier = Modifier
+                            .padding(start = 40.dp),
+                        text = "Fart: ${"%.2f".format(planeState.speed.toFloat())}",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                    )
+
+                    Text(
+                        modifier = Modifier
+                            .padding(end = 40.dp),
+                        text = "Høyde: ${if (planeState.height >= 0) "%.0f".format(planeState.height) else 0}",
+                        fontSize = 20.sp,
+                        color = Color.White,
+                    )
+                }
+            }
+        }
     }
 
-    // Column containing circular slider and throw button
-    Column (
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(1.dp)
-    ) {
-
-        Spacer(modifier = Modifier.height(180.dp))
-
-        // Circular Slider
-        if (throwScreenState == ThrowScreenState.Throwing) {
+    // Circular Slider
+    if (throwScreenState == ThrowScreenState.Throwing) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
             CircularSlider(
                 throwViewModel,
                 toggleMarkerInfoWindow,
             )
-        } else {
-            Spacer(modifier = Modifier.height(360.dp))
         }
+    }
 
-        // Buttons - only shown if user is moving on the map or about to throw
-        if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
+    /* Column containing throw, position and customization buttons
+     * Only shown if user is moving map or throwing
+     */
+    if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
+        Column (
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 50.dp)
+        ) {
+
             Button(
                 modifier = Modifier.shadow(
                     elevation = 10.dp,
@@ -202,6 +296,11 @@ fun ThrowScreen(
                     color = Color.White
                 )
             }
+
+            Spacer(
+                Modifier
+                    .height(50.dp)
+            )
 
             Row() {
                 // Opens position drawer
@@ -294,6 +393,7 @@ fun ThrowScreen(
                 }
             }
         ) {
+            // Cards for the different throw locations
             LazyRow(state = rowState) {
                 items(throwPointWeather.size) {
                     val location = throwPointWeather[it]
@@ -324,11 +424,40 @@ fun ThrowScreen(
                             }
                         }
                     ) {
-                        Text(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            text = "${throwPointWeather[it].namePos}",
-                            fontSize = 30.sp
-                        )
+                        val id = resources.getIdentifier(location.icon, "drawable", packageName)
+
+                        // Place name and weather icon
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                horizontalArrangement = Arrangement.Start
+                            ) {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    text = "${throwPointWeather[it].namePos}",
+                                    fontSize = 30.sp
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 22.dp),
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = id),
+                                    contentDescription = "Weather Icon",
+                                    modifier = modifier.size(size = 65.dp),
+                                    tint = Color.Unspecified
+                                )
+                            }
+                        }
 
                         Row(
                             modifier = Modifier
@@ -336,17 +465,6 @@ fun ThrowScreen(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            val context = LocalContext.current.applicationContext
-                            val resources = context.resources
-                            val packageName = context.packageName
-                            val id = resources.getIdentifier(location.icon, "drawable", packageName)
-
-                            Icon(
-                                painter = painterResource(id = id),
-                                contentDescription = "Weather Icon",
-                                modifier = modifier.size(size = 65.dp),
-                                tint = Color.Unspecified
-                            )
 
                             Text(
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
@@ -373,7 +491,29 @@ fun ThrowScreen(
                                     .rotate(location.windAngle.toFloat() + 90.toFloat()),
                                 contentDescription = "Vindretning",
                             )
+
+                            var airPressureDescription = "L"
+                            var airPressureColor = Color.Red
+
+                            if (location.airPressure > 1013) {
+                                airPressureDescription = "H"
+                                airPressureColor = Color.Blue
+                            }
+
+                            Text(
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                text = "hPa:",
+                                fontSize = 18.sp,
+                            )
+
+                            Text(
+                                modifier = Modifier.padding(end = 10.dp, top = 8.dp, bottom = 8.dp),
+                                text = airPressureDescription,
+                                fontSize = 28.sp,
+                                color = airPressureColor
+                            )
                         }
+
                         // High score banner
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
