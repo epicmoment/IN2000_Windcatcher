@@ -103,6 +103,14 @@ fun ThrowScreen(
         onBack()
     }
 
+    // This prevents the app from crashing when switching to dark mode
+    DisposableEffect(throwViewModel) {
+        onDispose {
+            throwViewModel.planeFlying.cancel()
+            throwViewModel.resetPlane()
+        }
+    }
+
     // Map composable
     AndroidView(
         { mapViewState },
@@ -150,7 +158,7 @@ fun ThrowScreen(
         )
     }
 
-    // Column containing wind arrow, circular slider and throw button
+    // Column containing circular slider and throw button
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -233,7 +241,11 @@ fun ThrowScreen(
                 }
                 // Goes to customization screen
                 Button (
-                    onClick = onCustomizePage,
+                    onClick = {
+                        throwViewModel.planeFlying.cancel()
+                        throwViewModel.resetPlane()
+                        onCustomizePage()
+                    },
                     colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                     shape = CircleShape,
                     modifier = Modifier
@@ -492,8 +504,8 @@ fun CircularSlider(
 
             radius = (size.minDimension / 2) - 50
 
-            val x = (shapeCenter.x + cos(toRadians(angle)) * radius).toFloat()
-            val y = (shapeCenter.y + sin(toRadians(angle)) * radius).toFloat()
+            val x = (shapeCenter.x + kotlin.math.cos(toRadians(angle)) * radius).toFloat()
+            val y = (shapeCenter.y + kotlin.math.sin(toRadians(angle)) * radius).toFloat()
 
             handleCenter = Offset(x, y)
 
