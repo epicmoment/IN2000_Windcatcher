@@ -103,6 +103,14 @@ fun ThrowScreen(
         onBack()
     }
 
+    // This prevents the app from crashing when switching to dark mode
+    DisposableEffect(throwViewModel) {
+        onDispose {
+            throwViewModel.planeFlying.cancel()
+            throwViewModel.resetPlane()
+        }
+    }
+
     // Map composable
     AndroidView(
         { mapViewState },
@@ -234,6 +242,7 @@ fun ThrowScreen(
                 // Goes to customization screen
                 Button (
                     onClick = {
+                        throwViewModel.planeFlying.cancel()
                         throwViewModel.resetPlane()
                         onCustomizePage()
                     },
@@ -495,8 +504,8 @@ fun CircularSlider(
 
             radius = (size.minDimension / 2) - 50
 
-            val x = (shapeCenter.x + cos(toRadians(angle)) * radius).toFloat()
-            val y = (shapeCenter.y + sin(toRadians(angle)) * radius).toFloat()
+            val x = (shapeCenter.x + kotlin.math.cos(toRadians(angle)) * radius).toFloat()
+            val y = (shapeCenter.y + kotlin.math.sin(toRadians(angle)) * radius).toFloat()
 
             handleCenter = Offset(x, y)
 
