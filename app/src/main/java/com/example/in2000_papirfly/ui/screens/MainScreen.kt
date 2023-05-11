@@ -1,6 +1,5 @@
 package com.example.in2000_papirfly.ui.screens
 
-import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +15,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.ui.composables.PlaneProvider
 import com.example.in2000_papirfly.ui.theme.colOrange
 
 @Composable
@@ -25,7 +25,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .paint(
-                painter = painterResource(id = R.drawable.kartbl_2),
+                painter = painterResource(id = R.drawable.bakgrunn_kart),
                 contentScale = ContentScale.Crop,
             )
     ) {
@@ -34,12 +34,12 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxSize()
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.paperplane),
-                contentDescription = "Paperplane Image",
+            Box(
                 modifier = Modifier
-                    .size(size = 250.dp),
-            )
+                    .size(size = 250.dp)
+            ) {
+                PlaneProvider()
+            }
 
             Button (
                 modifier = Modifier.shadow(
@@ -85,9 +85,11 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 8.dp)
-                        .shadow(elevation = 0.dp,
+                        .shadow(
+                            elevation = 0.dp,
                             ambientColor = Color.Black,
-                            spotColor = Color.Black),
+                            spotColor = Color.Black
+                        ),
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.construction),

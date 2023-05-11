@@ -24,6 +24,7 @@ import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.Attachment
 import com.example.in2000_papirfly.data.Attachments
+import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
 
 
@@ -41,7 +42,7 @@ fun CustomizationScreen (
     viewModel: CustomizationViewModel = viewModel(factory = (LocalContext.current.applicationContext as PapirflyApplication).appContainer.customizationViewModelFactory)
 ) {
 
-    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication)
+    //val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
 
     val customizeState = viewModel.customizeState.collectAsState()
     val loadoutState = viewModel.loadoutState.collectAsState()
@@ -77,11 +78,21 @@ fun CustomizationScreen (
                         .fillMaxWidth(0.8f)
                 ) {
 
-                    Image(
+                    /*Image(
                         painter = painterResource(id = R.drawable.paperplane2),
                         contentDescription = "Paper plane",
                         modifier = Modifier.fillMaxSize(0.62f)
-                    )
+                    )*/
+
+                    Box(
+                        modifier = Modifier.fillMaxSize(0.62f)
+                    ) {
+                        PlaneRender(
+                            nose = Attachments.list[1][loadoutState.value.slots[1]],
+                            wings = Attachments.list[2][loadoutState.value.slots[2]],
+                            tail = Attachments.list[3][loadoutState.value.slots[3]]
+                        )
+                    }
 
                     Column() {
 
@@ -91,7 +102,7 @@ fun CustomizationScreen (
 
                             AttachmentSlot(
                                 isSelected = customizeState.value.selectedSlot == i,
-                                attachment = Attachments.list[0][slotAttachment]
+                                attachment = Attachments.list[i][slotAttachment]
                             ) {
                                 viewModel.setSlot(i)
                             }
@@ -164,12 +175,6 @@ fun CustomizationScreen (
                                     isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
                                     onClickEquip = {
 
-                                        // Deselection
-                                        /*if (loadoutState.value.slots[customizeState.value.selectedSlot] == it) {
-                                            viewModel.equipAttachment(customizeState.value.selectedSlot, 0)
-                                        } else {
-                                            viewModel.equipAttachment(customizeState.value.selectedSlot, it)
-                                        }*/
                                         viewModel.equipAttachment(customizeState.value.selectedSlot, it)
 
                                     }
@@ -319,3 +324,37 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
     }
 
 }
+
+/*@Composable
+fun PlaneVisual(
+    nose : Attachment,
+    wings : Attachment,
+    tail : Attachment
+) {
+
+    Box (
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+
+        Image(
+            painter = painterResource(id = tail.icon),
+            contentDescription = "Halefinne",
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Image(
+            painter = painterResource(id = wings.icon),
+            contentDescription = "Vinge",
+            modifier = Modifier.fillMaxSize()
+        )
+
+        Image(
+            painter = painterResource(id = nose.icon),
+            contentDescription = "Vinge",
+            modifier = Modifier.fillMaxSize()
+        )
+
+    }
+
+}*/
