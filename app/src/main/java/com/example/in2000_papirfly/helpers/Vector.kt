@@ -26,6 +26,10 @@ class Vector(
         return 0
     }
 
+    override fun toString(): String{
+        return "<$x,$y>"
+    }
+
     fun equals(other: Vector): Boolean {
         if (x == other.x && y == other.y){
             return true
