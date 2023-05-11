@@ -150,7 +150,7 @@ fun ThrowScreen(
         )
     }
 
-    // Column containing wind arrow, circular slider and throw button
+    // Column containing circular slider and throw button
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceEvenly,
@@ -233,7 +233,10 @@ fun ThrowScreen(
                 }
                 // Goes to customization screen
                 Button (
-                    onClick = onCustomizePage,
+                    onClick = {
+                        throwViewModel.resetPlane()
+                        onCustomizePage()
+                    },
                     colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
                     shape = CircleShape,
                     modifier = Modifier
