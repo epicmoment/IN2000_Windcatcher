@@ -13,12 +13,10 @@ import org.junit.Test
 class VectorTests {
     @Test
     fun test_calculateVector_angle_45_magnitude_1(){
-        val vector45 = Vector(0.7071067811865476,0.7071067811865476)
+        val correct = Vector(0.7071067811865476,0.7071067811865476)
 
         val check01 = calculateVector(45.0, 1.0)
-        assert(vector45.equals(check01))
-        assertEquals(vector45.x, check01.x)
-        assertEquals(vector45.y, check01.y)
+        assert(correct.equals(check01))
     }
 
     @Test
@@ -45,6 +43,12 @@ class VectorTests {
     }
 
     @Test
+    fun test_vectorLength_is_null(){
+        val vector1 = Vector(0.0, 0.0)
+        assertEquals(0.0, vectorLength(vector1))
+    }
+
+    @Test
     fun test_dotProduct(){
         val vector1 = Vector(1.0, 1.0)
         val vector2 = Vector(1.0, 0.0)
@@ -56,12 +60,22 @@ class VectorTests {
     }
 
     @Test
-    fun test_subtractVectors(){
+    fun test_subtractVectors_answer_has_positive_values(){
         val vector1 = Vector(2.0, 1.0)
         val vector2 = Vector(1.0, 1.0)
 
         val correct01 = Vector(1.0, 0.0)
         val check01 = subtractVectors(vector1, vector2)
         assert(correct01.equals(check01))
+    }
+
+    @Test
+    fun test_subtractVectors_answer_has_negative_values(){
+        val vector1 = Vector(-2.0, 1.0)
+        val vector2 = Vector(1.0, 2.0)
+
+        val correct = Vector(-3.0, -1.0)
+        val check = subtractVectors(vector1, vector2)
+        assert(correct.equals(check)) {println("\nvector1 $vector1 vector2 $vector2")}
     }
 }
