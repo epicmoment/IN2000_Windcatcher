@@ -16,7 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.ui.composables.PlaneProvider
-import com.example.in2000_papirfly.ui.theme.colOrange
+import com.example.in2000_papirfly.ui.theme.colRed
 
 @Composable
 fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
@@ -48,7 +48,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                     spotColor = Color.Black
                 ),
                 onClick = onNextPage,
-                colors = ButtonDefaults.buttonColors(colOrange),
+                colors = ButtonDefaults.buttonColors(colRed),
                 shape = RoundedCornerShape(10),
             ) {
                 Text(
@@ -81,7 +81,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
             ){
                 Button (
                     onClick = onCustomizePage,
-                    colors = ButtonDefaults.buttonColors(colOrange),
+                    colors = ButtonDefaults.buttonColors(colRed),
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(horizontal = 10.dp, vertical = 8.dp)

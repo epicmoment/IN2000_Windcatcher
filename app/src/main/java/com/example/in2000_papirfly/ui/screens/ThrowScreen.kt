@@ -193,7 +193,7 @@ fun ThrowScreen(
                     // Sets state to "Throwing"
                     else throwViewModel.changeAngle(0.toFloat())
                 },
-                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
                 shape = RoundedCornerShape(10),
             ) {
                 Text(
@@ -216,7 +216,7 @@ fun ThrowScreen(
                         }
                         throwViewModel.setThrowScreenState(ThrowScreenState.ChoosingPosition)
                     },
-                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(
@@ -246,7 +246,7 @@ fun ThrowScreen(
                         throwViewModel.resetPlane()
                         onCustomizePage()
                     },
-                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(
@@ -409,7 +409,7 @@ fun ThrowScreen(
                                     }
                                     throwViewModel.updateHighScoreShownState(location.namePos!!)
                                 },
-                                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colOrange),
+                                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
                                 shape = RoundedCornerShape(10),
                             ) {
                                 Text(
@@ -510,7 +510,7 @@ fun CircularSlider(
             handleCenter = Offset(x, y)
 
             drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
-            drawCircle(color = com.example.in2000_papirfly.ui.theme.colOrange, center = handleCenter, radius = 50f)
+            drawCircle(color = com.example.in2000_papirfly.ui.theme.colRed, center = handleCenter, radius = 50f)
         }
 
         Box(modifier = Modifier

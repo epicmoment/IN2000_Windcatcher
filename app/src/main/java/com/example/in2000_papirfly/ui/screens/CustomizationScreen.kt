@@ -26,13 +26,12 @@ import com.example.in2000_papirfly.data.Attachment
 import com.example.in2000_papirfly.data.Attachments
 import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
+import com.example.in2000_papirfly.ui.theme.colRed
 
-
-val colOrange = Color(224, 128, 37)
 val colBlue = Color(92, 121, 148)
-val colOrangeHighlightTransparent = Color(224, 128, 37, 175)
-val colOrangeHighlight = Color(114, 84, 52)
-val colBlack = Color(30, 45, 60)
+val colOrangeHighlightTransparent = Color(127, 44, 36, 175)
+val colOrangeHighlight = Color(102, 51, 46)
+val colDarkBlue = Color(30, 45, 60)
 val colTextGray = Color(195, 195, 195)
 
 
@@ -50,7 +49,7 @@ fun CustomizationScreen (
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colBlue)
+            //.background(colBlue)
             .paint(
                 painter = painterResource(id = R.drawable.blueprint_bg),
                 contentScale = ContentScale.Crop
@@ -137,7 +136,7 @@ fun CustomizationScreen (
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(colBlack)
+                            .background(colDarkBlue)
                     ) {
 
                         Text(
@@ -157,7 +156,7 @@ fun CustomizationScreen (
                     }
 
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 20.dp),
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 5.dp),
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(0.92f)
@@ -207,7 +206,7 @@ fun CustomizationScreen (
                         .fillMaxWidth(0.5f)
                         .fillMaxHeight(0.7f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(colOrange)
+                        .background(colRed)
                         .clickable(onClick = onNextPage)
                 ) {
 
@@ -271,14 +270,14 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
     Box (
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(90.dp)
             .padding(4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(
                 color = if (isSelected) {
                     colOrangeHighlight
                 } else {
-                    colBlack
+                    colDarkBlue
                 }
             )
             .clickable(onClick = onClickEquip)

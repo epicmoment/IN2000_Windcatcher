@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -15,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.in2000_papirfly.ui.theme.colRed
 import kotlinx.coroutines.launch
 
 
@@ -127,7 +127,7 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                             .fillMaxHeight(0.5f)
                             .width(7.dp)
                             .background(
-                                if (showTopLine) {colOrange} else {Color.Transparent}
+                                if (showTopLine) {colRed} else {Color.Transparent}
                             )
                     )
 
@@ -137,7 +137,7 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                             .fillMaxHeight()
                             .width(7.dp)
                             .background(
-                                if (showBottomLine) {colOrange} else {Color.Transparent}
+                                if (showBottomLine) {colRed} else {Color.Transparent}
                             )
                     )
                 }
@@ -148,7 +148,7 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                     onDraw = {
                         drawCircle(
                             radius = 35f,
-                            color = colOrange
+                            color = colRed
                         )
                         drawCircle(
                             radius = 20f,
@@ -166,7 +166,7 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                     .fillMaxWidth()
                     .height(50.dp)
                     .clip(RoundedCornerShape(14.dp))
-                    .background(colBlack)
+                    .background(colDarkBlue)
             ) {
 
                 Text(i.toString())
