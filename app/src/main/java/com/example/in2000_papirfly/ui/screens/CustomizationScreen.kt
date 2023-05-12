@@ -88,6 +88,7 @@ fun CustomizationScreen (
                         modifier = Modifier.fillMaxSize(0.62f)
                     ) {
                         PlaneRender(
+                            paper = Attachments.list[0][loadoutState.value.slots[0]],
                             nose = Attachments.list[1][loadoutState.value.slots[1]],
                             wings = Attachments.list[2][loadoutState.value.slots[2]],
                             tail = Attachments.list[3][loadoutState.value.slots[3]]
