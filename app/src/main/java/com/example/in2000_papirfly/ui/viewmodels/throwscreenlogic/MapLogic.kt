@@ -161,7 +161,7 @@ fun drawStartMarker(
     marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
     // This way of getting context works somehow???
-    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_throwpoint)
+    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_debug1)
     marker.title = locationName
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapOverlay.add(marker)
