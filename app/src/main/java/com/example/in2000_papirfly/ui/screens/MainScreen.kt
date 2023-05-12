@@ -49,7 +49,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                 ),
                 onClick = onNextPage,
                 colors = ButtonDefaults.buttonColors(colRed),
-                shape = RoundedCornerShape(10),
+                shape = RoundedCornerShape(20),
             ) {
                 Text(
                     text = "START",

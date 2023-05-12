@@ -175,7 +175,7 @@ fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableL
     marker.position = markerPos
     marker.icon =
         ContextCompat.getDrawable(marker.infoWindow.mapView.context,
-        if (newHS) R.drawable.pin_highscore else R.drawable.baseline_push_pin_48
+        if (newHS) R.drawable.pin_highscore else R.drawable.pin_destination
     )
     marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)

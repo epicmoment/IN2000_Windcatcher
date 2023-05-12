@@ -11,7 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -102,7 +104,12 @@ fun CustomizationScreen (
 
                             AttachmentSlot(
                                 isSelected = customizeState.value.selectedSlot == i,
-                                attachment = Attachments.list[i][slotAttachment]
+                                attachment = Attachments.list[i][slotAttachment],
+                                tint = if (i != 0) {
+                                        Attachments.list[0][loadoutState.value.slots[0]].tint
+                                    } else {
+                                        Color(255, 255, 255)
+                                    }
                             ) {
                                 viewModel.setSlot(i)
                             }
@@ -129,7 +136,7 @@ fun CustomizationScreen (
 
                 Column (
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
 
                     Box (
                         contentAlignment = Alignment.Center,
@@ -173,12 +180,14 @@ fun CustomizationScreen (
                                 AttachmentCard(
                                     attachment = Attachments.list[customizeState.value.selectedSlot][it],
                                     isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
+                                    tint = if (customizeState.value.selectedSlot != 0) {
+                                            Attachments.list[0][loadoutState.value.slots[0]].tint
+                                        } else {
+                                            Color(255, 255, 255)
+                                        },
                                     onClickEquip = {
-
                                         viewModel.equipAttachment(customizeState.value.selectedSlot, it)
-
                                     }
-
                                 )
 
                             }
@@ -187,7 +196,7 @@ fun CustomizationScreen (
 
                     }
 
-            }
+                }
 
             }
 
@@ -229,7 +238,7 @@ fun CustomizationScreen (
 }
 
 @Composable
-fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot : () -> Unit) {
+fun AttachmentSlot(isSelected: Boolean, attachment: Attachment?, tint: Color, onClickSetSlot: () -> Unit) {
 
     Box(
         modifier = Modifier
@@ -254,6 +263,7 @@ fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot
                 Image(
                     painter = painterResource(id = attachment.icon),
                     contentDescription = "Ikon",
+                    colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.8f)
                 )
             }
@@ -265,7 +275,7 @@ fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot
 }
 
 @Composable
-fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : () -> Unit) {
+fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, onClickEquip: () -> Unit) {
 
     Box (
         modifier = Modifier
@@ -294,6 +304,7 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
                 Image(
                     painter = painterResource(id = attachment.icon),
                     contentDescription = "Attachment Icon",
+                    colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.85f)
                 )
             }

@@ -194,7 +194,7 @@ fun ThrowScreen(
                     else throwViewModel.changeAngle(0.toFloat())
                 },
                 colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
-                shape = RoundedCornerShape(10),
+                shape = RoundedCornerShape(20),
             ) {
                 Text(
                     text = if (throwScreenState == ThrowScreenState.Throwing) "KAST" else "KLAR",
