@@ -5,6 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawPlanePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawStartMarker
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

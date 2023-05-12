@@ -2,7 +2,6 @@ package com.example.in2000_papirfly
 
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
 import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.plane.WeatherRepository
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 

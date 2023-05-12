@@ -40,6 +40,9 @@ import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawHighScorePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.removeHighScorePath
 import io.ktor.util.reflect.*
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
