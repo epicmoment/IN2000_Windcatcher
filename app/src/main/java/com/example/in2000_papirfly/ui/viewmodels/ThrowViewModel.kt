@@ -5,9 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawGoalMarker
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawPlanePath
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowVievModelUtilities.drawStartMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawPlanePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawStartMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.emptyHighScoreMap
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.emptyThrowPointWeatherList
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.defaultHighScoreShownMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -61,7 +64,7 @@ class ThrowViewModel(
 
     // Caches if a specific high score is shown on the map or not
     private val _highScoresOnMapState: MutableStateFlow<MutableMap<String, Boolean>> =
-        MutableStateFlow(getHighScoreShownStates())
+        MutableStateFlow(defaultHighScoreShownMap())
     val highScoresOnMapState = _highScoresOnMapState.asStateFlow()
 
     private val allMarkers = emptyList<Marker>().toMutableList()
@@ -134,32 +137,6 @@ class ThrowViewModel(
             mapOverlay.remove(marker)
             mapOverlay.add(marker)
         }
-    }
-
-    /**
-     * This method produces a map where the keys are the names of the throw point locations,
-     * and the values are all empty 'HighScore'-objects.
-     *
-     * @return The mutable map as described above
-     */
-    private fun emptyHighScoreMap(): MutableMap<String, HighScore> {
-        val map = emptyMap<String, HighScore>().toMutableMap()
-        ThrowPointList.throwPoints.forEach {
-            map[it.key] = HighScore(locationName = it.key)
-        }
-        return map
-    }
-
-    private fun emptyThrowPointWeatherList(): List<Weather> {
-        val weather = emptyList<Weather>().toMutableList()
-        ThrowPointList.throwPoints.forEach {
-            weather.add(
-                Weather(
-                    namePos = it.key
-                )
-            )
-        }
-        return weather
     }
 
     fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
@@ -298,17 +275,6 @@ class ThrowViewModel(
                 copy
             }
         }
-    }
-
-    /**
-     * Initializes a map that keeps track of whether the high score is shown for a spesific point
-     */
-    private fun getHighScoreShownStates(): MutableMap<String, Boolean> {
-        val highScoreShownStates = emptyMap<String, Boolean>().toMutableMap()
-        ThrowPointList.throwPoints.forEach {
-            highScoreShownStates[it.key] = false
-        }
-        return highScoreShownStates
     }
 
     private fun updateHighScores() {

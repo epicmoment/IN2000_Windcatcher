@@ -3,13 +3,15 @@ package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.data.HighScore
 import com.example.in2000_papirfly.data.ThrowPointList
+import com.example.in2000_papirfly.data.Weather
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
 
-object ThrowVievModelUtilities {
+object ThrowScreenUtilities {
 
     fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destination: GeoPoint) {
         val points = listOf(origin, destination)
@@ -82,5 +84,52 @@ object ThrowVievModelUtilities {
         marker.showInfoWindow()
 
         return marker
+    }
+
+    /**
+     * This method produces a map where the keys are the names of the throw point locations,
+     * and the values are all empty 'HighScore'-objects.
+     *
+     * @return The mutable map as described above
+     */
+    fun emptyHighScoreMap(): MutableMap<String, HighScore> {
+        val map = emptyMap<String, HighScore>().toMutableMap()
+        ThrowPointList.throwPoints.forEach {
+            map[it.key] = HighScore(locationName = it.key)
+        }
+        return map
+    }
+
+    /**
+     * This method produces a map where the keys are the names of the throw point locations,
+     * and the values are all empty 'Weather'-objects.
+     *
+     * @return The mutable map as described above
+     */
+    fun emptyThrowPointWeatherList(): List<Weather> {
+        val weather = emptyList<Weather>().toMutableList()
+        ThrowPointList.throwPoints.forEach {
+            weather.add(
+                Weather(
+                    namePos = it.key
+                )
+            )
+        }
+        return weather
+    }
+
+    /**
+     * This method produces a map for keeping track of which high score paths
+     * currently shown on the map screen. The keys are the names of the throw
+     * point locations, and the values are all initialized to 'false'.
+     *
+     * @return The mutable map as described above
+     */
+    fun defaultHighScoreShownMap(): MutableMap<String, Boolean> {
+        val highScoreShownMap = emptyMap<String, Boolean>().toMutableMap()
+        ThrowPointList.throwPoints.forEach {
+            highScoreShownMap[it.key] = false
+        }
+        return highScoreShownMap
     }
 }
