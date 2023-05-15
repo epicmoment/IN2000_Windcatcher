@@ -1,7 +1,5 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
 import com.example.in2000_papirfly.data.PlaneRepository
 import com.example.in2000_papirfly.data.Weather
@@ -21,8 +19,14 @@ import kotlin.math.*
  * */
 class PlaneLogic(
     val planeRepository : PlaneRepository,
-    val loadoutRepository: LoadoutRepository,
 ) : ViewModel() {
+
+    // Extreme and standard values for weather
+    val RAIN_MAX = 10.0
+    val AIR_PRESSURE_MIN = 983.0
+    val AIR_PRESSURE_MAX = 1033.0
+    val TEMPERATURE_MAX = 35.6
+    val TEMPERATURE_MIN = -51.4
 
     val planeState = planeRepository.planeState
     private val defaultSlowRate = 0.2
@@ -30,10 +34,9 @@ class PlaneLogic(
     private val defaultDropRate = 0.1 * planeStartHeight
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
+    private val distanceMultiplier = 1000
+    private val groundedThreshold = 0.0
     val updateFrequency: Long = 1000
-    val distanceMultiplier = 1000
-    val zeroDegreeAngle = listOf(1.0, 0.0)
-    val groundedThreshold = 0.0
 
     /**
      * This method fetches the current plane state and uses the position, angle, speed
@@ -84,7 +87,11 @@ class PlaneLogic(
         )
     }
 
-
+    /**
+     * Calculates the size that the plane composable should be based on min and max values, and what height value of the Plane is.
+     * Returns the minPlaneScale if the height of the Plane is 0.0, and maxPlaneScale if the height is equal to the planeStartHeight.
+     * Scales linearly.
+     */
     fun getPlaneScale(): Float{
         var planeScale = (minPlaneScale + (maxPlaneScale - minPlaneScale) * (planeState.value.height / planeStartHeight)).toFloat()
         if (planeScale < minPlaneScale) planeScale = minPlaneScale.toFloat()
@@ -131,10 +138,9 @@ class PlaneLogic(
         // Setting up standard values
         //val airPressureMin = 937.1    // Lowest air pressure value we usually get
         //val airPressureMax = 1061.3   // Highest air pressure value we usually get
-        val airPressureMin = 983.0
-        val airPressureMax = 1033.0
-        val airPressureRange = (airPressureMax - airPressureMin) / 2    // The range of values that the air pressure can change in a positive and negative direction
-        val airPressureNormal = airPressureMin + airPressureRange
+
+        val airPressureRange = (AIR_PRESSURE_MAX - AIR_PRESSURE_MIN) / 2    // The range of values that the air pressure can change in a positive and negative direction
+        val airPressureNormal = AIR_PRESSURE_MIN + airPressureRange
 
         val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
 
@@ -147,20 +153,15 @@ class PlaneLogic(
      */
     fun calculateRainDropRate(rain: Double, flightModifier: FlightModifier): Double{
         //val rainMax = 78.5
-        val rainMax = 10.0
-
-        return rain / rainMax * defaultDropRate * flightModifier.rainEffect
+        return rain / RAIN_MAX * defaultDropRate * flightModifier.rainEffect
     }
 
     fun calculateTemperatureDropRate(temperature: Double, flightModifier: FlightModifier): Double{
         // Consider changing this to use a system of target temperature, range and effect
-        val temperatureMax = 35.6
-        val temperatureMin = -51.4
-
         val temp = if (temperature.absoluteValue > 0){
-            temperature / temperatureMax
-        } else{
-            temperature / temperatureMin
+            temperature / TEMPERATURE_MAX
+        } else {
+            temperature / TEMPERATURE_MIN
         }
 
         return temp * defaultDropRate * -flightModifier.temperatureEffect

@@ -31,7 +31,7 @@ class ThrowViewModel(
     val loadoutRepository: LoadoutRepository,
 ): ViewModel() {
 
-    private val planeLogic = PlaneLogic(planeRepository, loadoutRepository)
+    private val planeLogic = PlaneLogic(planeRepository)
     val planeState = planeLogic.planeState
 
     var planeFlying: Job = Job()
