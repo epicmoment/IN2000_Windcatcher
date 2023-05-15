@@ -603,7 +603,7 @@ fun PositionAndHighScoreDrawer(
                     Row(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 8.dp),
+                            .padding(horizontal = 10.dp),
                         horizontalArrangement = Arrangement.SpaceAround,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -664,7 +664,7 @@ fun PositionAndHighScoreDrawer(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 12.dp),
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         val locationName = highScores.getOrDefault(
