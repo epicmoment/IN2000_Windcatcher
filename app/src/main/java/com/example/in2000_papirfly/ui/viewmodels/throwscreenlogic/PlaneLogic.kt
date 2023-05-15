@@ -119,7 +119,7 @@ class PlaneLogic(
      *
      * **Adding functionality:** Any functionality that affects the drop rate goes here.
      */
-    private fun calculateDropRate(speed: Double, weather: Weather): Double{
+    fun calculateDropRate(speed: Double, weather: Weather): Double{
         val flightModifier = planeState.value.flightModifier
 
         var newDropRate = 0.0

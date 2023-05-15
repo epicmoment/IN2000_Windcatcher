@@ -3,6 +3,7 @@ package com.example.in2000_papirfly.planelogictests
 import com.example.in2000_papirfly.data.FlightModifier
 import com.example.in2000_papirfly.data.Plane
 import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
 import org.junit.Test
 
@@ -185,6 +186,35 @@ class PlaneLogicTests {
         val temperatureDropRate = planeLogic.calculateTemperatureDropRate(planeLogic.TEMPERATURE_MIN, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate > 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected positive value") }
+    }
+
+
+
+    //      calculateDropRate tests     //
+    @Test
+    fun test_calculateDropRate_only_weight_1(){
+        val plane = Plane(
+            flightModifier = FlightModifier(weight = 1.0)
+        )
+        val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
+        val planeLogic = PlaneLogic(planeRepository)
+
+        val weightDropRate = planeLogic.calculateDropRate(0.0, Weather())
+
+        assert(weightDropRate > 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected positive value") }
+    }
+
+    @Test
+    fun test_calculateDropRate_only_weight_0(){
+        val plane = Plane(
+            flightModifier = FlightModifier(weight = 0.0)
+        )
+        val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
+        val planeLogic = PlaneLogic(planeRepository)
+
+        val weightDropRate = planeLogic.calculateDropRate(0.0, Weather())
+
+        assert(weightDropRate == 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected 0.0") }
     }
 
 
