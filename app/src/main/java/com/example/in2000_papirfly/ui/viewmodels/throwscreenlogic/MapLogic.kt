@@ -20,8 +20,7 @@ import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
 import com.example.in2000_papirfly.data.ThrowPointList
 import com.example.in2000_papirfly.ui.theme.colGold
-import com.example.in2000_papirfly.ui.theme.colRed
-import com.example.in2000_papirfly.ui.theme.colDarkBlue
+import com.example.in2000_papirfly.ui.theme.colBlue
 import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
@@ -122,7 +121,7 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
 fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destination: GeoPoint) {
     val points = listOf(origin, destination)
     val polyline = Polyline() //TODO
-    polyline.outlinePaint.color = colRed.hashCode()
+    polyline.outlinePaint.color = colBlue.hashCode()
     polyline.setPoints(points)
     mapOverlay.add(polyline)
 }
@@ -178,7 +177,9 @@ fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableL
         if (newHS) R.drawable.pin_highscore else R.drawable.pin_destination
     )
     marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
-    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    //marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    marker.setAnchor(30f, 30f)
+    //marker.setInfoWindowAnchor(0.0f, 0.0f)
     mapOverlay.add(marker)
     marker.showInfoWindow()
 

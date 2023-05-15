@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.in2000_papirfly.ui.theme.colRed
+import com.example.in2000_papirfly.ui.theme.colDarkBlue
 import kotlinx.coroutines.launch
 
 
