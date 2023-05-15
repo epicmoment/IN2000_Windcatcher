@@ -5,6 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawPlanePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawStartMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.emptyHighScoreMap
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.emptyThrowPointWeatherList
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.defaultHighScoreShownMap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,7 +42,6 @@ class ThrowViewModel(
 
     var planeFlying: Job = Job()
 
-    private var startPos: GeoPoint = selectedLocation
     var previousPlanePos: GeoPoint = selectedLocation
     private var nextPlanePos: GeoPoint = selectedLocation
 
@@ -58,7 +63,7 @@ class ThrowViewModel(
 
     // Caches if a specific high score is shown on the map or not
     private val _highScoresOnMapState: MutableStateFlow<MutableMap<String, Boolean>> =
-        MutableStateFlow(getHighScoreShownStates())
+        MutableStateFlow(defaultHighScoreShownMap())
     val highScoresOnMapState = _highScoresOnMapState.asStateFlow()
 
     private val allMarkers = emptyList<Marker>().toMutableList()
@@ -69,6 +74,7 @@ class ThrowViewModel(
                 ThrowScreenState.MovingMap
             )
         }
+        mapController.setCenter(selectedLocation)
         mapController.setZoom(12.0)
 
         // Fetches updated weather data for all throw points
@@ -83,10 +89,11 @@ class ThrowViewModel(
         // Clears all overlays from the map, and then draws every cached flight path
         mapOverlay.clear()
         FlightPathRepository.flightPaths.forEach { path ->
-            var previous: GeoPoint? = null
+            var previous = GeoPoint(0.0, 0.0)
             path.second.forEach { point ->
-                if (previous != null) {
-                    drawPlanePath(mapOverlay, previous!!, point)
+                if (path.second.indexOf(point) > 0) {
+//                if (previous != null) {
+                    drawPlanePath(mapOverlay, previous, point)
                 }
                 previous = point
             }
@@ -133,36 +140,9 @@ class ThrowViewModel(
         }
     }
 
-    /**
-     * This method produces a map where the keys are the names of the throw point locations,
-     * and the values are all empty 'HighScore'-objects.
-     *
-     * @return The mutable map as described above
-     */
-    private fun emptyHighScoreMap(): MutableMap<String, HighScore> {
-        val map = emptyMap<String, HighScore>().toMutableMap()
-        ThrowPointList.throwPoints.forEach {
-            map[it.key] = HighScore(locationName = it.key)
-        }
-        return map
-    }
-
-    private fun emptyThrowPointWeatherList(): List<Weather> {
-        val weather = emptyList<Weather>().toMutableList()
-        ThrowPointList.throwPoints.forEach {
-            weather.add(
-                Weather(
-                    namePos = it.key
-                )
-            )
-        }
-        return weather
-    }
-
     fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
         selectedLocation = newLocation
         locationName = newLocationName
-        startPos = selectedLocation
         previousPlanePos = selectedLocation
         nextPlanePos = selectedLocation
         changeLocation(selectedLocation, locationName)
@@ -191,7 +171,7 @@ class ThrowViewModel(
         val speed = 10.0
         val planeStartHeight = 100.0
         val flightPath = mutableListOf<GeoPoint>()
-        flightPath.add(startPos)
+        flightPath.add(selectedLocation)
 
         setThrowScreenState(ThrowScreenState.Flying)
 
@@ -207,8 +187,8 @@ class ThrowViewModel(
         // Make sure the selected attachments are applied
         addAttachments(planeRepository, loadoutRepository)
 
-        previousPlanePos = startPos
-        mapController.setCenter(startPos)
+        previousPlanePos = selectedLocation
+        mapController.setCenter(selectedLocation)
 
         // Start the coroutine that updates the plane every second
         planeFlying = viewModelScope.launch {
@@ -244,14 +224,14 @@ class ThrowViewModel(
             }
 
             planeLogic.update(weather)
-            val distance = (startPos.distanceToAsDouble(previousPlanePos) / 1000).toInt()
+            val distance = (selectedLocation.distanceToAsDouble(previousPlanePos) / 1000).toInt()
             val newHS = updateHighScore(distance, flightPath)
             // Draws goal flag
             allMarkers.add(
                 drawGoalMarker(
                     markerFactory = markerFactory,
                     mapOverlay = mapOverlay,
-                    startPos = startPos,
+                    startPos = selectedLocation,
                     markerPos = previousPlanePos,
                     newHS = newHS
                 )
@@ -273,7 +253,11 @@ class ThrowViewModel(
         distance: Int,
         flightPath: List<GeoPoint>
     ): Boolean {
-        if (distance > throwPointHighScores.value[locationName]!!.distance) {
+        if (distance > throwPointHighScores.value.getOrDefault(
+                locationName,
+                HighScore()
+            ).distance
+        ) {
             weatherRepository.updateHighScore(
                 locationName,
                 distance,
@@ -289,23 +273,12 @@ class ThrowViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val copy = mutableMapOf<String, Boolean>()
             highScoresOnMapState.value.toMap(copy)
-            copy[location] = !copy[location]!!
+            copy[location] = !copy.getOrDefault(location, true)
             Log.d("HighScores", "Updated shown value to ${copy[location]}")
             _highScoresOnMapState.update {
                 copy
             }
         }
-    }
-
-    /**
-     * Initializes a map that keeps track of whether the high score is shown for a spesific point
-     */
-    private fun getHighScoreShownStates(): MutableMap<String, Boolean> {
-        val highScoreShownStates = emptyMap<String, Boolean>().toMutableMap()
-        ThrowPointList.throwPoints.forEach {
-            highScoreShownStates[it.key] = false
-        }
-        return highScoreShownStates
     }
 
     private fun updateHighScores() {
@@ -339,10 +312,12 @@ class ThrowViewModel(
                 weather = weatherRepository.getWeatherAtPoint(selectedLocation)
             }
             setThrowScreenState(ThrowScreenState.Throwing)
+            mapController.setCenter(selectedLocation)
+            mapController.setZoom(12.0)
         }
         val plane = planeState.value
         planeRepository.update(plane.copy(angle = value.toDouble()))
-        previousPlanePos = startPos
+        previousPlanePos = selectedLocation
     }
 
     fun getPlaneScale(): Float {
@@ -350,7 +325,7 @@ class ThrowViewModel(
         return planeLogic.getPlaneScale()
     }
 
-    fun planeIsFlying(): Boolean {
+    private fun planeIsFlying(): Boolean {
         //return planeState.value.height > 0.1
         return planeState.value.flying
     }

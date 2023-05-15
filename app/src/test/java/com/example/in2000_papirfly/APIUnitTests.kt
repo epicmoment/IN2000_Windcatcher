@@ -6,10 +6,10 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
 
-class NowcastAPItest {
+class APIUnitTests {
 
     @Test
-    fun test_Nowcast() {
+    fun nowCast_isResponding() {
         runBlocking {
             val response = getNowcastData(59.9138, 10.7387)
             Assert.assertEquals("Feature", response.type)
@@ -17,7 +17,7 @@ class NowcastAPItest {
     }
 
     @Test
-    fun test_Locationforecast() {
+    fun locationForecast_isResponding() {
         runBlocking {
             val response = getLocationforecastData(59.9138, 10.7387)
             Assert.assertEquals("Feature", response.type)

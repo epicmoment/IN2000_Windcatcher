@@ -20,15 +20,6 @@ object LocationforecastURL {
     }
 }
 
-val locationforecastClient = HttpClient(Android) {
-    install(ContentNegotiation) {
-        json()
-    }
-    install(UserAgent) {
-        agent = "Team 03"
-    }
-}
-
 /**
  * Fetches the weather at the given coordinates
  * asynchronously from the Locationforecast API.
@@ -44,6 +35,15 @@ suspend fun getLocationforecastData(lat: Double, lon: Double): LocationforecastD
     val roundedLat = kotlin.math.round(lat * 10000.0) / 10000.0
     val roundedLon = kotlin.math.round(lon * 10000.0) / 10000.0
     val response: HttpResponse
+
+    val locationforecastClient = HttpClient(Android) {
+        install(ContentNegotiation) {
+            json()
+        }
+        install(UserAgent) {
+            agent = "Team 03"
+        }
+    }
 
     try {
         response = locationforecastClient.get(LocationforecastURL.urlBuilder(roundedLat, roundedLon)) {
