@@ -258,7 +258,7 @@ fun CircularSlider(
             handleCenter = Offset(x, y)
 
             drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
-            drawCircle(color = com.example.in2000_papirfly.ui.theme.colOrange, center = handleCenter, radius = 50f)
+            drawCircle(color = com.example.in2000_papirfly.ui.theme.colRed, center = handleCenter, radius = 50f)
         }
         // Box for passing clicks in the center of the slider through to the map
         Box(modifier = Modifier
@@ -718,68 +718,4 @@ fun PositionAndHighScoreDrawer(
             }
         }
     }
-}
-
-                        val angleForPlane = angle.toFloat() + 90
-
-                        throwViewModel.changeAngle(angleForPlane)
-                        change.consume()
-                    }
-                }
-                .pointerInput(Unit) {
-                    detectTapGestures(
-                        onTap = { offset ->
-                            handleCenter = Offset.Zero + offset
-                            angle = getRotationAngle(handleCenter, shapeCenter)
-
-                            val angleForPlane = angle.toFloat() + 90
-
-                            throwViewModel.changeAngle(angleForPlane)
-                        },
-                        onPress = { offset ->
-                            handleCenter = Offset.Zero + offset
-                            angle = getRotationAngle(handleCenter, shapeCenter)
-
-                            val angleForPlane = angle.toFloat() + 90
-
-                            throwViewModel.changeAngle(angleForPlane)
-                        }
-                    )
-                }
-        ) {
-            shapeCenter = center
-
-            radius = (size.minDimension / 2) - 50
-
-            val x = (shapeCenter.x + kotlin.math.cos(toRadians(angle)) * radius).toFloat()
-            val y = (shapeCenter.y + kotlin.math.sin(toRadians(angle)) * radius).toFloat()
-
-            handleCenter = Offset(x, y)
-
-            drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
-            drawCircle(color = com.example.in2000_papirfly.ui.theme.colRed, center = handleCenter, radius = 50f)
-        }
-
-        Box(modifier = Modifier
-            .size(50.dp * 2f)
-            .clickable(true, onClick = {
-                Log.d("OpenMarker", "Click detected.")
-                openMarker()
-            }
-            ),
-            contentAlignment = Alignment.Center) {
-        }
-    }
-}
-
-private fun getRotationAngle(currentPosition: Offset, center: Offset): Double {
-    val (dx, dy) = currentPosition - center
-    val theta = atan2(dy, dx).toDouble()
-
-    var angle = toDegrees(theta)
-
-    if (angle < 0) {
-        angle += 360.0
-    }
-    return angle
 }
