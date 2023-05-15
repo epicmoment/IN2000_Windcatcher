@@ -71,8 +71,12 @@ val md_theme_dark_shadow = Color(0xFF000000)
 val md_theme_dark_surfaceTint = Color(0xFF97CBFF)
 val md_theme_dark_outlineVariant = Color(0xFF42474E)
 val md_theme_dark_scrim = Color(0xFF000000)
-val colOrange = Color(0xFFE08026)
+
+val colRed = Color(0xFF9E372D)
 val colBlue = Color(0xFF5C7994)
+val colGold = Color(0xFFFFCE21)
+val colDarkBlue = Color(0xFF1E2D3C)
+
 
 
 val seed = Color(0xFFBEDDFF)

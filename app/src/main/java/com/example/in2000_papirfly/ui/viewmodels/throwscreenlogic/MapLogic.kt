@@ -18,8 +18,9 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import androidx.compose.ui.graphics.Color
 import com.example.in2000_papirfly.data.ThrowPointList
+import com.example.in2000_papirfly.ui.theme.colGold
+import com.example.in2000_papirfly.ui.theme.colBlue
 import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
@@ -120,14 +121,14 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
 fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destination: GeoPoint) {
     val points = listOf(origin, destination)
     val polyline = Polyline() //TODO
-    polyline.outlinePaint.color = Color.Red.hashCode()
+    polyline.outlinePaint.color = colBlue.hashCode()
     polyline.setPoints(points)
     mapOverlay.add(polyline)
 }
 
 fun drawHighScorePath(mapOverlay: MutableList<Overlay>, points: List<GeoPoint>, throwLocation: String) {
     val polyline = PolyLineWithThrowLocation(throwLocation) //TODO
-    polyline.outlinePaint.color = Color.Yellow.hashCode()
+    polyline.outlinePaint.color = colGold.hashCode()
     polyline.setPoints(points)
     mapOverlay.add(polyline)
 }
@@ -159,7 +160,7 @@ fun drawStartMarker(
     marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
     // This way of getting context works somehow???
-    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.baseline_push_pin_green_48)
+    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_throwpoint)
     marker.title = locationName
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapOverlay.add(marker)
@@ -173,10 +174,12 @@ fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableL
     marker.position = markerPos
     marker.icon =
         ContextCompat.getDrawable(marker.infoWindow.mapView.context,
-        if (newHS) R.drawable.baseline_push_pin_48_new_hs else R.drawable.baseline_push_pin_48
+        if (newHS) R.drawable.pin_highscore else R.drawable.pin_destination
     )
     marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
-    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    //marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+    marker.setAnchor(30f, 30f)
+    //marker.setInfoWindowAnchor(0.0f, 0.0f)
     mapOverlay.add(marker)
     marker.showInfoWindow()
 
