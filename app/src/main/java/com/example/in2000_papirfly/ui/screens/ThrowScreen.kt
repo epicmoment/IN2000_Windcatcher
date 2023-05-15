@@ -39,6 +39,7 @@ import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
+import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
@@ -258,7 +259,7 @@ fun CircularSlider(
             handleCenter = Offset(x, y)
 
             drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
-            drawCircle(color = com.example.in2000_papirfly.ui.theme.colRed, center = handleCenter, radius = 50f)
+            drawCircle(color = colRed, center = handleCenter, radius = 50f)
         }
         // Box for passing clicks in the center of the slider through to the map
         Box(modifier = Modifier
@@ -413,7 +414,7 @@ fun ButtonPanel(
                     // Sets state to "Throwing"
                     else throwViewModel.changeAngle(0.toFloat())
                 },
-                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
+                colors = ButtonDefaults.buttonColors(colRed),
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
@@ -441,7 +442,7 @@ fun ButtonPanel(
                         }
                         throwViewModel.setThrowScreenState(ThrowScreenState.ChoosingPosition)
                     },
-                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
+                    colors = ButtonDefaults.buttonColors(colRed),
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(
@@ -471,7 +472,7 @@ fun ButtonPanel(
                         throwViewModel.resetPlane()
                         onCustomizePage()
                     },
-                    colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
+                    colors = ButtonDefaults.buttonColors(colRed),
                     shape = CircleShape,
                     modifier = Modifier
                         .padding(
@@ -705,7 +706,7 @@ fun PositionAndHighScoreDrawer(
                                 }
                                 throwViewModel.updateHighScoreShownState(location.namePos)
                             },
-                            colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
+                            colors = ButtonDefaults.buttonColors(colRed),
                             shape = RoundedCornerShape(10),
                         ) {
                             Text(

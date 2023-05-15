@@ -313,6 +313,7 @@ class ThrowViewModel(
             }
             setThrowScreenState(ThrowScreenState.Throwing)
             mapController.setCenter(selectedLocation)
+            mapController.setZoom(12.0)
         }
         val plane = planeState.value
         planeRepository.update(plane.copy(angle = value.toDouble()))
