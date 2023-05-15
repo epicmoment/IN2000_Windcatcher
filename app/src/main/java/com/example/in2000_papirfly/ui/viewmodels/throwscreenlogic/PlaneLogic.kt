@@ -129,8 +129,10 @@ class PlaneLogic(
      */
     fun calculateAirPressureDropRate(airPressure: Double, flightModifier: FlightModifier): Double{
         // Setting up standard values
-        val airPressureMin = 937.1    // Lowest air pressure value we usually get
-        val airPressureMax = 1061.3   // Highest air pressure value we usually get
+        //val airPressureMin = 937.1    // Lowest air pressure value we usually get
+        //val airPressureMax = 1061.3   // Highest air pressure value we usually get
+        val airPressureMin = 983.0
+        val airPressureMax = 1033.0
         val airPressureRange = (airPressureMax - airPressureMin) / 2    // The range of values that the air pressure can change in a positive and negative direction
         val airPressureNormal = airPressureMin + airPressureRange
 

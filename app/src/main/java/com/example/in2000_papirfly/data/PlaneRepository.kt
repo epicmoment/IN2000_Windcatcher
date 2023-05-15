@@ -8,12 +8,17 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class PlaneRepository(){
+
+interface PlaneRepository{
+    val planeState: StateFlow<Plane>
+    fun update(newPlane: Plane)
+}
+class PlaneRepo(): PlaneRepository{
 
     private val _planeState = MutableStateFlow(Plane())
-    val planeState : StateFlow<Plane> = _planeState.asStateFlow()
+    override val planeState : StateFlow<Plane> = _planeState.asStateFlow()
 
-    fun update(newPlane : Plane){
+    override fun update(newPlane : Plane){
         _planeState.update { _ -> newPlane }
 
         /*
