@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
 import com.example.in2000_papirfly.R
@@ -10,6 +11,7 @@ import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
+import kotlin.math.atan2
 
 object ThrowScreenUtilities {
 
@@ -131,5 +133,17 @@ object ThrowScreenUtilities {
             highScoreShownMap[it.key] = false
         }
         return highScoreShownMap
+    }
+
+    fun getRotationAngle(currentPosition: Offset, center: Offset): Double {
+        val (dx, dy) = currentPosition - center
+        val theta = atan2(dy, dx).toDouble()
+
+        var angle = Math.toDegrees(theta)
+
+        if (angle < 0) {
+            angle += 360.0
+        }
+        return angle
     }
 }

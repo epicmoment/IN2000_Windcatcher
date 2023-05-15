@@ -42,7 +42,6 @@ class ThrowViewModel(
 
     var planeFlying: Job = Job()
 
-    private var startPos: GeoPoint = selectedLocation
     var previousPlanePos: GeoPoint = selectedLocation
     private var nextPlanePos: GeoPoint = selectedLocation
 
@@ -75,6 +74,7 @@ class ThrowViewModel(
                 ThrowScreenState.MovingMap
             )
         }
+        mapController.setCenter(selectedLocation)
         mapController.setZoom(12.0)
 
         // Fetches updated weather data for all throw points
@@ -89,10 +89,11 @@ class ThrowViewModel(
         // Clears all overlays from the map, and then draws every cached flight path
         mapOverlay.clear()
         FlightPathRepository.flightPaths.forEach { path ->
-            var previous: GeoPoint? = null
+            var previous = GeoPoint(0.0, 0.0)
             path.second.forEach { point ->
-                if (previous != null) {
-                    drawPlanePath(mapOverlay, previous!!, point)
+                if (path.second.indexOf(point) > 0) {
+//                if (previous != null) {
+                    drawPlanePath(mapOverlay, previous, point)
                 }
                 previous = point
             }
@@ -142,7 +143,6 @@ class ThrowViewModel(
     fun moveLocation(newLocation: GeoPoint, newLocationName: String) {
         selectedLocation = newLocation
         locationName = newLocationName
-        startPos = selectedLocation
         previousPlanePos = selectedLocation
         nextPlanePos = selectedLocation
         changeLocation(selectedLocation, locationName)
@@ -171,7 +171,7 @@ class ThrowViewModel(
         val speed = 10.0
         val planeStartHeight = 100.0
         val flightPath = mutableListOf<GeoPoint>()
-        flightPath.add(startPos)
+        flightPath.add(selectedLocation)
 
         setThrowScreenState(ThrowScreenState.Flying)
 
@@ -187,8 +187,8 @@ class ThrowViewModel(
         // Make sure the selected attachments are applied
         addAttachments(planeRepository, loadoutRepository)
 
-        previousPlanePos = startPos
-        mapController.setCenter(startPos)
+        previousPlanePos = selectedLocation
+        mapController.setCenter(selectedLocation)
 
         // Start the coroutine that updates the plane every second
         planeFlying = viewModelScope.launch {
@@ -224,14 +224,14 @@ class ThrowViewModel(
             }
 
             planeLogic.update(weather)
-            val distance = (startPos.distanceToAsDouble(previousPlanePos) / 1000).toInt()
+            val distance = (selectedLocation.distanceToAsDouble(previousPlanePos) / 1000).toInt()
             val newHS = updateHighScore(distance, flightPath)
             // Draws goal flag
             allMarkers.add(
                 drawGoalMarker(
                     markerFactory = markerFactory,
                     mapOverlay = mapOverlay,
-                    startPos = startPos,
+                    startPos = selectedLocation,
                     markerPos = previousPlanePos,
                     newHS = newHS
                 )
@@ -253,7 +253,11 @@ class ThrowViewModel(
         distance: Int,
         flightPath: List<GeoPoint>
     ): Boolean {
-        if (distance > throwPointHighScores.value[locationName]!!.distance) {
+        if (distance > throwPointHighScores.value.getOrDefault(
+                locationName,
+                HighScore()
+            ).distance
+        ) {
             weatherRepository.updateHighScore(
                 locationName,
                 distance,
@@ -269,7 +273,7 @@ class ThrowViewModel(
         CoroutineScope(Dispatchers.IO).launch {
             val copy = mutableMapOf<String, Boolean>()
             highScoresOnMapState.value.toMap(copy)
-            copy[location] = !copy[location]!!
+            copy[location] = !copy.getOrDefault(location, true)
             Log.d("HighScores", "Updated shown value to ${copy[location]}")
             _highScoresOnMapState.update {
                 copy
@@ -308,10 +312,11 @@ class ThrowViewModel(
                 weather = weatherRepository.getWeatherAtPoint(selectedLocation)
             }
             setThrowScreenState(ThrowScreenState.Throwing)
+            mapController.setCenter(selectedLocation)
         }
         val plane = planeState.value
         planeRepository.update(plane.copy(angle = value.toDouble()))
-        previousPlanePos = startPos
+        previousPlanePos = selectedLocation
     }
 
     fun getPlaneScale(): Float {
@@ -319,7 +324,7 @@ class ThrowViewModel(
         return planeLogic.getPlaneScale()
     }
 
-    fun planeIsFlying(): Boolean {
+    private fun planeIsFlying(): Boolean {
         //return planeState.value.height > 0.1
         return planeState.value.flying
     }

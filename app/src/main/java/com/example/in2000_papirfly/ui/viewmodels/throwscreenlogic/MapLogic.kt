@@ -50,14 +50,14 @@ mapView: MapView, val openBottomSheet: (Int) -> Unit
     var setThrowScreenState = {}
     var updateWeather = {}
     var moveLocation = {}
-    var rowPosition = 0
+    private var rowPosition = 0
 
-    public override fun onMarkerClickDefault(marker: Marker?, mapView: MapView?): Boolean {
+    public override fun onMarkerClickDefault(marker: Marker, mapView: MapView): Boolean {
         updateWeather()
         setThrowScreenState()
         moveLocation()
         openBottomSheet(rowPosition)
-        mapView!!.controller.animateTo(mPosition, 12.0, 1000)
+        mapView.controller.animateTo(mPosition, 12.0, 1000)
         showInfoWindow()
         return true
     }
@@ -100,18 +100,12 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
     // Hides zoom buttons
     mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
-    // Declares max and min zoom levels, and sets default zoom level
-    // maxZoomLevel 12 is good for watching the plane glide
-
+    // Declares max and min zoom levels
     mapView.maxZoomLevel = 12.0
     mapView.minZoomLevel = 6.0
 
-//    val filter = androidx.compose.ui.graphics.ColorFilter
-//    mapView.overlayManager.tilesOverlay.setColorFilter(filter.lighting(Color(0x50A9AAFF), Color.Unspecified).asAndroidColorFilter())
-
     return mapView
 }
-
 
 @Composable
 fun rememberMapLifecycleObserver(mapView: MapView): LifecycleEventObserver =

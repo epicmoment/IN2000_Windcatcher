@@ -20,15 +20,6 @@ object NowcastURL {
     }
 }
 
-val nowcastClient = HttpClient(Android) {
-    install(ContentNegotiation) {
-        json()
-    }
-    install(UserAgent) {
-        agent = "Team 03"
-    }
-}
-
 /**
  * Fetches the weather at the given coordinates
  * asynchronously from the Nowcast API.
@@ -44,6 +35,15 @@ suspend fun getNowcastData(lat: Double, lon: Double): NowcastData {
     val roundedLat = kotlin.math.round(lat * 10000.0) / 10000.0
     val roundedLon = kotlin.math.round(lon * 10000.0) / 10000.0
     val response: HttpResponse
+
+    val nowcastClient = HttpClient(Android) {
+        install(ContentNegotiation) {
+            json()
+        }
+        install(UserAgent) {
+            agent = "Team 03"
+        }
+    }
 
     try {
         response = nowcastClient.get(NowcastURL.urlBuilder(roundedLat, roundedLon)) {
