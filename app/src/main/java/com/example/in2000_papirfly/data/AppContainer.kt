@@ -9,9 +9,9 @@ import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModelFactory
 class AppContainer(database: PapirflyDatabase) {
 
     // Repositories
-    val loadoutRepository = LoadoutRepository()
+    val loadoutRepository: LoadoutRepository = LoadoutRepo()
     val dataRepository = DataRepository(database)
-    val planeRepository = PlaneRepository()
+    val planeRepository: PlaneRepository = PlaneRepo()
 
 
     // ViewModel Factories

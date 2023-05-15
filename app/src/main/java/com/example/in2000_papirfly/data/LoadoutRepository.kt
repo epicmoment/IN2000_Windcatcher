@@ -5,13 +5,20 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-class LoadoutRepository {
+
+interface LoadoutRepository{
+    val loadoutState: StateFlow<Loadout>
+
+    fun equipAttachment(slot: Int, attachmentID: Int)
+    fun getAttachmentInSlot(slot : Int) : Attachment
+}
+class LoadoutRepo: LoadoutRepository {
 
 
     private val _loadoutState = MutableStateFlow(Loadout())
-    val loadoutState : StateFlow<Loadout> = _loadoutState.asStateFlow()
+    override val loadoutState : StateFlow<Loadout> = _loadoutState.asStateFlow()
 
-    fun equipAttachment(slot : Int, attachmentID : Int) {
+    override fun equipAttachment(slot : Int, attachmentID : Int) {
 
         val list2 = loadoutState.value.slots.toMutableList()
         list2[slot] = attachmentID
@@ -26,7 +33,7 @@ class LoadoutRepository {
 
     }
 
-    fun getAttachmentInSlot(slot : Int) : Attachment {
+    override fun getAttachmentInSlot(slot : Int) : Attachment {
         return Attachments.list[slot][loadoutState.value.slots[slot]]
     }
 
