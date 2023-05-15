@@ -80,7 +80,12 @@ class DataRepository(database: PapirflyDatabase) {
 
     fun getHighScore(locationName: String): HighScore {
 
-        val throwPoint = throwDao.getThrowPointInfo(locationName)!!
+        val throwPoint: ThrowPoint =
+            throwDao.getThrowPointInfo(locationName) ?:
+                return HighScore(
+                    locationName = locationName
+                )
+
         val flightPathInfo = flightDao.getFlightPath(locationName)
         val flightPathPoints: MutableList<GeoPoint> = mutableListOf()
 
@@ -94,23 +99,31 @@ class DataRepository(database: PapirflyDatabase) {
         return HighScore(
             locationName,
             throwPoint.hSDate,
-            throwPoint.hSDistance ?: 0,
+            throwPoint.hSDistance,
             flightPathPoints
         )
     }
 
     fun updateHighScore(location: String, distance: Int, time: Long, path: List<GeoPoint>, updateHighscore: () -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
-            val throwPoint = throwDao.getThrowPointInfo(location)!!
+
+            val throwPoint: ThrowPoint? = throwDao.getThrowPointInfo(location)
+
+            if (throwPoint == null) {
+                Log.e("Repo", "Invalid high score location \"$location\". Not updated.")
+                return@launch
+            }
+
             throwDao.insert(
                 ThrowPoint(
-                    name = throwPoint.name,
+                    name = location,
                     tileX = throwPoint.tileX,
                     tileY = throwPoint.tileY,
                     hSDate = time,
                     hSDistance = distance
                 )
             )
+
             flightDao.deleteFLightPath(location)
             path.forEach {
                 flightDao.insert(
@@ -138,6 +151,7 @@ class DataRepository(database: PapirflyDatabase) {
      * viewModelScope-Coroutine always runs on the main thread, and is thus not able to call
      * this function by itself. Runblocking will also not work from the main thread.
      * For best results, use **CoroutineScope(Dispatchers.IO).launch { ... }**
+     * In the case of a database error, this method returns an empty Weather-object
      *
      * @param point The GeoPoint for where you want to get weather data
      *
@@ -176,7 +190,12 @@ class DataRepository(database: PapirflyDatabase) {
                     weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                 )
             )
-            weatherTile = tileDao.getTileAt(lat, lon)!!
+            weatherTile = tileDao.getTileAt(lat, lon)
+            if (weatherTile == null) {
+                Log.e("Repo", "Unexpected null value for tile at $lat,$lon.")
+                return Weather()
+            }
+
             Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully added.")
 
         // If LocationForecast hasn't been called in the past hour, the tile is updated
@@ -202,7 +221,11 @@ class DataRepository(database: PapirflyDatabase) {
                         weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                     )
                 )
-                weatherTile = tileDao.getTileAt(lat, lon)!!
+                weatherTile = tileDao.getTileAt(lat, lon)
+                if (weatherTile == null) {
+                    Log.e("Repo", "Unexpected null value for tile at $lat,$lon.")
+                    return Weather()
+                }
 
                 Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully updated.")
             }
@@ -230,7 +253,12 @@ class DataRepository(database: PapirflyDatabase) {
                         weather.properties.timeseries[0].data.instant.details.wind_from_direction,
                     )
                 )
-                weatherTile = tileDao.getTileAt(lat, lon)!!
+                weatherTile = tileDao.getTileAt(lat, lon)
+                if (weatherTile == null) {
+                    Log.e("Repo", "Unexpected null value for tile at $lat,$lon.")
+                    return Weather()
+                }
+
                 Log.d("Repo", "Tile at ${weatherTile.locX},${weatherTile.locY} successfully updated.")
             }
         }

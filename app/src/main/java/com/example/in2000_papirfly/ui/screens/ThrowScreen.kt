@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly.ui.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
@@ -11,6 +12,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -40,18 +42,20 @@ import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawHighScorePath
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.getRotationAngle
+import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.removeHighScorePath
 import io.ktor.util.reflect.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import java.lang.Math.*
-import kotlin.math.atan2
 
-@SuppressLint("DiscouragedApi")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ThrowScreen(
-    modifier: Modifier = Modifier,
     selectedLocation : GeoPoint,
     locationName: String,
     changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
@@ -59,23 +63,20 @@ fun ThrowScreen(
     onLoad: ((map: MapView) -> Unit)? = null,
     onBack: () -> Unit
 ) {
-    val skipPartiallyExpanded by remember { mutableStateOf(false) }
+
+    // Initializes dependencies for the view model
+    val context = LocalContext.current.applicationContext
     val mapViewState = rememberMapViewWithLifecycle()
     val scope = rememberCoroutineScope()
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     val rowState = rememberLazyListState()
-
-    val context = LocalContext.current.applicationContext
-    val resources = context.resources
-    val packageName = context.packageName
-
+    val appContainer = (context as PapirflyApplication).appContainer
     val animateRow = { position: Int ->
         scope.launch {
             rowState.animateScrollToItem(position)
         }
     }
 
-    val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
+    // Initializes the view model
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
             locationName = locationName,
@@ -88,22 +89,10 @@ fun ThrowScreen(
         )
     }
 
-    val toggleMarkerInfoWindow = {
-        throwViewModel.setThrowScreenState(ThrowScreenState.MovingMap)
-        mapViewState.overlays.forEach {
-            if (it is ThrowPositionMarker && it.title == throwViewModel.locationName) {
-                it.onMarkerClickDefault(it, mapViewState)
-                return@forEach
-            }
-        }
-    }
-
-    val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
-    val highScores = throwViewModel.throwPointHighScores.collectAsState()
-    val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState()
+    // Fetches observable state of the screen
     val throwScreenState = throwViewModel.getThrowScreenState().collectAsState().value
-    val planeState = throwViewModel.planeState.collectAsState().value
 
+    // Defines the behaviour of the "back"-button to prevent a crash
     BackHandler {
         Log.d("ThrowScreen", "Back press detected")
         throwViewModel.planeFlying.cancel()
@@ -119,15 +108,13 @@ fun ThrowScreen(
         }
     }
 
-    // Map composable
+    // Shows the map
     AndroidView(
         { mapViewState },
         Modifier.border(1.dp, Color(0xFF000000))
-    ) { mapView -> onLoad?.invoke(mapView) }
-
-    // This fixes the map glitching
-    mapViewState.controller.setCenter(throwViewModel.previousPlanePos)
-    mapViewState.controller.setZoom(12.0)
+    ) {
+        mapView -> onLoad?.invoke(mapView)
+    }
 
     // Paper plane
     PlaneComposable(
@@ -137,82 +124,228 @@ fun ThrowScreen(
     )
 
     // Flight info box
+    FlightInfoBox(
+        context = context,
+        throwViewModel = throwViewModel,
+    )
+
+    // Circular Slider - only shown when screen state is set to "Throwing"
+    if (throwScreenState == ThrowScreenState.Throwing) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularSlider(
+                throwViewModel,
+                mapViewState,
+            )
+        }
+    }
+
+    // Button panel for throwing, navigating and customizing
+    if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
+        ButtonPanel(
+            throwScreenState = throwScreenState,
+            throwViewModel = throwViewModel,
+            scope = scope,
+            rowState = rowState,
+            onCustomizePage = onCustomizePage,
+        )
+    }
+
+    // Navigation and high score drawer
+    val skipPartiallyExpanded by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = skipPartiallyExpanded
+    )
+    if (throwScreenState == ThrowScreenState.ChoosingPosition) {
+        PositionAndHighScoreDrawer(
+            context = context,
+            throwViewModel = throwViewModel,
+            bottomSheetState = bottomSheetState,
+            rowState = rowState,
+            scope = scope,
+            mapViewState = mapViewState,
+            changeLocation = changeLocation,
+        )
+    }
+}
+
+@Composable
+fun showPlane(throwScreenState: ThrowScreenState): Boolean{
+    val value = when (throwScreenState){
+        is ThrowScreenState.Throwing -> true
+        is ThrowScreenState.Flying -> true
+        is ThrowScreenState.MovingMap -> false
+        is ThrowScreenState.ChoosingPosition -> false
+    }
+    return value
+}
+
+//Code tatt fra stackoverflow
+//Rafsanjani answered Dec 20, 2021 at 16:02
+@Composable
+fun CircularSlider(
+    throwViewModel: ThrowViewModel,
+    mapViewState: DisableMapView,
+) {
+    var radius by remember { mutableStateOf(0f) }
+    var shapeCenter by remember { mutableStateOf(Offset.Zero) }
+    var handleCenter by remember { mutableStateOf(Offset.Zero) }
+    var angle by remember { mutableStateOf(270.0) }
+
+    val openMarker = {
+        throwViewModel.setThrowScreenState(ThrowScreenState.MovingMap)
+        mapViewState.overlays.forEach {
+            if (it is ThrowPositionMarker && it.title == throwViewModel.locationName) {
+                it.onMarkerClickDefault(it, mapViewState)
+                return@forEach
+            }
+        }
+    }
+
+    // The outer bounding box containing the slider
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(180.dp * 2f)
+    ) {
+        // The canvas on which the slider is drawn
+        Canvas(
+            modifier = Modifier
+                .size(170.dp * 2f)
+                .padding(20.dp)
+                .pointerInput(Unit) {
+                    detectDragGestures { change, dragAmount ->
+                        handleCenter += dragAmount
+                        angle = getRotationAngle(handleCenter, shapeCenter)
+
+                        val angleForPlane = angle.toFloat() + 90
+
+                        throwViewModel.changeAngle(angleForPlane)
+                        change.consume()
+                    }
+                }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = { offset ->
+                            handleCenter = Offset.Zero + offset
+                            angle = getRotationAngle(handleCenter, shapeCenter)
+
+                            val angleForPlane = angle.toFloat() + 90
+
+                            throwViewModel.changeAngle(angleForPlane)
+                        },
+                        onPress = { offset ->
+                            handleCenter = Offset.Zero + offset
+                            angle = getRotationAngle(handleCenter, shapeCenter)
+
+                            val angleForPlane = angle.toFloat() + 90
+
+                            throwViewModel.changeAngle(angleForPlane)
+                        }
+                    )
+                }
+        ) {
+            shapeCenter = center
+
+            radius = (size.minDimension / 2) - 50
+
+            val x = (shapeCenter.x + kotlin.math.cos(toRadians(angle)) * radius).toFloat()
+            val y = (shapeCenter.y + kotlin.math.sin(toRadians(angle)) * radius).toFloat()
+
+            handleCenter = Offset(x, y)
+
+            drawCircle(color = Color.Black.copy(alpha = 0.10f), style = Stroke(20f), radius = radius)
+            drawCircle(color = com.example.in2000_papirfly.ui.theme.colOrange, center = handleCenter, radius = 50f)
+        }
+        // Box for passing clicks in the center of the slider through to the map
+        Box(modifier = Modifier
+            .size(50.dp * 2f)
+            .clickable(
+                true,
+                onClick = {
+                    Log.d("OpenMarker", "Click detected.")
+                    openMarker()
+                }
+            ),
+            contentAlignment = Alignment.Center) {
+        }
+    }
+}
+
+@SuppressLint("DiscouragedApi")
+@Composable
+fun FlightInfoBox(
+    modifier: Modifier = Modifier,
+    context: Context,
+    throwViewModel: ThrowViewModel,
+) {
+    val resources = context.resources
+    val packageName = context.packageName
+    val id = resources.getIdentifier(throwViewModel.weather.icon, "drawable", packageName)
+    val planeState = throwViewModel.planeState.collectAsState().value
+
+    var airPressureDescription = "L"
+    var airPressureColor = Color.Red
+
+    if (throwViewModel.weather.airPressure > 1013) {
+        airPressureDescription = "H"
+        airPressureColor = Color.Blue
+    }
+
+    // Invisible box filling the entire screen
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp),
         contentAlignment = Alignment.Center,
     ) {
-        val id = resources.getIdentifier(throwViewModel.weather.icon, "drawable", packageName)
+        // Box containing the info elements
         Box(
             modifier = Modifier
                 .fillMaxSize(0.8f)
                 .clip(RoundedCornerShape(14.dp))
                 .background(Color(0, 0, 0, 100)),
         ) {
+            // Column for positioning the info elements correctly
             Column(
                 modifier = Modifier
                     .fillMaxSize(),
                 verticalArrangement = Arrangement.Top,
-//                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Box(
-//                    modifier = Modifier
-//                        .fillMaxSize()
-                ) {
-
+                // Box containing weather icon, wind arrow and air pressure symbol
+                Box {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(90.dp),
-                        horizontalArrangement = Arrangement.Start,
+                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-
+                        // Weather icon
                         Icon(
                             painter = painterResource(id = id),
                             contentDescription = "Weather Icon",
                             modifier = modifier
-                                .padding(start = 12.dp)
+                                .padding(start = 20.dp, top = 20.dp)
                                 .size(size = 80.dp),
                             tint = Color.Unspecified
                         )
-                    }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(90.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-
+                        // Wind direction indicator
                         Image(
+                            modifier = Modifier
+                                .padding(end = 40.dp, top = 10.dp)
+                                .rotate((throwViewModel.weather.windAngle + 180).toFloat())
+                                .size(100.dp),
                             painter = painterResource(id = R.drawable.up_arrow__1_),
                             contentDescription = "Weather direction arrow",
-                            modifier = Modifier
-                                .rotate((throwViewModel.weather.windAngle + 180).toFloat())
-                                .size(80.dp),
                             colorFilter = ColorFilter.tint(Color.White)
                         )
-                    }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(90.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-
-                        var airPressureDescription = "L"
-                        var airPressureColor = Color.Red
-
-                        if (throwViewModel.weather.airPressure > 1013) {
-                            airPressureDescription = "H"
-                            airPressureColor = Color.Blue
-                        }
-
+                        // Air pressure status
                         Text(
                             modifier = Modifier
                                 .padding(end = 40.dp),
@@ -223,12 +356,13 @@ fun ThrowScreen(
                         )
                     }
                 }
-
+                // Row showing speed and height data
                 Row(
                     modifier = Modifier
                         .fillMaxSize(),
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
+                    // Speed indicator
                     Text(
                         modifier = Modifier
                             .padding(start = 40.dp),
@@ -237,6 +371,7 @@ fun ThrowScreen(
                         color = Color.White,
                     )
 
+                    // Height indicator
                     Text(
                         modifier = Modifier
                             .padding(end = 40.dp),
@@ -248,32 +383,23 @@ fun ThrowScreen(
             }
         }
     }
+}
 
-    // Circular Slider
-    if (throwScreenState == ThrowScreenState.Throwing) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularSlider(
-                throwViewModel,
-                toggleMarkerInfoWindow,
-            )
-        }
-    }
-
-    /* Column containing throw, position and customization buttons
-     * Only shown if user is moving map or throwing
-     */
-    if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Bottom,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(bottom = 50.dp)
-        ) {
+@Composable
+fun ButtonPanel(
+    throwScreenState: ThrowScreenState,
+    throwViewModel: ThrowViewModel,
+    scope: CoroutineScope,
+    rowState: LazyListState,
+    onCustomizePage: () -> Unit,
+) {
+    Column (
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Bottom,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 50.dp)
+    ) {
 
             Button(
                 modifier = Modifier.shadow(
@@ -297,12 +423,12 @@ fun ThrowScreen(
                 )
             }
 
-            Spacer(
-                Modifier
-                    .height(50.dp)
-            )
+        Spacer(
+            Modifier
+                .height(50.dp)
+        )
 
-            Row() {
+            Row {
                 // Opens position drawer
                 Button(
                     onClick = {
@@ -369,194 +495,223 @@ fun ThrowScreen(
         }
     }
 
-    // Navigation and high score sheet
-    if (throwScreenState == ThrowScreenState.ChoosingPosition) {
-        ModalBottomSheet(
-            modifier = Modifier
-                .fillMaxWidth(),
-            onDismissRequest = {
-                // Sets ThrowScreenState to Throwing when sheet is dismissed
-                throwViewModel.changeAngle(0.toFloat())
-            },
-            sheetState = bottomSheetState,
-            dragHandle = {
-                Card(
+@SuppressLint("DiscouragedApi")
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PositionAndHighScoreDrawer(
+    modifier: Modifier = Modifier,
+    context: Context,
+    throwViewModel: ThrowViewModel,
+    bottomSheetState: SheetState,
+    rowState: LazyListState,
+    scope: CoroutineScope,
+    mapViewState: DisableMapView,
+    changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
+) {
+    val resources = context.resources
+    val packageName = context.packageName
+    val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
+    val highScores = throwViewModel.throwPointHighScores.collectAsState().value
+    val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState().value
+
+    ModalBottomSheet(
+        modifier = Modifier
+            .fillMaxWidth(),
+        onDismissRequest = {
+            // Sets ThrowScreenState to Throwing when sheet is dismissed
+            throwViewModel.changeAngle(0.toFloat())
+        },
+        sheetState = bottomSheetState,
+        dragHandle = {
+            Card(
+                modifier = Modifier
+                    .padding(8.dp),
+            ) {
+                Text(
                     modifier = Modifier
-                        .padding(8.dp),
-                ) {
-                    Text(
-                        modifier = Modifier
-                            .padding(horizontal = 10.dp),
-                        text = "Velg kastested",
-                        fontSize = 20.sp,
-                    )
-                }
+                        .padding(horizontal = 10.dp),
+                    text = "Velg kastested",
+                    fontSize = 20.sp,
+                )
             }
-        ) {
-            // Cards for the different throw locations
-            LazyRow(state = rowState) {
-                items(throwPointWeather.size) {
-                    val location = throwPointWeather[it]
-                    Card(
-                        shape = MaterialTheme.shapes.medium,
+        }
+    ) {
+        // Cards for the different throw locations
+        LazyRow(state = rowState) {
+            items(throwPointWeather.size) {
+
+                val location = throwPointWeather[it]
+                val id = resources.getIdentifier(location.icon, "drawable", packageName)
+
+                // Clickable card
+                Card(
+                    shape = MaterialTheme.shapes.medium,
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(15.dp)
+                        .size(width = 380.dp, height = 200.dp),
+                    onClick = {
+                        if (location.namePos == throwViewModel.locationName) {
+                            // Sets ThrowScreenState to Throwing when sheet is dismissed
+                            throwViewModel.changeAngle(0.toFloat())
+                        } else {
+                            scope.launch {
+                                rowState.animateScrollToItem(it)
+                            }
+                            val newLocation = ThrowPointList.throwPoints.getOrDefault(
+                                location.namePos,
+                                GeoPoint(0.0, 0.0)
+                            )
+
+                            throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
+                            mapViewState.controller.animateTo(newLocation, 12.0, 1000)
+                            throwViewModel.moveLocation(
+                                newLocation,
+                                location.namePos
+                            )
+                            // Sets the Screen State location to the new location
+                            changeLocation(newLocation, location.namePos)
+                        }
+                    }
+                ) {
+                    // Place name and weather icon
+                    Row(
                         modifier = modifier
                             .fillMaxWidth()
-                            .padding(15.dp)
-                            .size(width = 380.dp, height = 200.dp),
-                        onClick = {
-                            if (throwPointWeather[it].namePos == throwViewModel.locationName) {
-                                // Sets ThrowScreenState to Throwing when sheet is dismissed
-                                throwViewModel.changeAngle(0.toFloat())
-                            } else {
-                                scope.launch {
-                                    rowState.animateScrollToItem(it)
-                                }
-                                val newLocation =
-                                    ThrowPointList.throwPoints[throwPointWeather[it].namePos]
-                                throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
-                                mapViewState.controller.animateTo(newLocation, 12.0, 1000)
-                                throwViewModel.moveLocation(
-                                    newLocation!!,
-                                    throwPointWeather[it].namePos!!
-                                )
-                                // Sets the Screen State location to the new location
-                                changeLocation(newLocation, throwPointWeather[it].namePos!!)
-                            }
-                        }
+                            .padding(horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        val id = resources.getIdentifier(location.icon, "drawable", packageName)
+                        // Place name
+                        Text(
+                            modifier = modifier.padding(start = 12.dp, top = 6.dp),
+                            text = location.namePos,
+                            fontSize = 30.sp
+                        )
 
-                        // Place name and weather icon
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
-                                horizontalArrangement = Arrangement.Start
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    text = "${throwPointWeather[it].namePos}",
-                                    fontSize = 30.sp
-                                )
-                            }
+                        // Weather icon
+                        Icon(
+                            painter = painterResource(id = id),
+                            contentDescription = "Weather Icon",
+                            modifier = modifier
+                                .padding(end = 20.dp, top = 5.dp)
+                                .size(size = 65.dp),
+                            tint = Color.Unspecified
+                        )
+                    }
 
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 22.dp),
-                                horizontalArrangement = Arrangement.End
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = id),
-                                    contentDescription = "Weather Icon",
-                                    modifier = modifier.size(size = 65.dp),
-                                    tint = Color.Unspecified
-                                )
-                            }
+                    // Row containing temperature, precipitation, wind direction and air pressure
+                    Row(
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp),
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        // Temperature
+                        Text(
+                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            text = "${"%.0f".format(location.temperature)}°C",
+                            fontSize = 28.sp
+                        )
+
+                        // Precipitation
+                        Text(
+                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            text = "${"%.0f".format(location.rain)}mm",
+                            fontSize = 18.sp
+                        )
+
+                        // Wind speed
+                        Text(
+                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            text = "${"%.0f".format(location.windSpeed)}m/s",
+                            fontSize = 18.sp
+                        )
+
+                        // Wind direction arrow
+                        Icon(
+                            painterResource(id = R.drawable.baseline_arrow_right_alt_24),
+                            modifier = modifier
+                                .size(size = 45.dp)
+                                .rotate(location.windAngle.toFloat() + 90.toFloat()),
+                            contentDescription = "Vindretning",
+                        )
+
+                        // Air pressure symbol
+                        var airPressureDescription = "L"
+                        var airPressureColor = Color.Red
+                        if (location.airPressure > 1013) {
+                            airPressureDescription = "H"
+                            airPressureColor = Color.Blue
                         }
 
-                        Row(
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
+                        Text(
+                            modifier = modifier.padding(
+                                start = 10.dp,
+                                end = 10.dp,
+                                top = 8.dp,
+                                bottom = 8.dp
+                            ),
+                            text = airPressureDescription,
+                            fontSize = 28.sp,
+                            color = airPressureColor
+                        )
+                    }
+
+                    // High score banner
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        val locationName = highScores.getOrDefault(
+                            location.namePos,
+                            HighScore()
+                        )
+                        val highScoreShown = highScoreOnMap.getOrDefault(
+                            location.namePos,
+                            false
+                        )
+
+                        // High score distance
+                        Text(
+                            modifier = modifier
+                                .padding(end = 10.dp),
+                            text = "Highscore: ${locationName.distance}km",
+                            fontSize = 16.sp
+                        )
+
+                        // Button for toggling if high score path is shown or not
+                        Button (
+                            modifier = modifier
+                                .size(180.dp, 45.dp),
+                            enabled = locationName.distance != 0,
+                            onClick = {
+                                if (!highScoreShown) {
+                                    drawHighScorePath(mapViewState.overlays, locationName.flightPath, location.namePos)
+                                    drawGoalMarker(
+                                        { HighScoreMarker(mapViewState, location.namePos) },
+                                        mapViewState.overlays,
+                                        locationName.flightPath[0],
+                                        locationName.flightPath.last(),
+                                        true
+                                    )
+                                } else {
+                                    removeHighScorePath(mapViewState.overlays, location.namePos)
+                                    mapViewState.invalidate()
+                                }
+                                throwViewModel.updateHighScoreShownState(location.namePos)
+                            },
+                            colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
+                            shape = RoundedCornerShape(10),
                         ) {
-
                             Text(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                                text = "${"%.0f".format(location.temperature)}°C",
-                                fontSize = 28.sp
+                                text = if (!highScoreShown) "Vis highscore" else "Skjul highscore",
+                                fontSize = 16.sp,
                             )
-
-                            Text(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                                text = "${"%.0f".format(location.rain)}mm",
-                                fontSize = 18.sp
-                            )
-
-                            Text(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                                text = "${"%.0f".format(location.windSpeed)}m/s",
-                                fontSize = 18.sp
-                            )
-
-                            Icon(
-                                painterResource(id = R.drawable.baseline_arrow_right_alt_24),
-                                modifier = modifier
-                                    .size(size = 45.dp)
-                                    .rotate(location.windAngle.toFloat() + 90.toFloat()),
-                                contentDescription = "Vindretning",
-                            )
-
-                            var airPressureDescription = "L"
-                            var airPressureColor = Color.Red
-
-                            if (location.airPressure > 1013) {
-                                airPressureDescription = "H"
-                                airPressureColor = Color.Blue
-                            }
-
-                            Text(
-                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                                text = "hPa:",
-                                fontSize = 18.sp,
-                            )
-
-                            Text(
-                                modifier = Modifier.padding(end = 10.dp, top = 8.dp, bottom = 8.dp),
-                                text = airPressureDescription,
-                                fontSize = 28.sp,
-                                color = airPressureColor
-                            )
-                        }
-
-                        // High score banner
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 10.dp, vertical = 12.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                modifier = Modifier
-                                    .padding(end = 10.dp),
-                                text = "Highscore: ${highScores.value[location.namePos]!!.distance}km",
-                                fontSize = 16.sp
-                            )
-
-                            Button (
-                                modifier = Modifier
-                                    .size(180.dp, 45.dp),
-                                enabled = highScores.value[location.namePos]!!.distance != 0,
-                                onClick = {
-                                    if (!highScoreOnMap.value[location.namePos]!!) {
-                                        drawHighScorePath(mapViewState.overlays, highScores.value[location.namePos]!!.flightPath!!, location.namePos!!)
-                                        drawGoalMarker(
-                                            { HighScoreMarker(mapViewState, location.namePos!!) },
-                                            mapViewState.overlays,
-                                            highScores.value[location.namePos]!!.flightPath!![0],
-                                            highScores.value[location.namePos]!!.flightPath!!.last(),
-                                            true
-                                        )
-                                    } else {
-                                        removeHighScorePath(mapViewState.overlays, location.namePos!!)
-                                        mapViewState.invalidate()
-                                    }
-                                    throwViewModel.updateHighScoreShownState(location.namePos!!)
-                                },
-                                colors = ButtonDefaults.buttonColors(com.example.in2000_papirfly.ui.theme.colRed),
-                                shape = RoundedCornerShape(10),
-                            ) {
-                                Text(
-                                    text = if (!highScoreOnMap.value[location.namePos]!!) "Vis highscore" else "Skjul highscore",
-                                    fontSize = 16.sp,
-                                )
-                            }
                         }
                     }
                 }
@@ -564,54 +719,6 @@ fun ThrowScreen(
         }
     }
 }
-
-@Composable
-fun showPlane(throwScreenState: ThrowScreenState): Boolean{
-    val value = when (throwScreenState){
-        is ThrowScreenState.Throwing -> true
-        is ThrowScreenState.Flying -> true
-        is ThrowScreenState.MovingMap -> false
-        is ThrowScreenState.ChoosingPosition -> false
-    }
-    return value
-}
-
-//Code tatt fra stackoverflow
-//Rafsanjani answered Dec 20, 2021 at 16:02
-@Composable
-fun CircularSlider(
-    throwViewModel: ThrowViewModel,
-    openMarker: () -> Unit
-) {
-    var radius by remember {
-        mutableStateOf(0f)
-    }
-
-    var shapeCenter by remember {
-        mutableStateOf(Offset.Zero)
-    }
-
-    var handleCenter by remember {
-        mutableStateOf(Offset.Zero)
-    }
-
-    var angle by remember {
-        mutableStateOf(270.0)
-    }
-
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .size(180.dp * 2f)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .size(170.dp * 2f)
-                .padding(20.dp)
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        handleCenter += dragAmount
-                        angle = getRotationAngle(handleCenter, shapeCenter)
 
                         val angleForPlane = angle.toFloat() + 90
 
