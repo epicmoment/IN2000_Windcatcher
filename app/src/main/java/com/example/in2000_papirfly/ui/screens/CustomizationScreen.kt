@@ -29,11 +29,10 @@ import com.example.in2000_papirfly.data.Attachments
 import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
 import com.example.in2000_papirfly.ui.theme.colRed
+import com.example.in2000_papirfly.ui.theme.colDarkBlue
 
-val colBlue = Color(92, 121, 148)
 val colOrangeHighlightTransparent = Color(127, 44, 36, 175)
 val colOrangeHighlight = Color(102, 51, 46)
-val colDarkBlue = Color(30, 45, 60)
 val colTextGray = Color(195, 195, 195)
 
 
@@ -78,12 +77,6 @@ fun CustomizationScreen (
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                 ) {
-
-                    /*Image(
-                        painter = painterResource(id = R.drawable.paperplane2),
-                        contentDescription = "Paper plane",
-                        modifier = Modifier.fillMaxSize(0.62f)
-                    )*/
 
                     Box(
                         modifier = Modifier.fillMaxSize(0.62f)
@@ -335,37 +328,3 @@ fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, on
     }
 
 }
-
-/*@Composable
-fun PlaneVisual(
-    nose : Attachment,
-    wings : Attachment,
-    tail : Attachment
-) {
-
-    Box (
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-
-        Image(
-            painter = painterResource(id = tail.icon),
-            contentDescription = "Halefinne",
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Image(
-            painter = painterResource(id = wings.icon),
-            contentDescription = "Vinge",
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Image(
-            painter = painterResource(id = nose.icon),
-            contentDescription = "Vinge",
-            modifier = Modifier.fillMaxSize()
-        )
-
-    }
-
-}*/

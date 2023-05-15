@@ -75,6 +75,7 @@ val md_theme_dark_scrim = Color(0xFF000000)
 val colRed = Color(0xFF9E372D)
 val colBlue = Color(0xFF5C7994)
 val colGold = Color(0xFFFFCE21)
+val colDarkBlue = Color(0xFF1E2D3C)
 
 
 

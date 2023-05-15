@@ -18,10 +18,10 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import androidx.compose.ui.graphics.Color
 import com.example.in2000_papirfly.data.ThrowPointList
 import com.example.in2000_papirfly.ui.theme.colGold
 import com.example.in2000_papirfly.ui.theme.colRed
+import com.example.in2000_papirfly.ui.theme.colDarkBlue
 import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
@@ -161,7 +161,7 @@ fun drawStartMarker(
     marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
     marker.position = startPos
     // This way of getting context works somehow???
-    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_debug1)
+    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_throwpoint)
     marker.title = locationName
     marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
     mapOverlay.add(marker)
