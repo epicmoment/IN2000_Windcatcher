@@ -11,12 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-//import com.example.in2000_papirfly.ui.screens.MapView
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
-import org.osmdroid.util.GeoPoint
-import com.example.in2000_papirfly.data.Weather
-import com.example.in2000_papirfly.ui.screens.FlightLog
+import com.example.in2000_papirfly.ui.screens.NavScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -44,15 +41,15 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    //NavScreen()
-                    FlightLog(
+                    NavScreen()
+                    /*FlightLog(
                         distance = 120,
                         logPoints = mutableListOf(
                             Pair(GeoPoint(0.0, 0.0,), Weather(windSpeed = 20.0))
                         )
                     ) {
 
-                    }
+                    }*/
                 }
             }
         }

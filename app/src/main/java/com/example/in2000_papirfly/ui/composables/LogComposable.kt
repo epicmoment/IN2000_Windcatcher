@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,26 +20,32 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.LogState
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.theme.colDarkBlue
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FlightLog (distance: Int, logPoints : MutableList<Pair<GeoPoint, Weather>>, onBack : () -> Unit) {
+fun FlightLog (
+    logStateParam: StateFlow<LogState>,
+    scaffoldState: BottomSheetScaffoldState,
+    centerMap: (GeoPoint) -> Unit,
+    onBack : () -> Unit
+) {
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(180, 180, 180))
-            .clickable { onBack() }
-    )
+    val logState = logStateParam.collectAsState()
 
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden ) {
+            onBack()
+        }
+    }
 
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState()
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
@@ -49,28 +57,40 @@ fun FlightLog (distance: Int, logPoints : MutableList<Pair<GeoPoint, Weather>>, 
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.6f)
+                    .fillMaxHeight(0.5f)
             ) {
+
+                //TODO: Fix
+                Text(
+                    text = logState.value.distance.toString(),
+                    modifier = Modifier
+                        .clickable {
+                            onBack()
+                            scope.launch {
+                                scaffoldState.bottomSheetState.hide()
+                            }
+                        }
+                )
 
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
                 ) {
 
-                    items(logPoints.size) {
+                    items(logState.value.logPoints.size) {
 
                         Box (
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    scaffoldState.bottomSheetState.partialExpand()
-                                    //mapController.animateTo(logPoints[it].first) ?
+                                    //scaffoldState.bottomSheetState.partialExpand()
+                                    centerMap(logState.value.logPoints[it].first)
                                 }
                             }
                         ) {
                             PathEntryCard(
                                 showTopLine = it > 0,
-                                showBottomLine = it < logPoints.size-1,
-                                logPoint = logPoints[it]
+                                showBottomLine = it < logState.value.logPoints.size-1,
+                                logPoint = logState.value.logPoints[it]
                             )
                         }
 
@@ -86,14 +106,8 @@ fun FlightLog (distance: Int, logPoints : MutableList<Pair<GeoPoint, Weather>>, 
 
         }
 
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(Color(100, 200, 140))
-        ) {
-            Text("Map her")
-        }
+    ) {
+
     }
 
 }
@@ -105,7 +119,6 @@ fun PathEntryCard(
     logPoint : Pair<GeoPoint, Weather>
 ) {
 
-    val geoPoint = logPoint.first
     val weather = logPoint.second
 
     // Padding

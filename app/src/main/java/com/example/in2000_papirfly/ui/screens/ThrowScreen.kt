@@ -77,6 +77,15 @@ fun ThrowScreen(
         }
     }
 
+    val logBottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false
+    )
+
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = logBottomSheetState
+    )
+
     // Initializes the view model
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
@@ -86,7 +95,12 @@ fun ThrowScreen(
             openBottomSheet = { position: Int ->
                 animateRow(position)
             },
-            changeLocation = changeLocation
+            changeLocation = changeLocation,
+            onShowLog = {
+                scope.launch {
+                    scaffoldState.bottomSheetState.partialExpand()
+                }
+            }
         )
     }
 
@@ -171,6 +185,17 @@ fun ThrowScreen(
             changeLocation = changeLocation,
         )
     }
+
+    FlightLog(
+        logStateParam = throwViewModel.logState,
+        scaffoldState = scaffoldState,
+        centerMap = { pos ->
+            mapViewState.controller.animateTo(pos)
+        }
+    ) {
+        throwViewModel.closeLog()
+    }
+
 }
 
 @Composable
@@ -180,6 +205,7 @@ fun showPlane(throwScreenState: ThrowScreenState): Boolean{
         is ThrowScreenState.Flying -> true
         is ThrowScreenState.MovingMap -> false
         is ThrowScreenState.ChoosingPosition -> false
+        is ThrowScreenState.ViewingLog -> false
     }
     return value
 }

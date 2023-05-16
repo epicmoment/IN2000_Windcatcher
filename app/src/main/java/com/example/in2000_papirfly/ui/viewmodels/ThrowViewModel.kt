@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.data.LogState
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawPlanePath
@@ -35,6 +36,7 @@ class ThrowViewModel(
     val weatherRepository: DataRepository,
     val planeRepository: PlaneRepository,
     val loadoutRepository: LoadoutRepository,
+    val onShowLog : () -> Unit
 ): ViewModel() {
 
     private val planeLogic = PlaneLogic(planeRepository)
@@ -66,11 +68,14 @@ class ThrowViewModel(
         MutableStateFlow(defaultHighScoreShownMap())
     val highScoresOnMapState = _highScoresOnMapState.asStateFlow()
 
+    private val _logState = MutableStateFlow(LogState())
+    val logState = _logState.asStateFlow()
+
     private val allMarkers = emptyList<Marker>().toMutableList()
 
     init {
         updateOnMoveMap {
-            if (getThrowScreenState().value !is ThrowScreenState.MovingMap) setThrowScreenState(
+            if (getThrowScreenState().value !is ThrowScreenState.MovingMap && getThrowScreenState().value !is ThrowScreenState.ViewingLog) setThrowScreenState(
                 ThrowScreenState.MovingMap
             )
         }
@@ -221,7 +226,7 @@ class ThrowViewModel(
                 flightPath.add(nextPlanePos)
 
                 // FLIGHT-LOG
-                val logPoint = Pair<GeoPoint, Weather>(previousPlanePos, weather.copy())
+                val logPoint = Pair<GeoPoint, Weather>(GeoPoint(planeState.value.pos[0], planeState.value.pos[1]), weather.copy())
                 logPoints.add(logPoint)
 
                 // This fixes the map glitching
@@ -251,17 +256,49 @@ class ThrowViewModel(
             // Unlock map
             setInteraction(true)
 
-
             // FLIGHT-LOG
-            showLog(logPoints)
+            showLog(
+                distance,
+                newHS,
+                logPoints
+            )
 
             // Landing state?
-            setThrowScreenState(ThrowScreenState.MovingMap)
+            setThrowScreenState(ThrowScreenState.ViewingLog)
         }
     }
 
-    private fun showLog(logPoints: MutableList<Pair<GeoPoint, Weather>>) {
-        TODO("Not yet implemented")
+    private fun showLog(
+        distance: Int,
+        newHS: Boolean,
+        logPoints: MutableList<Pair<GeoPoint, Weather>>
+    ) {
+        viewModelScope.launch {
+            _logState.update {
+                it.copy(
+                    isVisible = true,
+                    distance = distance,
+                    newHS = newHS,
+                    logPoints = logPoints
+                )
+            }
+        }
+
+        onShowLog()
+    }
+
+    fun closeLog() {
+
+        viewModelScope.launch {
+            _logState.update {
+                it.copy(
+                    isVisible = false
+                )
+            }
+        }
+
+        setThrowScreenState(ThrowScreenState.MovingMap)
+
     }
 
     private fun updateHighScore(
@@ -357,6 +394,7 @@ class ThrowViewModelFactory(
         mapViewState: DisableMapView,
         openBottomSheet: (Int) -> Unit,
         changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
+        onShowLog : () -> Unit
 
     ): ThrowViewModel{
         return ThrowViewModel(
@@ -386,6 +424,7 @@ class ThrowViewModelFactory(
             planeRepository = planeRepository,
             weatherRepository = weatherRepository,
             loadoutRepository = loadoutRepository,
+            onShowLog = onShowLog
         )
     }
 }
@@ -403,4 +442,6 @@ sealed interface ThrowScreenState{
     object MovingMap: ThrowScreenState
 
     object ChoosingPosition: ThrowScreenState
+
+    object ViewingLog: ThrowScreenState
 }
