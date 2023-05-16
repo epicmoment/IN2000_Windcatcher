@@ -39,6 +39,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_NORMAL
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
@@ -643,7 +644,7 @@ fun PositionAndHighScoreDrawer(
                         // Air pressure symbol
                         var airPressureDescription = stringResource(R.string.low_air_pressure_display)
                         var airPressureColor = Color.Red
-                        if (location.airPressure > Weather.AIR_PRESSURE_NORMAL) {
+                        if (location.airPressure > AIR_PRESSURE_NORMAL) {
                             airPressureDescription = stringResource(R.string.high_air_pressure_display)
                             airPressureColor = Color.Blue
                         }
