@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -288,11 +289,11 @@ fun FlightInfoBox(
     val id = resources.getIdentifier(throwViewModel.weather.icon, "drawable", packageName)
     val planeState = throwViewModel.planeState.collectAsState().value
 
-    var airPressureDescription = "L"
+    var airPressureDescription = stringResource(R.string.low_air_pressure_display)
     var airPressureColor = Color.Red
 
     if (throwViewModel.weather.airPressure > 1013) {
-        airPressureDescription = "H"
+        airPressureDescription = stringResource(R.string.high_air_pressure_display)
         airPressureColor = Color.Blue
     }
 
@@ -328,7 +329,7 @@ fun FlightInfoBox(
                         // Weather icon
                         Icon(
                             painter = painterResource(id = id),
-                            contentDescription = "Weather Icon",
+                            contentDescription = stringResource(R.string.weather_icon_description),
                             modifier = modifier
                                 .padding(start = 20.dp, top = 20.dp)
                                 .size(size = 80.dp),
@@ -342,7 +343,7 @@ fun FlightInfoBox(
                                 .rotate((throwViewModel.weather.windAngle + 180).toFloat())
                                 .size(100.dp),
                             painter = painterResource(id = R.drawable.up_arrow__1_),
-                            contentDescription = "Weather direction arrow",
+                            contentDescription = stringResource(R.string.wind_direction_arrow_description),
                             colorFilter = ColorFilter.tint(Color.White)
                         )
 
@@ -367,7 +368,7 @@ fun FlightInfoBox(
                     Text(
                         modifier = Modifier
                             .padding(start = 40.dp),
-                        text = "Fart: ${"%.2f".format(planeState.speed.toFloat())}",
+                        text = stringResource(R.string.speed_display, "%.2f".format(planeState.speed.toFloat())),
                         fontSize = 20.sp,
                         color = Color.White,
                     )
@@ -376,7 +377,7 @@ fun FlightInfoBox(
                     Text(
                         modifier = Modifier
                             .padding(end = 40.dp),
-                        text = "Høyde: ${if (planeState.height >= 0) "%.0f".format(planeState.height) else 0}",
+                        text = stringResource(R.string.height_display, if (planeState.height >= 0) "%.0f".format(planeState.height) else 0),
                         fontSize = 20.sp,
                         color = Color.White,
                     )
@@ -418,7 +419,7 @@ fun ButtonPanel(
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = if (throwScreenState == ThrowScreenState.Throwing) "KAST" else "KLAR",
+                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.THROW) else stringResource(R.string.READY),
                     fontSize = 35.sp,
                     color = Color.White
                 )
@@ -459,7 +460,7 @@ fun ButtonPanel(
                         painter = painterResource(
                             id = R.drawable.partlycloudy_day
                         ),
-                        contentDescription = "See current weather and choose position",
+                        contentDescription = stringResource(R.string.position_selection_card_description),
                         modifier = Modifier
                             .size(30.dp),
                         tint = Color.White
@@ -487,7 +488,7 @@ fun ButtonPanel(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.construction),
-                        contentDescription = "Customize Page",
+                        contentDescription = stringResource(R.string.customize_page_description),
                         modifier = Modifier.size(size = 30.dp),
                         tint = Color.White
                     )
@@ -531,7 +532,7 @@ fun PositionAndHighScoreDrawer(
                 Text(
                     modifier = Modifier
                         .padding(horizontal = 10.dp),
-                    text = "Velg kastested",
+                    text = stringResource(R.string.choose_throw_location),
                     fontSize = 20.sp,
                 )
             }
@@ -592,7 +593,7 @@ fun PositionAndHighScoreDrawer(
                         // Weather icon
                         Icon(
                             painter = painterResource(id = id),
-                            contentDescription = "Weather Icon",
+                            contentDescription = stringResource(R.string.weather_icon_description),
                             modifier = modifier
                                 .padding(end = 20.dp, top = 5.dp)
                                 .size(size = 65.dp),
@@ -612,21 +613,21 @@ fun PositionAndHighScoreDrawer(
                         // Temperature
                         Text(
                             modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = "${"%.0f".format(location.temperature)}°C",
+                            text = stringResource(R.string.temperature_display, "%.0f".format(location.temperature)),
                             fontSize = 28.sp
                         )
 
                         // Precipitation
                         Text(
                             modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = "${"%.0f".format(location.rain)}mm",
+                            text = stringResource(R.string.rain_display, "%.0f".format(location.rain)),
                             fontSize = 18.sp
                         )
 
                         // Wind speed
                         Text(
                             modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = "${"%.0f".format(location.windSpeed)}m/s",
+                            text = stringResource(R.string.wind_speed_display, "%.0f".format(location.windSpeed)),
                             fontSize = 18.sp
                         )
 
@@ -636,14 +637,14 @@ fun PositionAndHighScoreDrawer(
                             modifier = modifier
                                 .size(size = 45.dp)
                                 .rotate(location.windAngle.toFloat() + 90.toFloat()),
-                            contentDescription = "Vindretning",
+                            contentDescription = stringResource(R.string.wind_direction_arrow_description, location.windAngle.toInt()),
                         )
 
                         // Air pressure symbol
-                        var airPressureDescription = "L"
+                        var airPressureDescription = stringResource(R.string.low_air_pressure_display)
                         var airPressureColor = Color.Red
-                        if (location.airPressure > 1013) {
-                            airPressureDescription = "H"
+                        if (location.airPressure > Weather.AIR_PRESSURE_NORMAL) {
+                            airPressureDescription = stringResource(R.string.high_air_pressure_display)
                             airPressureColor = Color.Blue
                         }
 
@@ -681,7 +682,7 @@ fun PositionAndHighScoreDrawer(
                         Text(
                             modifier = modifier
                                 .padding(end = 10.dp),
-                            text = "Highscore: ${locationName.distance}km",
+                            text = stringResource(R.string.highscore_display, locationName.distance),
                             fontSize = 16.sp
                         )
 
@@ -710,7 +711,7 @@ fun PositionAndHighScoreDrawer(
                             shape = RoundedCornerShape(10),
                         ) {
                             Text(
-                                text = if (!highScoreShown) "Vis highscore" else "Skjul highscore",
+                                text = if (!highScoreShown) stringResource(R.string.show_highscore) else stringResource(R.string.hide_highscore),
                                 fontSize = 16.sp,
                             )
                         }

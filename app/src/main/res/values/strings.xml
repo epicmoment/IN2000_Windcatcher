@@ -1,3 +1,26 @@
 <resources>
     <string name="app_name">Windcatcher</string>
+    <string name="papertype_01">Skrivepapir</string>
+
+    <!--        ThrowScreen strings         -->
+    <string name="THROW">KAST</string>
+    <string name="READY">KLAR</string>
+    <string name="choose_throw_location">Velg kastested</string>
+    <string name="show_highscore">Vis highscore</string>
+    <string name="hide_highscore">Skjul highscore</string>
+
+    <string name="weather_icon_description">Weather Icon</string>
+    <string name="position_selection_card_description">See current weather and choose position</string>
+    <string name="customize_page_description">Customize Page</string>
+    <string name="wind_direction_arrow_description">Vindretningen er %d grader</string>
+
+    <string name="high_air_pressure_display">H</string>
+    <string name="low_air_pressure_display">L</string>
+    <string name="speed_display">Fart: %s</string>
+    <string name="height_display">Høyde: %s</string>
+    <string name="temperature_display">%s °C</string>
+    <string name="rain_display">%s mm</string>
+    <string name="wind_speed_display">%sm/s</string>
+    <string name="highscore_display">Highscore: %dkm</string>
+
 </resources>
