@@ -2,16 +2,15 @@ package com.example.in2000_papirfly.data
 
 import com.example.in2000_papirfly.data.database.PapirflyDatabase
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
-import com.example.in2000_papirfly.ui.viewmodels.PositionScreenViewModelFactory
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModelFactory
 
 
 class AppContainer(database: PapirflyDatabase) {
 
     // Repositories
-    val loadoutRepository = LoadoutRepository()
+    val loadoutRepository: LoadoutRepository = LoadoutRepo()
     val dataRepository = DataRepository(database)
-    val planeRepository = PlaneRepository()
+    val planeRepository: PlaneRepository = PlaneRepo()
 
 
     // ViewModel Factories
@@ -21,6 +20,4 @@ class AppContainer(database: PapirflyDatabase) {
         planeRepository = planeRepository,
         loadoutRepository = loadoutRepository,
     )
-    val positionScreenViewModelFactory = PositionScreenViewModelFactory(dataRepository)
-
 }

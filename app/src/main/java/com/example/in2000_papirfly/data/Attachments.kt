@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.data
 
+import androidx.compose.ui.graphics.Color
 import com.example.in2000_papirfly.R
 
 object Attachments {
@@ -10,20 +11,21 @@ object Attachments {
             Attachment(
                 name = "Skrivepapir",
                 description = "Påvirkes av vind og regn.",
-                icon = R.drawable.paperplane2,
+                icon = R.drawable.attachmentpaperoffice,
                 flightModifier = FlightModifier(windEffect = 0.75, rainEffect = 1.0, slowRateEffect = 1.0),
             ),
             Attachment(
                 name = "Fotopapir",
                 description = "Tung papirtype som flyr bedre i regn.",
-                icon = R.drawable.paperplane2,
+                icon = R.drawable.attachmentpaperphoto,
                 flightModifier = FlightModifier(windEffect = 0.25, weight = 1.0, rainEffect = -1.0)
             ),
             Attachment(
                 name = "Bakepapir",
                 description = "Lett papirtype som flyr bedre i høye temperaturer, men tåler regn dårlig.",
-                icon = R.drawable.paperplane2,
-                flightModifier = FlightModifier(rainEffect = 1.0, temperatureEffect = 1.0)
+                icon = R.drawable.attachmentpaperbake,
+                flightModifier = FlightModifier(rainEffect = 1.0, temperatureEffect = 1.0),
+                tint = Color(211, 176, 139)
             )
         ),
 
@@ -112,4 +114,5 @@ data class Attachment (
     val description : String,
     val icon : Int = R.drawable.paperplane2,
     val flightModifier: FlightModifier = FlightModifier(),
+    val tint : Color = Color(255, 255, 255)
 )

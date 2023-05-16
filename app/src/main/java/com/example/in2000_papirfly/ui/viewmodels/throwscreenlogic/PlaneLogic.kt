@@ -1,9 +1,15 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
-import android.util.Log
-import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.ViewModel
+import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.helpers.Vector
+import com.example.in2000_papirfly.helpers.Vector.Companion.addVectors
+import com.example.in2000_papirfly.helpers.Vector.Companion.calculateAngle
+import com.example.in2000_papirfly.helpers.Vector.Companion.calculateVector
+import com.example.in2000_papirfly.helpers.Vector.Companion.multiplyVector
+import com.example.in2000_papirfly.helpers.Vector.Companion.vectorLength
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**
@@ -13,20 +19,24 @@ import kotlin.math.*
  * */
 class PlaneLogic(
     val planeRepository : PlaneRepository,
-    val loadoutRepository: LoadoutRepository,
 ) : ViewModel() {
+
+    // Extreme and standard values for weather
+    val RAIN_MAX = 10.0
+    val AIR_PRESSURE_MIN = 983.0
+    val AIR_PRESSURE_MAX = 1033.0
+    val TEMPERATURE_MAX = 35.6
+    val TEMPERATURE_MIN = -51.4
 
     val planeState = planeRepository.planeState
     private val defaultSlowRate = 0.2
     private val planeStartHeight = 100.0
     private val defaultDropRate = 0.1 * planeStartHeight
-    private val maxPlaneStartSpeed = 20.0
     private val minPlaneScale = 0.3
     private val maxPlaneScale = 0.6
+    private val distanceMultiplier = 1000
+    private val groundedThreshold = 0.0
     val updateFrequency: Long = 1000
-    val distanceMultiplier = 1000
-    val zeroDegreeAngle = listOf(1.0, 0.0)
-    val groundedThreshold = 0.0
 
     /**
      * This method fetches the current plane state and uses the position, angle, speed
@@ -34,11 +44,10 @@ class PlaneLogic(
      * Wind and plane speeds are in meters(per second). To calculate the distance traveled the speed
      * is multiplied by a constant, distanceMultiplier (probably valued at 1000)
      */
-    suspend fun update(weather: Weather){
-
+    fun update(weather: Weather){
         // Set up
         val plane = planeRepository.planeState.value
-        Log.d("PlaneLogic.plane.pos", planeState.value.pos.toString())
+
         // Make sure plane doesn't fly if it shouldn't
         if (!plane.flying){
             planeRepository.update(
@@ -49,16 +58,11 @@ class PlaneLogic(
             )
             return
         }
-        Log.d("PlaneLogic.plane.pos after !plane.flying", planeState.value.pos.toString())
-
 
         // Calculate the modified trajectory of the plane
         val currentPlaneVector = calculateVector(plane.angle, plane.speed - calculateSpeedLoss(plane.flightModifier, plane.speed) )
         val affectedPlaneVector = calculateNewPlaneVector(currentPlaneVector, weather)
 
-        Log.d("making new plane pos", "")
-        Log.d("currentPlaneVector", currentPlaneVector.toString())
-        Log.d("affectedPlaneVector", affectedPlaneVector.toString())
         // Make new plane pos
         val newPlanePos = GeoPoint(plane.pos[0], plane.pos[1]).destinationPoint(
             vectorLength(affectedPlaneVector) * distanceMultiplier,
@@ -81,19 +85,17 @@ class PlaneLogic(
                 flying = flying
             )
         )
-        Log.d("PlaneLogic.plane.pos after everything", planeRepository.planeState.value.pos.toString())
-
     }
 
-
+    /**
+     * Calculates the size that the plane composable should be based on min and max values, and what height value of the Plane is.
+     * Returns the minPlaneScale if the height of the Plane is 0.0, and maxPlaneScale if the height is equal to the planeStartHeight.
+     * Scales linearly.
+     */
     fun getPlaneScale(): Float{
         var planeScale = (minPlaneScale + (maxPlaneScale - minPlaneScale) * (planeState.value.height / planeStartHeight)).toFloat()
         if (planeScale < minPlaneScale) planeScale = minPlaneScale.toFloat()
         return planeScale
-    }
-
-    fun planeIsFlying(): Boolean{
-        return planeRepository.planeState.value.height > 0.1
     }
 
     /** Calculates a new plane vector based on the available modifiers.
@@ -101,13 +103,12 @@ class PlaneLogic(
      *
      * **Adding functionality:** Functionality that affects plane angle or speed should added here.
      **/
-    private fun calculateNewPlaneVector(currentPlaneVector: List<Double>, weather: Weather): List<Double>{
+    private fun calculateNewPlaneVector(currentPlaneVector: Vector, weather: Weather): Vector {
         // Adjust for wind-effect
         val windVector = multiplyVector(calculateVector(weather.windAngle, weather.windSpeed), -1.0)
         val affectedWindVector = multiplyVector(windVector, calculateWindEffect())
-        var newPlaneVector = addVectors(currentPlaneVector, affectedWindVector)
 
-        return newPlaneVector
+        return addVectors(currentPlaneVector, affectedWindVector)
     }
 
     /**
@@ -118,7 +119,7 @@ class PlaneLogic(
      *
      * **Adding functionality:** Any functionality that affects the drop rate goes here.
      */
-    private fun calculateDropRate(speed: Double, weather: Weather): Double{
+    fun calculateDropRate(speed: Double, weather: Weather): Double{
         val flightModifier = planeState.value.flightModifier
 
         var newDropRate = 0.0
@@ -135,10 +136,11 @@ class PlaneLogic(
      */
     fun calculateAirPressureDropRate(airPressure: Double, flightModifier: FlightModifier): Double{
         // Setting up standard values
-        val airPressureMin = 937.1    // Lowest air pressure value we usually get
-        val airPressureMax = 1061.3   // Highest air pressure value we usually get
-        val airPressureRange = (airPressureMax - airPressureMin) / 2    // The range of values that the air pressure can change in a positive and negative direction
-        val airPressureNormal = airPressureMin + airPressureRange
+        //val airPressureMin = 937.1    // Lowest air pressure value we usually get
+        //val airPressureMax = 1061.3   // Highest air pressure value we usually get
+
+        val airPressureRange = (AIR_PRESSURE_MAX - AIR_PRESSURE_MIN) / 2    // The range of values that the air pressure can change in a positive and negative direction
+        val airPressureNormal = AIR_PRESSURE_MIN + airPressureRange
 
         val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
 
@@ -151,20 +153,15 @@ class PlaneLogic(
      */
     fun calculateRainDropRate(rain: Double, flightModifier: FlightModifier): Double{
         //val rainMax = 78.5
-        val rainMax = 10.0
-
-        return rain / rainMax * defaultDropRate * flightModifier.rainEffect
+        return rain / RAIN_MAX * defaultDropRate * flightModifier.rainEffect
     }
 
     fun calculateTemperatureDropRate(temperature: Double, flightModifier: FlightModifier): Double{
         // Consider changing this to use a system of target temperature, range and effect
-        val temperatureMax = 35.6
-        val temperatureMin = -51.4
-
         val temp = if (temperature.absoluteValue > 0){
-            temperature / temperatureMax
-        } else{
-            temperature / temperatureMin
+            temperature / TEMPERATURE_MAX
+        } else {
+            temperature / TEMPERATURE_MIN
         }
 
         return temp * defaultDropRate * -flightModifier.temperatureEffect
@@ -179,45 +176,5 @@ class PlaneLogic(
     // Wind
     fun calculateWindEffect(): Double{
         return planeState.value.flightModifier.windEffect
-    }
-
-
-    // Help methods
-
-    // This vector stuff should probably be extracted
-    fun calculateVector(angle: Double, magnitude: Double): List<Double>{
-        val radianAngle = Math.toRadians(angle)
-        val x = magnitude * cos(radianAngle)
-        val y = magnitude * cos(Math.toRadians(90.0) - radianAngle)
-        return listOf(x, y)
-    }
-
-    fun calculateAngle(vector1: List<Double>, vector2: List<Double> = zeroDegreeAngle): Double{
-        // returns the angle of a vector given in degrees
-        var newAngle =  Math.toDegrees( acos(dotProduct(vector1, vector2) / (vectorLength(vector1) * vectorLength(vector2))) )
-        if (vector1[1] < 0){
-            newAngle = 360.0 - newAngle
-        }
-        return newAngle
-    }
-
-    fun dotProduct(vector1: List<Double>, vector2: List<Double>): Double{
-        return (vector1[0] * vector2[0]) + (vector1[1] * vector2[1])
-    }
-
-    fun vectorLength(vector: List<Double>): Double{
-        return sqrt(vector[0].pow(2) + vector[1].pow(2))
-    }
-
-    fun addVectors(vector1 : List<Double>, vector2 : List<Double>): List<Double>{
-        return listOf(vector1[0] + vector2[0], vector1[1] + vector2[1])
-    }
-
-    fun subtractVectors(vector1: List<Double>, vector2: List<Double>): List<Double>{
-        return listOf(vector1[0] - vector2[0], vector1[1] - vector2[1])
-    }
-
-    fun multiplyVector(vector1: List<Double>, x: Double): List<Double>{
-        return listOf(vector1[0] * x, vector1[1] * x)
     }
 }

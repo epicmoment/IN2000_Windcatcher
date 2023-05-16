@@ -11,7 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,13 +28,11 @@ import com.example.in2000_papirfly.data.Attachment
 import com.example.in2000_papirfly.data.Attachments
 import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
+import com.example.in2000_papirfly.ui.theme.colRed
+import com.example.in2000_papirfly.ui.theme.colDarkBlue
 
-
-val colOrange = Color(224, 128, 37)
-val colBlue = Color(92, 121, 148)
-val colOrangeHighlightTransparent = Color(224, 128, 37, 175)
-val colOrangeHighlight = Color(114, 84, 52)
-val colBlack = Color(30, 45, 60)
+val colOrangeHighlightTransparent = Color(127, 44, 36, 175)
+val colOrangeHighlight = Color(102, 51, 46)
 val colTextGray = Color(195, 195, 195)
 
 
@@ -50,7 +50,7 @@ fun CustomizationScreen (
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(colBlue)
+            //.background(colBlue)
             .paint(
                 painter = painterResource(id = R.drawable.blueprint_bg),
                 contentScale = ContentScale.Crop
@@ -78,16 +78,11 @@ fun CustomizationScreen (
                         .fillMaxWidth(0.8f)
                 ) {
 
-                    /*Image(
-                        painter = painterResource(id = R.drawable.paperplane2),
-                        contentDescription = "Paper plane",
-                        modifier = Modifier.fillMaxSize(0.62f)
-                    )*/
-
                     Box(
                         modifier = Modifier.fillMaxSize(0.62f)
                     ) {
                         PlaneRender(
+                            paper = Attachments.list[0][loadoutState.value.slots[0]],
                             nose = Attachments.list[1][loadoutState.value.slots[1]],
                             wings = Attachments.list[2][loadoutState.value.slots[2]],
                             tail = Attachments.list[3][loadoutState.value.slots[3]]
@@ -102,7 +97,12 @@ fun CustomizationScreen (
 
                             AttachmentSlot(
                                 isSelected = customizeState.value.selectedSlot == i,
-                                attachment = Attachments.list[i][slotAttachment]
+                                attachment = Attachments.list[i][slotAttachment],
+                                tint = if (i != 0) {
+                                        Attachments.list[0][loadoutState.value.slots[0]].tint
+                                    } else {
+                                        Color(255, 255, 255)
+                                    }
                             ) {
                                 viewModel.setSlot(i)
                             }
@@ -129,14 +129,14 @@ fun CustomizationScreen (
 
                 Column (
                     horizontalAlignment = Alignment.CenterHorizontally
-                ){
+                ) {
 
                     Box (
                         contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .background(colBlack)
+                            .background(colDarkBlue)
                     ) {
 
                         Text(
@@ -156,7 +156,7 @@ fun CustomizationScreen (
                     }
 
                     LazyColumn(
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 20.dp),
+                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 5.dp),
                         modifier = Modifier
                             .fillMaxHeight()
                             .fillMaxWidth(0.92f)
@@ -173,12 +173,14 @@ fun CustomizationScreen (
                                 AttachmentCard(
                                     attachment = Attachments.list[customizeState.value.selectedSlot][it],
                                     isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
+                                    tint = if (customizeState.value.selectedSlot != 0) {
+                                            Attachments.list[0][loadoutState.value.slots[0]].tint
+                                        } else {
+                                            Color(255, 255, 255)
+                                        },
                                     onClickEquip = {
-
                                         viewModel.equipAttachment(customizeState.value.selectedSlot, it)
-
                                     }
-
                                 )
 
                             }
@@ -187,7 +189,7 @@ fun CustomizationScreen (
 
                     }
 
-            }
+                }
 
             }
 
@@ -206,7 +208,7 @@ fun CustomizationScreen (
                         .fillMaxWidth(0.5f)
                         .fillMaxHeight(0.7f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(colOrange)
+                        .background(colRed)
                         .clickable(onClick = onNextPage)
                 ) {
 
@@ -229,7 +231,7 @@ fun CustomizationScreen (
 }
 
 @Composable
-fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot : () -> Unit) {
+fun AttachmentSlot(isSelected: Boolean, attachment: Attachment?, tint: Color, onClickSetSlot: () -> Unit) {
 
     Box(
         modifier = Modifier
@@ -254,6 +256,7 @@ fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot
                 Image(
                     painter = painterResource(id = attachment.icon),
                     contentDescription = "Ikon",
+                    colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.8f)
                 )
             }
@@ -265,19 +268,19 @@ fun AttachmentSlot(isSelected : Boolean, attachment: Attachment?, onClickSetSlot
 }
 
 @Composable
-fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : () -> Unit) {
+fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, onClickEquip: () -> Unit) {
 
     Box (
         modifier = Modifier
             .fillMaxWidth()
-            .height(100.dp)
+            .height(90.dp)
             .padding(4.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(
                 color = if (isSelected) {
                     colOrangeHighlight
                 } else {
-                    colBlack
+                    colDarkBlue
                 }
             )
             .clickable(onClick = onClickEquip)
@@ -294,6 +297,7 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
                 Image(
                     painter = painterResource(id = attachment.icon),
                     contentDescription = "Attachment Icon",
+                    colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.85f)
                 )
             }
@@ -324,37 +328,3 @@ fun AttachmentCard (attachment: Attachment, isSelected: Boolean, onClickEquip : 
     }
 
 }
-
-/*@Composable
-fun PlaneVisual(
-    nose : Attachment,
-    wings : Attachment,
-    tail : Attachment
-) {
-
-    Box (
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-
-        Image(
-            painter = painterResource(id = tail.icon),
-            contentDescription = "Halefinne",
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Image(
-            painter = painterResource(id = wings.icon),
-            contentDescription = "Vinge",
-            modifier = Modifier.fillMaxSize()
-        )
-
-        Image(
-            painter = painterResource(id = nose.icon),
-            contentDescription = "Vinge",
-            modifier = Modifier.fillMaxSize()
-        )
-
-    }
-
-}*/

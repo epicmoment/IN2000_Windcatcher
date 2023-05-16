@@ -9,18 +9,13 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.in2000_papirfly.R
-import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polyline
-import androidx.compose.ui.graphics.Color
-import com.example.in2000_papirfly.data.ThrowPointList
-import org.osmdroid.views.overlay.Overlay
 
 // This class based on comment by grine4ka:
 // https://stackoverflow.com/a/60808815/18814731
@@ -55,14 +50,14 @@ mapView: MapView, val openBottomSheet: (Int) -> Unit
     var setThrowScreenState = {}
     var updateWeather = {}
     var moveLocation = {}
-    var rowPosition = 0
+    private var rowPosition = 0
 
-    public override fun onMarkerClickDefault(marker: Marker?, mapView: MapView?): Boolean {
+    public override fun onMarkerClickDefault(marker: Marker, mapView: MapView): Boolean {
         updateWeather()
         setThrowScreenState()
         moveLocation()
         openBottomSheet(rowPosition)
-        mapView!!.controller.animateTo(mPosition, 12.0, 1000)
+        mapView.controller.animateTo(mPosition, 12.0, 1000)
         showInfoWindow()
         return true
     }
@@ -105,82 +100,11 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
     // Hides zoom buttons
     mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
-    // Declares max and min zoom levels, and sets default zoom level
-    // maxZoomLevel 12 is good for watching the plane glide
-
+    // Declares max and min zoom levels
     mapView.maxZoomLevel = 12.0
     mapView.minZoomLevel = 6.0
 
-//    val filter = androidx.compose.ui.graphics.ColorFilter
-//    mapView.overlayManager.tilesOverlay.setColorFilter(filter.lighting(Color(0x50A9AAFF), Color.Unspecified).asAndroidColorFilter())
-
     return mapView
-}
-
-fun drawPlanePath(mapOverlay: MutableList<Overlay>, origin: GeoPoint, destination: GeoPoint) {
-    val points = listOf(origin, destination)
-    val polyline = Polyline() //TODO
-    polyline.outlinePaint.color = Color.Red.hashCode()
-    polyline.setPoints(points)
-    mapOverlay.add(polyline)
-}
-
-fun drawHighScorePath(mapOverlay: MutableList<Overlay>, points: List<GeoPoint>, throwLocation: String) {
-    val polyline = PolyLineWithThrowLocation(throwLocation) //TODO
-    polyline.outlinePaint.color = Color.Yellow.hashCode()
-    polyline.setPoints(points)
-    mapOverlay.add(polyline)
-}
-
-fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String) {
-    mapOverlay.forEach {overlay ->
-        if (overlay is PolyLineWithThrowLocation) {
-            if (overlay.throwLocation == throwLocation) {
-                mapOverlay.remove(overlay)
-            }
-        } else if (overlay is HighScoreMarker) {
-            if (overlay.throwLocation == throwLocation) {
-                mapOverlay.remove(overlay)
-            }
-        }
-    }
-}
-
-fun drawStartMarker(
-    markerFactory: (type: String) -> Marker,
-    setThrowScreenState: () -> Unit,
-    updateWeather: () -> Unit,
-    moveLocation: () -> Unit,
-    mapOverlay: MutableList<Overlay>,
-    startPos: GeoPoint, locationName: String
-): ThrowPositionMarker {
-
-    val marker: ThrowPositionMarker = markerFactory("Start") as ThrowPositionMarker
-    marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
-    marker.position = startPos
-    // This way of getting context works somehow???
-    marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.baseline_push_pin_green_48)
-    marker.title = locationName
-    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    mapOverlay.add(marker)
-
-    return marker
-}
-
-fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean): Marker {
-    val marker = markerFactory("Goal")
-
-    marker.position = markerPos
-    marker.icon =
-        ContextCompat.getDrawable(marker.infoWindow.mapView.context,
-        if (newHS) R.drawable.baseline_push_pin_48_new_hs else R.drawable.baseline_push_pin_48
-    )
-    marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
-    marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-    mapOverlay.add(marker)
-    marker.showInfoWindow()
-
-    return marker
 }
 
 @Composable
