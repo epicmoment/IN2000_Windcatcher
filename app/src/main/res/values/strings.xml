@@ -1,3 +1,68 @@
 <resources>
     <string name="app_name">Windcatcher</string>
+
+
+    <!--        Attachment strings      -->
+    <string name="papertype_01">Skrivepapir</string>
+    <string name="papertype_01_desctiption">Påvirkes av vind og regn.</string>
+    <string name="papertype_02">Fotopapir</string>
+    <string name="papertype_02_description">Tung papirtype som flyr bedre i regn.</string>
+    <string name="papertype_03">Bakepapir</string>
+    <string name="papertype_03_description">Lett papirtype som flyr bedre i høye temperaturer, men tåler regn dårlig.</string>
+
+
+    <string name="nose_01">Medium nese</string>
+    <string name="nose_01_description">Helt vanlig nese.</string>
+    <string name="nose_02">Spiss nese</string>
+    <string name="nose_02_description">Kan fly raskere, men mister lettere høyde.</string>
+    <string name="nose_03">Butt nese</string>
+    <string name="nose_03_description">Mister mindre høyde, men flyr tregere.</string>
+
+    <string name="wing_01">Medium vinger</string>
+    <string name="wing_01_description">Helt vanlige vinger.</string>
+    <string name="wing_02">Smale vinger</string>
+    <string name="wing_02_description">Flyr bedre i lavt lufttrykk.</string>
+    <string name="wing_03">Brede vinger</string>
+    <string name="wing_03_description">Flyr bedre i høyt lufttrykk.</string>
+
+    <string name="tail_01">Ingen halefinne</string>
+    <string name="tail_01_description">Påvirkes mye av vind.</string>
+    <string name="tail_02">Liten halefinne</string>
+    <string name="tail_02_description">Påvirkes mindre av vind.</string>
+    <string name="tail_03">Stor halefinne</string>
+    <string name="tail_03_description">Påvirkes lite av vind.</string>
+
+
+    <!--        MainScreen strings          -->
+    <string name="start">start</string>
+
+    <!--        CustomizationScreen strings     -->
+    <string name="attachment_icon_description">Attachment icon</string>
+    <string name="papertype">papirtype</string>
+    <string name="nose">nese</string>
+    <string name="wings">vinger</string>
+    <string name="tail">halefinne</string>
+    <string name="use">bruk</string>
+
+    <!--        ThrowScreen strings         -->
+    <string name="throw_string">kast</string>
+    <string name="ready">klar</string>
+    <string name="choose_throw_location">Velg kastested</string>
+    <string name="show_highscore">Vis highscore</string>
+    <string name="hide_highscore">Skjul highscore</string>
+
+    <string name="weather_icon_description">Weather Icon</string>
+    <string name="position_selection_card_description">See current weather and choose position</string>
+    <string name="customize_page_description">Customize Page</string>
+    <string name="wind_direction_arrow_description">Vindretningen er %d grader</string>
+
+    <string name="high_air_pressure_display">H</string>
+    <string name="low_air_pressure_display">L</string>
+    <string name="speed_display">Fart: %s</string>
+    <string name="height_display">Høyde: %s</string>
+    <string name="temperature_display">%s °C</string>
+    <string name="rain_display">%s mm</string>
+    <string name="wind_speed_display">%sm/s</string>
+    <string name="highscore_display">Highscore: %dkm</string>
+
 </resources>
