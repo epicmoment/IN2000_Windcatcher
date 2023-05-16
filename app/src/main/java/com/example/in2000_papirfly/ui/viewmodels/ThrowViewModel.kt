@@ -190,6 +190,9 @@ class ThrowViewModel(
         previousPlanePos = selectedLocation
         mapController.setCenter(selectedLocation)
 
+        // FLIGHT-LOG
+        val logPoints = mutableListOf<Pair<GeoPoint, Weather>>()
+
         // Start the coroutine that updates the plane every second
         planeFlying = viewModelScope.launch {
             // Locks map
@@ -212,11 +215,14 @@ class ThrowViewModel(
                 }
                 delay(planeLogic.updateFrequency)
                 // TODO // Await the answer for the weather call // Seems to not be needed
-
                 // Draws the plane path
                 drawPlanePath(mapOverlay, previousPlanePos, nextPlanePos)
                 // Saves flight path point
                 flightPath.add(nextPlanePos)
+
+                // FLIGHT-LOG
+                val logPoint = Pair<GeoPoint, Weather>(previousPlanePos, weather.copy())
+                logPoints.add(logPoint)
 
                 // This fixes the map glitching
                 previousPlanePos = GeoPoint(planeState.value.pos[0], planeState.value.pos[1])
@@ -245,8 +251,17 @@ class ThrowViewModel(
             // Unlock map
             setInteraction(true)
 
+
+            // FLIGHT-LOG
+            showLog(logPoints)
+
+            // Landing state?
             setThrowScreenState(ThrowScreenState.MovingMap)
         }
+    }
+
+    private fun showLog(logPoints: MutableList<Pair<GeoPoint, Weather>>) {
+        TODO("Not yet implemented")
     }
 
     private fun updateHighScore(

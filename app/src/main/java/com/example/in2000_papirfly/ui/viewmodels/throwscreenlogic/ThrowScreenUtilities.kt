@@ -1,5 +1,6 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
+import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.core.content.ContextCompat
 import com.example.in2000_papirfly.R
@@ -75,14 +76,15 @@ object ThrowScreenUtilities {
     fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean): Marker {
         val marker = markerFactory("Goal")
 
+        Log.d("MARKER", "Drawing goal marker")
+
         marker.position = markerPos
         marker.icon =
             ContextCompat.getDrawable(marker.infoWindow.mapView.context,
                 if (newHS) R.drawable.pin_highscore else R.drawable.pin_destination
             )
         marker.title = "${(startPos.distanceToAsDouble(markerPos) / 1000).toInt()}km"
-//        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
-        marker.setAnchor(30f, 30f)
+        marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         mapOverlay.add(marker)
         marker.showInfoWindow()
 
