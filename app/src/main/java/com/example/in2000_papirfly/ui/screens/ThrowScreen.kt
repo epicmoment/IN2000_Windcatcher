@@ -36,13 +36,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_NORMAL
+import com.example.in2000_papirfly.ui.composables.FlightLog
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
-import com.example.in2000_papirfly.ui.theme.colBlue
 import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
@@ -451,7 +450,7 @@ fun ButtonPanel(
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.throw_string).uppercase() else stringResource(R.string.ready),
+                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.throw_string).uppercase() else stringResource(R.string.ready).uppercase(),
                     fontSize = 35.sp,
                     color = Color.White
                 )

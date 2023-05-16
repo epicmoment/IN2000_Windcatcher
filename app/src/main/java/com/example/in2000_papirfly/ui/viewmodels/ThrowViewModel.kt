@@ -75,7 +75,7 @@ class ThrowViewModel(
 
     init {
         updateOnMoveMap {
-            if (getThrowScreenState().value !is ThrowScreenState.MovingMap && getThrowScreenState().value !is ThrowScreenState.ViewingLog) setThrowScreenState(
+            if (throwScreenState.value !is ThrowScreenState.MovingMap && throwScreenState.value !is ThrowScreenState.ViewingLog) setThrowScreenState(
                 ThrowScreenState.MovingMap
             )
         }
@@ -298,7 +298,6 @@ class ThrowViewModel(
         }
 
         setThrowScreenState(ThrowScreenState.MovingMap)
-
     }
 
     private fun updateHighScore(

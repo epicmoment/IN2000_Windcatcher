@@ -21,9 +21,9 @@
     <string name="wing_01">Medium vinger</string>
     <string name="wing_01_description">Helt vanlige vinger.</string>
     <string name="wing_02">Smale vinger</string>
-    <string name="wing_02_description">Flyr bedre i lavt lufttrykk.</string>
+    <string name="wing_02_description">Flyr bedre i høyt lufttrykk.</string>
     <string name="wing_03">Brede vinger</string>
-    <string name="wing_03_description">Flyr bedre i høyt lufttrykk.</string>
+    <string name="wing_03_description">Flyr bedre i lavt lufttrykk.</string>
 
     <string name="tail_01">Ingen halefinne</string>
     <string name="tail_01_description">Påvirkes mye av vind.</string>

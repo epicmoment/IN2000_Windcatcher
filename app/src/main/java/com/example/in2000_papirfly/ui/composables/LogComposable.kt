@@ -1,5 +1,6 @@
-package com.example.in2000_papirfly.ui.screens
+package com.example.in2000_papirfly.ui.composables
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,7 +46,7 @@ fun FlightLog (
     val logState = logStateParam.collectAsState()
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden ) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden) {
             onBack()
         }
     }
@@ -126,6 +127,7 @@ fun FlightLog (
 
 }
 
+@SuppressLint("DiscouragedApi")
 @Composable
 fun PathEntryCard(
     showTopLine : Boolean,
