@@ -10,16 +10,10 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-//import com.example.in2000_papirfly.ui.screens.MapView
-import com.example.in2000_papirfly.ui.screens.NavScreen
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
-import org.osmdroid.util.GeoPoint
-import androidx.activity.viewModels
-import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
+import com.example.in2000_papirfly.ui.screens.NavScreen
 
 
 class MainActivity : ComponentActivity() {
@@ -48,19 +42,16 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     NavScreen()
-                    //MapView(
-                    //    startLocation = GeoPoint(59.9441, 10.7191)
-                    //)
+                    /*FlightLog(
+                        distance = 120,
+                        logPoints = mutableListOf(
+                            Pair(GeoPoint(0.0, 0.0,), Weather(windSpeed = 20.0))
+                        )
+                    ) {
+
+                    }*/
                 }
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    IN2000_PapirflyTheme {
-
     }
 }

@@ -36,11 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_NORMAL
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
+import com.example.in2000_papirfly.ui.theme.colBlue
+import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -79,6 +82,15 @@ fun ThrowScreen(
         }
     }
 
+    val logBottomSheetState = rememberStandardBottomSheetState(
+        initialValue = SheetValue.Hidden,
+        skipHiddenState = false
+    )
+
+    val scaffoldState = rememberBottomSheetScaffoldState(
+        bottomSheetState = logBottomSheetState
+    )
+
     // Initializes the view model
     val throwViewModel = remember {
         appContainer.throwViewModelFactory.newViewModel(
@@ -88,7 +100,12 @@ fun ThrowScreen(
             openBottomSheet = { position: Int ->
                 animateRow(position)
             },
-            changeLocation = changeLocation
+            changeLocation = changeLocation,
+            onShowLog = {
+                scope.launch {
+                    scaffoldState.bottomSheetState.partialExpand()
+                }
+            }
         )
     }
 
@@ -127,10 +144,12 @@ fun ThrowScreen(
     )
 
     // Flight info box
-    FlightInfoBox(
-        context = context,
-        throwViewModel = throwViewModel,
-    )
+    if (throwScreenState != ThrowScreenState.ViewingLog) {
+        FlightInfoBox(
+            context = context,
+            throwViewModel = throwViewModel,
+        )
+    }
 
     // Circular Slider - only shown when screen state is set to "Throwing"
     if (throwScreenState == ThrowScreenState.Throwing) {
@@ -173,6 +192,17 @@ fun ThrowScreen(
             changeLocation = changeLocation,
         )
     }
+
+    FlightLog(
+        logStateParam = throwViewModel.logState,
+        scaffoldState = scaffoldState,
+        centerMap = { pos ->
+            mapViewState.controller.animateTo(pos)
+        }
+    ) {
+        throwViewModel.closeLog()
+    }
+
 }
 
 @Composable
@@ -182,6 +212,7 @@ fun showPlane(throwScreenState: ThrowScreenState): Boolean{
         is ThrowScreenState.Flying -> true
         is ThrowScreenState.MovingMap -> false
         is ThrowScreenState.ChoosingPosition -> false
+        is ThrowScreenState.ViewingLog -> false
     }
     return value
 }
@@ -310,7 +341,7 @@ fun FlightInfoBox(
             modifier = Modifier
                 .fillMaxSize(0.8f)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0, 0, 0, 100)),
+                .background(colBlueTransparent),
         ) {
             // Column for positioning the info elements correctly
             Column(

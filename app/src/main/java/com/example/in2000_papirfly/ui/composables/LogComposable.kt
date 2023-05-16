@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,63 +9,102 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.LogState
+import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.theme.colDarkBlue
+import com.example.in2000_papirfly.ui.theme.colGold
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.osmdroid.util.GeoPoint
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TempLogScreen ( onBack : () -> Unit) {
+fun FlightLog (
+    logStateParam: StateFlow<LogState>,
+    scaffoldState: BottomSheetScaffoldState,
+    centerMap: (GeoPoint) -> Unit,
+    onBack : () -> Unit
+) {
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(180, 180, 180))
-            .clickable { onBack() }
-    )
+    val logState = logStateParam.collectAsState()
 
+    LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
+        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden ) {
+            onBack()
+        }
+    }
 
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState()
 
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 180.dp,
-        sheetContainerColor = Color(0, 20, 50, 100),
+        sheetContainerColor = colBlueTransparent,
         sheetContent = {
 
             Column (
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.6f)
+                    .fillMaxHeight(0.5f)
             ) {
+
+                Box (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = logState.value.distance.toString() + " km",
+                        color = if (logState.value.newHS) colGold else Color.White,
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clickable {
+                                onBack()
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.hide()
+                                }
+                            }
+                    )
+                }
 
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth(0.9f)
                 ) {
 
-                    items(10) {
+                    items(logState.value.logPoints.size) {
 
                         Box (
                             modifier = Modifier.clickable {
                                 scope.launch {
-                                    scaffoldState.bottomSheetState.partialExpand()
+                                    //scaffoldState.bottomSheetState.partialExpand()
+                                    centerMap(logState.value.logPoints[it].first)
                                 }
                             }
                         ) {
                             PathEntryCard(
-                                i = it,
                                 showTopLine = it > 0,
-                                showBottomLine = it < 9
+                                showBottomLine = it < logState.value.logPoints.size-1,
+                                logPoint = logState.value.logPoints[it]
                             )
                         }
 
@@ -80,22 +120,22 @@ fun TempLogScreen ( onBack : () -> Unit) {
 
         }
 
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxHeight()
-                .background(Color(100, 200, 140))
-        ) {
-            Text("Map her")
-        }
+    ) {
+
     }
 
 }
 
 @Composable
-fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
+fun PathEntryCard(
+    showTopLine : Boolean,
+    showBottomLine : Boolean,
+    logPoint : Pair<GeoPoint, Weather>
+) {
 
-    // Paddingbeholder
+    val weather = logPoint.second
+
+    // Padding
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
@@ -109,7 +149,6 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                 .fillMaxSize()
         ){
 
-            // Sirkelholder
             Box (
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -122,28 +161,33 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                     modifier = Modifier.fillMaxSize()
                 ) {
 
-                    // Top Line
                     Box (
                         modifier = Modifier
                             .fillMaxHeight(0.5f)
                             .width(7.dp)
                             .background(
-                                if (showTopLine) {colRed} else {Color.Transparent}
+                                if (showTopLine) {
+                                    colRed
+                                } else {
+                                    Color.Transparent
+                                }
                             )
                     )
 
-                    // Bottom Line
                     Box (
                         modifier = Modifier
                             .fillMaxHeight()
                             .width(7.dp)
                             .background(
-                                if (showBottomLine) {colRed} else {Color.Transparent}
+                                if (showBottomLine) {
+                                    colRed
+                                } else {
+                                    Color.Transparent
+                                }
                             )
                     )
                 }
 
-                // Sirkel
                 Canvas(
                     modifier = Modifier.size(25.dp),
                     onDraw = {
@@ -170,7 +214,29 @@ fun PathEntryCard(i : Int, showTopLine : Boolean, showBottomLine : Boolean) {
                     .background(colDarkBlue)
             ) {
 
-                Text(i.toString())
+
+                Row (
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier
+                        .fillMaxWidth()
+
+                ){
+
+                    Text(weather.windSpeed.toString())
+
+                    Image(
+                        painter = painterResource(
+                            id = LocalContext.current.resources.getIdentifier(
+                                weather.icon,
+                                "drawable",
+                                LocalContext.current.packageName
+                            )
+                        ),
+                        contentDescription = "ikon"
+                    )
+
+                }
+
 
             }
 
