@@ -35,10 +35,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
+import com.example.in2000_papirfly.ui.theme.colBlue
+import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
@@ -139,10 +142,12 @@ fun ThrowScreen(
     )
 
     // Flight info box
-    FlightInfoBox(
-        context = context,
-        throwViewModel = throwViewModel,
-    )
+    if (throwScreenState != ThrowScreenState.ViewingLog) {
+        FlightInfoBox(
+            context = context,
+            throwViewModel = throwViewModel,
+        )
+    }
 
     // Circular Slider - only shown when screen state is set to "Throwing"
     if (throwScreenState == ThrowScreenState.Throwing) {
@@ -315,11 +320,11 @@ fun FlightInfoBox(
     val planeState = throwViewModel.planeState.collectAsState().value
 
     var airPressureDescription = "L"
-    var airPressureColor = Color.Red
+    var airPressureColor = colRed
 
     if (throwViewModel.weather.airPressure > 1013) {
         airPressureDescription = "H"
-        airPressureColor = Color.Blue
+        airPressureColor = colBlue
     }
 
     // Invisible box filling the entire screen
@@ -334,7 +339,7 @@ fun FlightInfoBox(
             modifier = Modifier
                 .fillMaxSize(0.8f)
                 .clip(RoundedCornerShape(14.dp))
-                .background(Color(0, 0, 0, 100)),
+                .background(colBlueTransparent),
         ) {
             // Column for positioning the info elements correctly
             Column(

@@ -18,11 +18,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.data.Weather
 import com.example.in2000_papirfly.data.LogState
+import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.theme.colDarkBlue
+import com.example.in2000_papirfly.ui.theme.colGold
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
@@ -50,7 +55,7 @@ fun FlightLog (
     BottomSheetScaffold(
         scaffoldState = scaffoldState,
         sheetPeekHeight = 180.dp,
-        sheetContainerColor = Color(0, 20, 50, 100),
+        sheetContainerColor = colBlueTransparent,
         sheetContent = {
 
             Column (
@@ -60,17 +65,26 @@ fun FlightLog (
                     .fillMaxHeight(0.5f)
             ) {
 
-                //TODO: Fix
-                Text(
-                    text = logState.value.distance.toString(),
+                Box (
                     modifier = Modifier
-                        .clickable {
-                            onBack()
-                            scope.launch {
-                                scaffoldState.bottomSheetState.hide()
+                        .fillMaxWidth()
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = logState.value.distance.toString() + " km",
+                        color = if (logState.value.newHS) colGold else Color.White,
+                        fontFamily = FontFamily.SansSerif,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .clickable {
+                                onBack()
+                                scope.launch {
+                                    scaffoldState.bottomSheetState.hide()
+                                }
                             }
-                        }
-                )
+                    )
+                }
 
                 LazyColumn(
                     modifier = Modifier
