@@ -12,6 +12,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.in2000_papirfly.R
@@ -52,7 +53,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = "START",
+                    text = stringResource(R.string.start).uppercase(),
                     fontSize = 40.sp,
                     color = Color.White
                 )
@@ -93,7 +94,7 @@ fun MainScreen(onNextPage : () -> Unit, onCustomizePage : () -> Unit) {
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.construction),
-                        contentDescription = "Customize Page",
+                        contentDescription = stringResource(R.string.customize_page_description),
                         modifier = Modifier.size(size = 30.dp),
                         tint = Color.White
                     )

@@ -10,6 +10,11 @@ import com.example.in2000_papirfly.helpers.Vector.Companion.calculateAngle
 import com.example.in2000_papirfly.helpers.Vector.Companion.calculateVector
 import com.example.in2000_papirfly.helpers.Vector.Companion.multiplyVector
 import com.example.in2000_papirfly.helpers.Vector.Companion.vectorLength
+import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_MAX
+import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_MIN
+import com.example.in2000_papirfly.helpers.WeatherConstants.RAIN_MAX
+import com.example.in2000_papirfly.helpers.WeatherConstants.TEMPERATURE_MAX
+import com.example.in2000_papirfly.helpers.WeatherConstants.TEMPERATURE_MIN
 import org.osmdroid.util.GeoPoint
 import kotlin.math.*
 /**
@@ -20,13 +25,6 @@ import kotlin.math.*
 class PlaneLogic(
     val planeRepository : PlaneRepository,
 ) : ViewModel() {
-
-    // Extreme and standard values for weather
-    val RAIN_MAX = 10.0
-    val AIR_PRESSURE_MIN = 983.0
-    val AIR_PRESSURE_MAX = 1033.0
-    val TEMPERATURE_MAX = 35.6
-    val TEMPERATURE_MIN = -51.4
 
     val planeState = planeRepository.planeState
     private val defaultSlowRate = 0.2

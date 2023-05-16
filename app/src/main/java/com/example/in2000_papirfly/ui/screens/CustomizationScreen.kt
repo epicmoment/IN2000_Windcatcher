@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -141,10 +142,10 @@ fun CustomizationScreen (
 
                         Text(
                             text = when (customizeState.value.selectedSlot) {
-                                0 -> "PAPIRTYPE"
-                                1 -> "NESE"
-                                2 -> "VINGER"
-                                else -> "HALEFINNE"
+                                0 -> stringResource(R.string.papertype).uppercase()
+                                1 -> stringResource(R.string.nose).uppercase()
+                                2 -> stringResource(R.string.wings).uppercase()
+                                else -> stringResource(R.string.tail).uppercase()
                             },
                             color = Color.White,
                             fontFamily = FontFamily.SansSerif,
@@ -213,7 +214,7 @@ fun CustomizationScreen (
                 ) {
 
                     Text(
-                        text = "BRUK",
+                        text = stringResource(R.string.use).uppercase(),
                         color = Color.White,
                         fontFamily = FontFamily.SansSerif,
                         fontSize = 36.sp,
@@ -255,7 +256,7 @@ fun AttachmentSlot(isSelected: Boolean, attachment: Attachment?, tint: Color, on
             if (attachment != null) {
                 Image(
                     painter = painterResource(id = attachment.icon),
-                    contentDescription = "Ikon",
+                    contentDescription = stringResource(attachment.description),
                     colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.8f)
                 )
@@ -296,7 +297,7 @@ fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, on
             ){
                 Image(
                     painter = painterResource(id = attachment.icon),
-                    contentDescription = "Attachment Icon",
+                    contentDescription = stringResource(R.string.attachment_icon_description),
                     colorFilter = ColorFilter.tint(color = tint, blendMode = BlendMode.Modulate),
                     modifier = Modifier.fillMaxSize(0.85f)
                 )
@@ -306,14 +307,14 @@ fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, on
                 modifier = Modifier.padding(8.dp)
             ) {
                 Text(
-                    text = attachment.name.uppercase(),
+                    text = stringResource(attachment.name).uppercase(),
                     color = Color.White,
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = attachment.description,
+                    text = stringResource(attachment.description),
                     color = colTextGray,
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 14.sp,
