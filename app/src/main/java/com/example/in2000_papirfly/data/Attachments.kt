@@ -1,28 +1,34 @@
 package com.example.in2000_papirfly.data
 
+import android.content.res.Resources
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.core.content.res.TypedArrayUtils.getString
+import androidx.core.content.res.TypedArrayUtils.getText
+import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 
 object Attachments {
+
     val list : List<List<Attachment>> = listOf(
 
         // Papirtype
         listOf(
             Attachment(
-                name = "Skrivepapir",
-                description = "Påvirkes av vind og regn.",
+                name = R.string.papertype_01,
+                description = R.string.papertype_01_desctiption,
                 icon = R.drawable.attachmentpaperoffice,
                 flightModifier = FlightModifier(windEffect = 0.75, rainEffect = 1.0, slowRateEffect = 1.0),
             ),
             Attachment(
-                name = "Fotopapir",
-                description = "Tung papirtype som flyr bedre i regn.",
+                name = R.string.papertype_02,
+                description = R.string.papertype_02_description,
                 icon = R.drawable.attachmentpaperphoto,
                 flightModifier = FlightModifier(windEffect = 0.25, weight = 1.0, rainEffect = -1.0)
             ),
             Attachment(
-                name = "Bakepapir",
-                description = "Lett papirtype som flyr bedre i høye temperaturer, men tåler regn dårlig.",
+                name = R.string.papertype_03,
+                description = R.string.papertype_03_description,
                 icon = R.drawable.attachmentpaperbake,
                 flightModifier = FlightModifier(rainEffect = 1.0, temperatureEffect = 1.0),
                 tint = Color(211, 176, 139)
@@ -33,22 +39,22 @@ object Attachments {
         listOf(
 
             Attachment(
-                name = "Medium Nese",
-                description = "Helt vanlig nese.",
+                name = R.string.nose_01,
+                description = R.string.nose_01_description,
                 icon = R.drawable.attachmentnosenormal,
                 flightModifier = FlightModifier(slowRateEffect = 1.0)
             ),
 
             Attachment(
-                name = "Spiss Nese",
-                description = "Kan fly raskere, men mister lettere høyde",
+                name = R.string.nose_02,
+                description = R.string.nose_02_description,
                 icon = R.drawable.attachmentnosenarrow,
                 flightModifier = FlightModifier(weight = 0.5, slowRateEffect = 0.1)
             ),
 
             Attachment(
-                name = "Butt Nese",
-                description = "Mister mindre høyde, men flyr tregere",
+                name = R.string.nose_03,
+                description = R.string.nose_03_description,
                 icon = R.drawable.attachmentempty,
                 flightModifier = FlightModifier(weight = 0.1, slowRateEffect = 1.0)
 
@@ -60,21 +66,21 @@ object Attachments {
         listOf(
 
             Attachment(
-                name = "Medium Vinger",
-                description = "Helt vanlige vinger.",
+                name = R.string.nose_01,
+                description = R.string.nose_01_description,
                 icon = R.drawable.attachmentwingsnormal
             ),
 
             Attachment(
-                name = "Smale Vinger",
-                description = "Flyr bedre i lavt lufttrykk",
+                name = R.string.nose_02,
+                description = R.string.nose_02_description,
                 icon = R.drawable.attachmentwingsnarrow,
                 flightModifier = FlightModifier(airPressureEffect = 1.0)
             ),
 
             Attachment(
-                name = "Brede vinger",
-                description = "Flyr bedre i høyt lufttrykk",
+                name = R.string.nose_03,
+                description = R.string.nose_03_description,
                 icon = R.drawable.attachmentwingswide,
                 flightModifier = FlightModifier(airPressureEffect = -1.0)
             )
@@ -85,22 +91,22 @@ object Attachments {
         listOf(
 
             Attachment(
-                name = "Ingen Halefinne",
-                description = "Påvirkes mye av vind.",
+                name = R.string.tail_01,
+                description = R.string.tail_01_description,
                 icon = R.drawable.attachmentempty,
                 flightModifier = FlightModifier(windEffect = 0.5)
             ),
 
             Attachment(
-                name = "Liten Halefinne",
-                description = "Påvirkes mindre av vind.",
+                name = R.string.tail_02,
+                description = R.string.tail_02_description,
                 icon = R.drawable.attachmentfinsmall,
                 flightModifier = FlightModifier(windEffect = 0.25, slowRateEffect = -0.1)
             ),
 
             Attachment(
-                name = "Stor Halefinne",
-                description = "Påvirkes lite av vind.",
+                name = R.string.tail_03,
+                description = R.string.tail_03_description,
                 icon = R.drawable.attachmentfinlarge,
                 flightModifier = FlightModifier(windEffect = 0.1, slowRateEffect = -0.2)
             )
@@ -110,8 +116,8 @@ object Attachments {
 }
 
 data class Attachment (
-    val name : String,
-    val description : String,
+    val name : Int,
+    val description : Int,
     val icon : Int = R.drawable.paperplane2,
     val flightModifier: FlightModifier = FlightModifier(),
     val tint : Color = Color(255, 255, 255)

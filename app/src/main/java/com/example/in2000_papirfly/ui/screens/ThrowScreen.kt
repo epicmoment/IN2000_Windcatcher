@@ -420,7 +420,7 @@ fun ButtonPanel(
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.THROW) else stringResource(R.string.READY),
+                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.throw_string).uppercase() else stringResource(R.string.ready),
                     fontSize = 35.sp,
                     color = Color.White
                 )
