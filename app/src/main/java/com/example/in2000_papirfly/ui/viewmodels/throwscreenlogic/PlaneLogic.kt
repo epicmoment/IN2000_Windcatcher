@@ -145,7 +145,8 @@ class PlaneLogic(
         // if gaining height is not allowed, we cap the drop rate at the minDropRate value and return tht if we would get anything below
         // This is a cheap hack and should be done fundamentally differently by making the modifier effect calculations combined naturally cap out at the minimum
         // now there are many evaluations that result in the minimum possible drop rate, which makes for less distinct choices
-        var result = round((flightModifier.weight * defaultDropRate) + newDropRate)
+
+        var result = round((flightModifier.weight * defaultDropRate) + (newDropRate * defaultDropRate))
         if (!gainHeightAllowed && result < minDropRate){
             result = minDropRate
         }
@@ -158,14 +159,11 @@ class PlaneLogic(
      * https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder
      */
     fun calculateAirPressureDropRate(airPressure: Double, flightModifier: FlightModifier): Double{
-        // Setting up standard values
-        //val airPressureMin = 937.1    // Lowest air pressure value we usually get
-        //val airPressureMax = 1061.3   // Highest air pressure value we usually get
-
         val airPressureRange = (AIR_PRESSURE_MAX - AIR_PRESSURE_MIN) / 2    // The range of values that the air pressure can change in a positive and negative direction
         val airPressureNormal = AIR_PRESSURE_MIN + airPressureRange
 
-        val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
+        //val airPressureDropRate = defaultDropRate * (airPressure - airPressureNormal) / airPressureRange
+        val airPressureDropRate = (airPressure - airPressureNormal) / airPressureRange
 
         return airPressureDropRate * -flightModifier.airPressureEffect
     }
@@ -175,8 +173,8 @@ class PlaneLogic(
      * https://no.wikipedia.org/wiki/Norske_v%C3%A6rrekorder
      */
     fun calculateRainDropRate(rain: Double, flightModifier: FlightModifier): Double{
-        //val rainMax = 78.5
-        return rain / RAIN_MAX * defaultDropRate * flightModifier.rainEffect
+        return rain / RAIN_MAX * flightModifier.rainEffect
+        //return rain / RAIN_MAX * defaultDropRate * flightModifier.rainEffect
     }
 
     fun calculateTemperatureDropRate(temperature: Double, flightModifier: FlightModifier): Double{
@@ -187,7 +185,8 @@ class PlaneLogic(
             temperature / TEMPERATURE_MIN
         }
 
-        return temp * defaultDropRate * -flightModifier.temperatureEffect
+        //return temp * defaultDropRate * -flightModifier.temperatureEffect
+        return temp * -flightModifier.temperatureEffect
     }
 
 
