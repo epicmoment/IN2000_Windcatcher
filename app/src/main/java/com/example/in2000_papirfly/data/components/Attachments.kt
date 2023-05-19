@@ -70,14 +70,14 @@ object Attachments {
                 name = R.string.wing_02,
                 description = R.string.wing_02_description,
                 icon = R.drawable.attachmentwingsnarrow,
-                flightModifier = FlightModifier(airPressureEffect = -1.0)
+                flightModifier = FlightModifier(airPressureEffect = 1.0)
             ),
 
             Attachment(
                 name = R.string.wing_03,
                 description = R.string.wing_03_description,
                 icon = R.drawable.attachmentwingswide,
-                flightModifier = FlightModifier(airPressureEffect = 1.0)
+                flightModifier = FlightModifier(airPressureEffect = -1.0)
             )
 
         ),

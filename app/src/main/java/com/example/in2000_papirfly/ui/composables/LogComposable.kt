@@ -1,6 +1,7 @@
 package com.example.in2000_papirfly.ui.composables
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -30,6 +31,7 @@ import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.theme.colDarkBlue
 import com.example.in2000_papirfly.ui.theme.colGold
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
 
@@ -45,10 +47,16 @@ fun FlightLog (
 ) {
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        if (scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden && uiState.uiState is ThrowScreenState.ViewingLog) {
+        delay(100)
+        Log.d("Log", "LogState: ${scaffoldState.bottomSheetState.currentValue}")
+        if (
+            scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden &&
+            uiState.uiState is ThrowScreenState.ViewingLog
+        ) {
             onBack()
         }
     }
+
 
     val scope = rememberCoroutineScope()
 
