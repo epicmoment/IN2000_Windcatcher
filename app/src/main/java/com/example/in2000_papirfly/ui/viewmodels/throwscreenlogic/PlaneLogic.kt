@@ -123,10 +123,24 @@ class PlaneLogic(
     fun calculateDropRate(weather: Weather): Double{
         val flightModifier = planeState.value.flightModifier
 
+        val dropRates = listOf(
+            {calculateAirPressureDropRate(weather.airPressure, flightModifier)},
+            {calculateRainDropRate(weather.rain, flightModifier)},
+            {calculateTemperatureDropRate(weather.temperature, flightModifier)}
+        )
+
+        val value = 1.0 / dropRates.size
+        var newDropRate = 0.0
+        for (dropRate: () -> Double in dropRates){
+            newDropRate += dropRate() * value
+        }
+
+        /*
         var newDropRate = 0.0
         newDropRate += calculateAirPressureDropRate(weather.airPressure, flightModifier)
         newDropRate += calculateRainDropRate(weather.rain, flightModifier)
         newDropRate += calculateTemperatureDropRate(weather.temperature, flightModifier)
+         */
 
         // if gaining height is not allowed, we cap the drop rate at the minDropRate value and return tht if we would get anything below
         // This is a cheap hack and should be done fundamentally differently by making the modifier effect calculations combined naturally cap out at the minimum
