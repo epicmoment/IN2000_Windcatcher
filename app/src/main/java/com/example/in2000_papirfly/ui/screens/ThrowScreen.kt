@@ -85,7 +85,7 @@ fun ThrowScreen(
     }
 
     val logBottomSheetState = rememberStandardBottomSheetState(
-        initialValue = SheetValue.Hidden,
+        initialValue = SheetValue.PartiallyExpanded,
         skipHiddenState = false
     )
 
@@ -103,11 +103,6 @@ fun ThrowScreen(
                 animateRow(position)
             },
             changeLocation = changeLocation,
-            onShowLog = {
-                scope.launch {
-                    scaffoldState.bottomSheetState.partialExpand()
-                }
-            }
         )
     }
 
@@ -200,7 +195,6 @@ fun ThrowScreen(
 
     // Flight log drawer
     if (throwScreenState.uiState == ThrowScreenState.ViewingLog) {
-        mapViewState.invalidate()
         FlightLog(
             logState = throwScreenState.logState,
             scaffoldState = scaffoldState,
@@ -210,6 +204,8 @@ fun ThrowScreen(
             uiState = throwScreenState
         ) {
             throwViewModel.closeLog()
+            scope.launch { scaffoldState.bottomSheetState.partialExpand() }
+
         }
     }
 }

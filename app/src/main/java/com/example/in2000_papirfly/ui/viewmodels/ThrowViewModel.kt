@@ -43,7 +43,6 @@ class ThrowViewModel(
     val weatherRepository: DataBaseContentNegotiator,
     val planeRepository: PlaneRepository,
     val loadOutRepository: LoadOutRepository,
-    val onShowLog : () -> Unit
 ): ViewModel() {
 
     /**
@@ -283,7 +282,7 @@ class ThrowViewModel(
     private fun showLog(
         distance: Int,
         newHS: Boolean,
-        logPoints: MutableList<Pair<GeoPoint, Weather>>
+        logPoints: MutableList<Pair<GeoPoint, Weather>>,
     ) {
         viewModelScope.launch {
             _uiState.update {
@@ -297,11 +296,11 @@ class ThrowViewModel(
                 )
             }
         }
-
-        onShowLog()
     }
 
     fun closeLog() {
+        Log.d("Log", "Closing log")
+
         val newLogState = LogState(
             isVisible = false,
             distance = uiState.value.logState.distance,
@@ -420,7 +419,6 @@ class ThrowViewModelFactory(
         mapViewState: DisableMapView,
         openBottomSheet: (Int) -> Unit,
         changeLocation: (locationPoint: GeoPoint, locationName: String) -> Unit,
-        onShowLog : () -> Unit
 
     ): ThrowViewModel{
         return ThrowViewModel(
@@ -461,7 +459,6 @@ class ThrowViewModelFactory(
             planeRepository = planeRepository,
             weatherRepository = weatherRepository,
             loadOutRepository = loadOutRepository,
-            onShowLog = onShowLog
         )
     }
 }
