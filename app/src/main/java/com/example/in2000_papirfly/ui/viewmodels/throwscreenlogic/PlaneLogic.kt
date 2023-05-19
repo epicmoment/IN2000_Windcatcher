@@ -37,7 +37,7 @@ class PlaneLogic(
     val updateFrequency: Long = 1000
 
     private val gainHeightAllowed = false
-    private val minDropRate = 2.0
+    private val minDropRate = 1.0
 
     /**
      * This method fetches the current plane state and uses the position, angle, speed
