@@ -25,8 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
-import com.example.in2000_papirfly.data.Attachment
-import com.example.in2000_papirfly.data.Attachments
+import com.example.in2000_papirfly.data.components.Attachment
+import com.example.in2000_papirfly.data.components.Attachments
 import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
 import com.example.in2000_papirfly.ui.theme.colRed
@@ -46,7 +46,7 @@ fun CustomizationScreen (
     //val appContainer = (LocalContext.current.applicationContext as PapirflyApplication).appContainer
 
     val customizeState = viewModel.customizeState.collectAsState()
-    val loadoutState = viewModel.loadoutState.collectAsState()
+    val loadOutState = viewModel.loadOutState.collectAsState()
 
     Box(
         modifier = Modifier
@@ -83,10 +83,10 @@ fun CustomizationScreen (
                         modifier = Modifier.fillMaxSize(0.62f)
                     ) {
                         PlaneRender(
-                            paper = Attachments.list[0][loadoutState.value.slots[0]],
-                            nose = Attachments.list[1][loadoutState.value.slots[1]],
-                            wings = Attachments.list[2][loadoutState.value.slots[2]],
-                            tail = Attachments.list[3][loadoutState.value.slots[3]]
+                            paper = Attachments.list[0][loadOutState.value.slots[0]],
+                            nose = Attachments.list[1][loadOutState.value.slots[1]],
+                            wings = Attachments.list[2][loadOutState.value.slots[2]],
+                            tail = Attachments.list[3][loadOutState.value.slots[3]]
                         )
                     }
 
@@ -94,13 +94,13 @@ fun CustomizationScreen (
 
                         for (i in 0..3) {
 
-                            val slotAttachment = loadoutState.value.slots[i]
+                            val slotAttachment = loadOutState.value.slots[i]
 
                             AttachmentSlot(
                                 isSelected = customizeState.value.selectedSlot == i,
                                 attachment = Attachments.list[i][slotAttachment],
                                 tint = if (i != 0) {
-                                        Attachments.list[0][loadoutState.value.slots[0]].tint
+                                        Attachments.list[0][loadOutState.value.slots[0]].tint
                                     } else {
                                         Color(255, 255, 255)
                                     }
@@ -173,9 +173,9 @@ fun CustomizationScreen (
 
                                 AttachmentCard(
                                     attachment = Attachments.list[customizeState.value.selectedSlot][it],
-                                    isSelected = loadoutState.value.slots[customizeState.value.selectedSlot] == it,
+                                    isSelected = loadOutState.value.slots[customizeState.value.selectedSlot] == it,
                                     tint = if (customizeState.value.selectedSlot != 0) {
-                                            Attachments.list[0][loadoutState.value.slots[0]].tint
+                                            Attachments.list[0][loadOutState.value.slots[0]].tint
                                         } else {
                                             Color(255, 255, 255)
                                         },

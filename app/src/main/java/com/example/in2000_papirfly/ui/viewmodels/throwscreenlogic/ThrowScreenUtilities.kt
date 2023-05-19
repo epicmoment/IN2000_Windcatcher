@@ -4,9 +4,10 @@ import android.util.Log
 import androidx.compose.ui.geometry.Offset
 import androidx.core.content.ContextCompat
 import com.example.in2000_papirfly.R
-import com.example.in2000_papirfly.data.HighScore
-import com.example.in2000_papirfly.data.ThrowPointList
-import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.components.HighScore
+import com.example.in2000_papirfly.data.components.ThrowPointList
+import com.example.in2000_papirfly.data.components.Weather
+import com.example.in2000_papirfly.data.repositories.FlightPathRepository
 import com.example.in2000_papirfly.ui.theme.colBlue
 import com.example.in2000_papirfly.ui.theme.colGold
 import org.osmdroid.util.GeoPoint
@@ -32,6 +33,41 @@ object ThrowScreenUtilities {
         mapOverlay.add(polyline)
     }
 
+    fun changeHighScoreMarkerToNormal(
+        markerFactory: (type: String, throwLocation: String, temporary: Boolean) -> Marker,
+        mapOverlay: MutableList<Overlay>,
+        startPos: GeoPoint,
+        throwLocation: String,
+    ) {
+        val oldAndNewMarker: MutableList<Marker> = mutableListOf()
+        for (marker in FlightPathRepository.markers) {
+            if (marker is GoalMarker && marker.highScore && marker.throwLocation == throwLocation) {
+
+                oldAndNewMarker.add(marker)
+
+                mapOverlay.remove(marker)
+
+                oldAndNewMarker.add(
+                    drawGoalMarker(
+                        markerFactory,
+                        mapOverlay,
+                        startPos,
+                        throwLocation,
+                        marker.position,
+                        newHS = false,
+                        temporary = false
+                    )
+                )
+                break
+            }
+        }
+
+        if (oldAndNewMarker.size == 2) {
+            FlightPathRepository.markers.add(oldAndNewMarker.last())
+            FlightPathRepository.markers.remove(oldAndNewMarker.first())
+        }
+    }
+
     fun removeHighScorePath(mapOverlay: MutableList<Overlay>, throwLocation: String) {
         val toRemove = emptyList<Overlay>().toMutableList()
 
@@ -40,8 +76,9 @@ object ThrowScreenUtilities {
                 if (overlay.throwLocation == throwLocation) {
                     toRemove.add(overlay)
                 }
-            } else if (overlay is HighScoreMarker) {
-                if (overlay.throwLocation == throwLocation) {
+            } else if (overlay is GoalMarker) {
+                overlay.closeInfoWindow()
+                if (overlay.throwLocation == throwLocation && overlay.temporary) {
                     toRemove.add(overlay)
                 }
             }
@@ -54,18 +91,31 @@ object ThrowScreenUtilities {
     }
 
     fun drawStartMarker(
-        markerFactory: (type: String) -> Marker,
+        markerFactory: (type: String, throwLocation: String, temporary: Boolean) -> Marker,
         setThrowScreenState: () -> Unit,
         updateWeather: () -> Unit,
         moveLocation: () -> Unit,
         mapOverlay: MutableList<Overlay>,
-        startPos: GeoPoint, locationName: String
+        startPos: GeoPoint,
+        locationName: String,
     ): ThrowPositionMarker {
 
-        val marker: ThrowPositionMarker = markerFactory("Start") as ThrowPositionMarker
-        marker.setInfoFromViewModel(setThrowScreenState, updateWeather, moveLocation, ThrowPointList.throwPoints.keys.indexOf(locationName))
+        val marker: ThrowPositionMarker = markerFactory(
+            "Start",
+            locationName,
+            false
+        ) as ThrowPositionMarker
+
+        marker.setInfoFromViewModel(
+            setThrowScreenState, updateWeather,
+            moveLocation,
+            ThrowPointList.throwPoints.keys.indexOf(locationName)
+        )
         marker.position = startPos
-        marker.icon = ContextCompat.getDrawable(marker.infoWindow.mapView.context, R.drawable.pin_throwpoint)
+        marker.icon = ContextCompat.getDrawable(
+            marker.infoWindow.mapView.context,
+            R.drawable.pin_throwpoint
+        )
         marker.title = locationName
         marker.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
         mapOverlay.add(marker)
@@ -73,8 +123,20 @@ object ThrowScreenUtilities {
         return marker
     }
 
-    fun drawGoalMarker(markerFactory: (type: String) -> Marker, mapOverlay: MutableList<Overlay>, startPos: GeoPoint, markerPos: GeoPoint, newHS: Boolean): Marker {
-        val marker = markerFactory("Goal")
+    fun drawGoalMarker(
+        markerFactory: (type: String, throwLocation: String, temporary: Boolean) -> Marker,
+        mapOverlay: MutableList<Overlay>,
+        startPos: GeoPoint,
+        throwLocation: String,
+        markerPos: GeoPoint,
+        newHS: Boolean,
+        temporary: Boolean
+    ): GoalMarker {
+        val marker = markerFactory(
+            if (newHS) "HighScore" else "Goal",
+            throwLocation,
+            temporary
+        ) as GoalMarker
 
         Log.d("MARKER", "Drawing goal marker")
 

@@ -1,5 +1,6 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.screenuistates
 
+import com.example.in2000_papirfly.data.components.Weather
 import org.osmdroid.util.GeoPoint
 
 data class LogState(

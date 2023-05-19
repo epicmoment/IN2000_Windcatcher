@@ -1,8 +1,7 @@
 package com.example.in2000_papirfly.ui.viewmodels
 
 import androidx.lifecycle.*
-import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.in2000_papirfly.data.ScreenState
+import com.example.in2000_papirfly.data.screenuistates.ScreenState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

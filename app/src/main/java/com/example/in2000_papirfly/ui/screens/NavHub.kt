@@ -10,7 +10,7 @@ import com.example.in2000_papirfly.ui.viewmodels.ScreenStateViewModel
 import org.osmdroid.util.GeoPoint
 
 @Composable
-fun NavScreen(
+fun NavHub(
     viewModel : ScreenStateViewModel = viewModel()
 ) {
 

@@ -43,8 +43,10 @@ class DisableMapView @JvmOverloads constructor(
     }
 }
 
-class ThrowPositionMarker constructor(
-mapView: MapView, val openBottomSheet: (Int) -> Unit
+class ThrowPositionMarker(
+mapView: MapView,
+val openBottomSheet: (Int) -> Unit,
+val throwLocation: String
 ) : Marker(mapView) {
 
     var setThrowScreenState = {}
@@ -70,7 +72,12 @@ mapView: MapView, val openBottomSheet: (Int) -> Unit
     }
 }
 
-class HighScoreMarker(mapView: MapView, val throwLocation: String): Marker(mapView)
+class GoalMarker(
+    mapView: MapView,
+    val throwLocation: String,
+    val highScore: Boolean,
+    val temporary: Boolean
+): Marker(mapView)
 
 class PolyLineWithThrowLocation(val throwLocation: String): Polyline()
 
@@ -101,7 +108,7 @@ fun rememberMapViewWithLifecycle(): DisableMapView {
     mapView.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
 
     // Declares max and min zoom levels
-    mapView.maxZoomLevel = 12.0
+    mapView.maxZoomLevel = 14.0
     mapView.minZoomLevel = 6.0
 
     return mapView

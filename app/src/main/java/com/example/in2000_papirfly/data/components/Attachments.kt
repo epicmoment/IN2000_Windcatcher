@@ -1,4 +1,4 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.components
 
 import androidx.compose.ui.graphics.Color
 import com.example.in2000_papirfly.R

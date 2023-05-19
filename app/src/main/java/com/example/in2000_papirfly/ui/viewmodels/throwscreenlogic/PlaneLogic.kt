@@ -1,9 +1,9 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
 import androidx.lifecycle.ViewModel
-import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.data.Weather
-import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.data.repositories.PlaneRepository
+import com.example.in2000_papirfly.data.components.Weather
+import com.example.in2000_papirfly.data.components.FlightModifier
 import com.example.in2000_papirfly.helpers.Vector
 import com.example.in2000_papirfly.helpers.Vector.Companion.addVectors
 import com.example.in2000_papirfly.helpers.Vector.Companion.calculateAngle
