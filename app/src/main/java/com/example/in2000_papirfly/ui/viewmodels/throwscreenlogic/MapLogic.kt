@@ -58,10 +58,10 @@ val throwLocation: String
 
     public override fun onMarkerClickDefault(marker: Marker, mapView: MapView): Boolean {
         updateWeather()
+        moveLocation()
 
         if (getThrowScreenState() !is ThrowScreenState.ViewingLog) {
             setThrowScreenState()
-            moveLocation()
             openBottomSheet(rowPosition)
         }
 

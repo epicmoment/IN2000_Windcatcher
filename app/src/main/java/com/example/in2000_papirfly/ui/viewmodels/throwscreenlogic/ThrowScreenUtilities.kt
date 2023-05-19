@@ -40,15 +40,14 @@ object ThrowScreenUtilities {
         startPos: GeoPoint,
         throwLocation: String,
     ) {
-        val oldAndNewMarker: MutableList<Marker> = mutableListOf()
-        for (marker in FlightPathRepository.markers) {
+        val oldAndNewMarkers: MutableList<GoalMarker> = mutableListOf()
+        FlightPathRepository.markers.forEach { marker ->
             if (marker is GoalMarker && marker.highScore && marker.throwLocation == throwLocation) {
 
-                oldAndNewMarker.add(marker)
-
+                oldAndNewMarkers.add(marker)
                 mapOverlay.remove(marker)
 
-                oldAndNewMarker.add(
+                oldAndNewMarkers.add(
                     drawGoalMarker(
                         markerFactory,
                         mapOverlay,
@@ -59,13 +58,15 @@ object ThrowScreenUtilities {
                         temporary = false
                     )
                 )
-                break
             }
         }
 
-        if (oldAndNewMarker.size == 2) {
-            FlightPathRepository.markers.add(oldAndNewMarker.last())
-            FlightPathRepository.markers.remove(oldAndNewMarker.first())
+        oldAndNewMarkers.forEach {
+            if (it.highScore) {
+                FlightPathRepository.markers.remove(it)
+            } else {
+                FlightPathRepository.markers.add(it)
+            }
         }
     }
 

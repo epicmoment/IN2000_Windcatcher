@@ -58,14 +58,14 @@ fun FlightLog (
         sheetContainerColor = colBlueTransparent,
         sheetContent = {
 
-            Column (
+            Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.5f)
             ) {
 
-                Box (
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -93,7 +93,7 @@ fun FlightLog (
 
                     items(logState.logPoints.size) {
 
-                        Box (
+                        Box(
                             modifier = Modifier.clickable {
                                 scope.launch {
                                     //scaffoldState.bottomSheetState.partialExpand()
@@ -103,7 +103,7 @@ fun FlightLog (
                         ) {
                             PathEntryCard(
                                 showTopLine = it > 0,
-                                showBottomLine = it < logState.logPoints.size-1,
+                                showBottomLine = it < logState.logPoints.size - 1,
                                 logPoint = logState.logPoints[it]
                             )
                         }
@@ -115,7 +115,6 @@ fun FlightLog (
                 Spacer(
                     modifier = Modifier.height(30.dp)
                 )
-
             }
 
         }

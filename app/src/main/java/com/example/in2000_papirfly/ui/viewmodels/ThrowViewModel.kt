@@ -62,11 +62,13 @@ class ThrowViewModel(
     var planeFlying: Job = Job()
 
     // Weather at the current plane position
-    var weather: Weather
+    var weather: Weather = Weather()
 
     init {
         updateOnMoveMap {
-            if (uiState.value.uiState !is ThrowScreenState.MovingMap && uiState.value.uiState !is ThrowScreenState.ViewingLog) setThrowScreenState(
+            if (uiState.value.uiState !is ThrowScreenState.MovingMap &&
+                uiState.value.uiState !is ThrowScreenState.ViewingLog
+            ) setThrowScreenState(
                 ThrowScreenState.MovingMap
             )
         }
@@ -75,6 +77,11 @@ class ThrowViewModel(
 
         // Fetches updated weather data for all throw points
         fetchWeatherForAllThrowPoints()
+
+        // Fetches weather for start location
+        CoroutineScope(Dispatchers.IO).launch {
+            weather = weatherRepository.getWeatherAtPoint(selectedLocation)
+        }
 
         // Clears all overlays from the map, and then draws every cached flight path
         mapOverlay.clear()
@@ -128,11 +135,6 @@ class ThrowViewModel(
             }
         }
         fetchUpdatedHighScores()
-
-        // Fetches weather for Oslo as start value
-        weather = uiState.value.throwPointWeatherList[12]
-
-        closeLog()
     }
 
     private fun redrawMapMarkers() {
@@ -258,13 +260,13 @@ class ThrowViewModel(
 
             FlightPathRepository.markers.add(goalMarker)
 
-            // Moves all markers in front of flight paths
-            redrawMapMarkers()
-
             FlightPathRepository.flightPaths.add(Pair(distance, flightPath))
 
             // Unlock map
             setInteraction(true)
+
+            // Landing state?
+            setThrowScreenState(ThrowScreenState.ViewingLog)
 
             // FLIGHT-LOG
             showLog(
@@ -273,8 +275,8 @@ class ThrowViewModel(
                 logPoints
             )
 
-            // Landing state?
-            setThrowScreenState(ThrowScreenState.ViewingLog)
+            // Moves all markers in front of flight paths
+            redrawMapMarkers()
         }
     }
 
