@@ -198,17 +198,20 @@ fun ThrowScreen(
         )
     }
 
-    FlightLog(
-        logState = throwScreenState.logState,
-        scaffoldState = scaffoldState,
-        centerMap = { pos ->
-            mapViewState.controller.animateTo(pos)
-        },
-        uiState = throwScreenState
-    ) {
-        throwViewModel.closeLog()
+    // Flight log drawer
+    if (throwScreenState.uiState == ThrowScreenState.ViewingLog) {
+        mapViewState.invalidate()
+        FlightLog(
+            logState = throwScreenState.logState,
+            scaffoldState = scaffoldState,
+            centerMap = { pos ->
+                mapViewState.controller.animateTo(pos)
+            },
+            uiState = throwScreenState
+        ) {
+            throwViewModel.closeLog()
+        }
     }
-
 }
 
 @Composable
