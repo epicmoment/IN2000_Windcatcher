@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.data.*
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.addAttachments
+import com.example.in2000_papirfly.data.repositories.LoadOutRepository
+import com.example.in2000_papirfly.data.screenuistates.CustomizationScreenUIState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,13 +14,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class CustomizationViewModel (
-    val loadoutRepository: LoadoutRepository,
+    val loadOutRepository: LoadOutRepository,
 ) : ViewModel() {
 
     private val _customizeState = MutableStateFlow(CustomizationScreenUIState())
     val customizeState : StateFlow<CustomizationScreenUIState> = _customizeState.asStateFlow()
 
-    val loadoutState = loadoutRepository.loadoutState
+    val loadOutState = loadOutRepository.loadOutState
 
     fun setSlot(newSlot : Int) {
 
@@ -37,7 +38,7 @@ class CustomizationViewModel (
 
         viewModelScope.launch {
 
-            loadoutRepository.equipAttachment(slot, attachmentID)
+            loadOutRepository.equipAttachment(slot, attachmentID)
         }
 
     }
@@ -54,7 +55,7 @@ class CustomizationViewModel (
                 val application = checkNotNull(extras[APPLICATION_KEY])
 
                 return CustomizationViewModel(
-                    (application as PapirflyApplication).appContainer.loadoutRepository,
+                    (application as PapirflyApplication).appContainer.loadOutRepository,
                 ) as T
             }
         }

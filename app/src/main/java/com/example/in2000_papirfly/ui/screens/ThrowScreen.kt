@@ -36,16 +36,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.data.components.HighScore
+import com.example.in2000_papirfly.data.components.ThrowPointList
+import com.example.in2000_papirfly.data.screenuistates.ThrowScreenState
+import com.example.in2000_papirfly.data.screenuistates.ThrowScreenUIState
 import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_NORMAL
+import com.example.in2000_papirfly.ui.composables.FlightLog
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
-import com.example.in2000_papirfly.ui.theme.colBlue
 import com.example.in2000_papirfly.ui.theme.colBlueTransparent
 import com.example.in2000_papirfly.ui.theme.colRed
-import com.example.in2000_papirfly.ui.viewmodels.ThrowScreenState
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
@@ -110,7 +112,7 @@ fun ThrowScreen(
     }
 
     // Fetches observable state of the screen
-    val throwScreenState = throwViewModel.getThrowScreenState().collectAsState().value
+    val throwScreenState = throwViewModel.uiState.collectAsState().value
 
     // Defines the behaviour of the "back"-button to prevent a crash
     BackHandler {
@@ -133,18 +135,19 @@ fun ThrowScreen(
         { mapViewState },
         Modifier.border(1.dp, Color(0xFF000000))
     ) {
-        mapView -> onLoad?.invoke(mapView)
+        mapView ->
+            onLoad?.invoke(mapView)
     }
 
     // Paper plane
     PlaneComposable(
         planeSize = throwViewModel.getPlaneScale(),
         planeState = throwViewModel.planeState,
-        planeVisible = showPlane(throwScreenState)
+        planeVisible = showPlane(throwScreenState.uiState)
     )
 
     // Flight info box
-    if (throwScreenState != ThrowScreenState.ViewingLog) {
+    if (throwScreenState.uiState != ThrowScreenState.ViewingLog) {
         FlightInfoBox(
             context = context,
             throwViewModel = throwViewModel,
@@ -152,7 +155,7 @@ fun ThrowScreen(
     }
 
     // Circular Slider - only shown when screen state is set to "Throwing"
-    if (throwScreenState == ThrowScreenState.Throwing) {
+    if (throwScreenState.uiState == ThrowScreenState.Throwing) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -166,10 +169,11 @@ fun ThrowScreen(
     }
 
     // Button panel for throwing, navigating and customizing
-    if (throwScreenState == ThrowScreenState.MovingMap || throwScreenState == ThrowScreenState.Throwing) {
+    if (throwScreenState.uiState == ThrowScreenState.MovingMap || throwScreenState.uiState == ThrowScreenState.Throwing) {
         ButtonPanel(
-            throwScreenState = throwScreenState,
+            throwScreenState = throwScreenState.uiState,
             throwViewModel = throwViewModel,
+            mapView = mapViewState,
             scope = scope,
             rowState = rowState,
             onCustomizePage = onCustomizePage,
@@ -181,10 +185,11 @@ fun ThrowScreen(
     val bottomSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = skipPartiallyExpanded
     )
-    if (throwScreenState == ThrowScreenState.ChoosingPosition) {
+    if (throwScreenState.uiState == ThrowScreenState.ChoosingPosition) {
         PositionAndHighScoreDrawer(
             context = context,
             throwViewModel = throwViewModel,
+            throwScreenState = throwScreenState,
             bottomSheetState = bottomSheetState,
             rowState = rowState,
             scope = scope,
@@ -194,11 +199,12 @@ fun ThrowScreen(
     }
 
     FlightLog(
-        logStateParam = throwViewModel.logState,
+        logState = throwScreenState.logState,
         scaffoldState = scaffoldState,
         centerMap = { pos ->
             mapViewState.controller.animateTo(pos)
-        }
+        },
+        uiState = throwScreenState
     ) {
         throwViewModel.closeLog()
     }
@@ -217,8 +223,10 @@ fun showPlane(throwScreenState: ThrowScreenState): Boolean{
     return value
 }
 
-//Code tatt fra stackoverflow
-//Rafsanjani answered Dec 20, 2021 at 16:02
+/*
+ * Code from stackoverflow
+ * Rafsanjani answered Dec 20, 2021 at 16:02
+ */
 @Composable
 fun CircularSlider(
     throwViewModel: ThrowViewModel,
@@ -423,6 +431,7 @@ fun FlightInfoBox(
 fun ButtonPanel(
     throwScreenState: ThrowScreenState,
     throwViewModel: ThrowViewModel,
+    mapView: DisableMapView,
     scope: CoroutineScope,
     rowState: LazyListState,
     onCustomizePage: () -> Unit,
@@ -445,13 +454,18 @@ fun ButtonPanel(
                     // Throws the plane
                     if (throwScreenState == ThrowScreenState.Throwing) throwViewModel.throwPlane()
                     // Sets state to "Throwing"
-                    else throwViewModel.changeAngle(0.toFloat())
+                    else {
+                        mapView.controller.stopAnimation(false)
+                        throwViewModel.changeAngle(0.toFloat())
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(colRed),
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.throw_string).uppercase() else stringResource(R.string.ready),
+                    text = if (throwScreenState == ThrowScreenState.Throwing)
+                                stringResource(R.string.throw_string).uppercase()
+                           else stringResource(R.string.ready).uppercase(),
                     fontSize = 35.sp,
                     color = Color.White
                 )
@@ -536,6 +550,7 @@ fun PositionAndHighScoreDrawer(
     modifier: Modifier = Modifier,
     context: Context,
     throwViewModel: ThrowViewModel,
+    throwScreenState: ThrowScreenUIState,
     bottomSheetState: SheetState,
     rowState: LazyListState,
     scope: CoroutineScope,
@@ -544,16 +559,15 @@ fun PositionAndHighScoreDrawer(
 ) {
     val resources = context.resources
     val packageName = context.packageName
-    val throwPointWeather = throwViewModel.throwWeatherState.collectAsState().value.weather
-    val highScores = throwViewModel.throwPointHighScores.collectAsState().value
-    val highScoreOnMap = throwViewModel.highScoresOnMapState.collectAsState().value
+    val throwPointWeather = throwScreenState.throwPointWeatherList
+    val highScores = throwScreenState.throwPointHighScoreMap
+    val highScoreOnMap = throwScreenState.highScoresShownOnMap
 
     ModalBottomSheet(
         modifier = Modifier
             .fillMaxWidth(),
         onDismissRequest = {
-            // Sets ThrowScreenState to Throwing when sheet is dismissed
-            throwViewModel.changeAngle(0.toFloat())
+            throwViewModel.setThrowScreenState(ThrowScreenState.MovingMap)
         },
         sheetState = bottomSheetState,
         dragHandle = {
@@ -597,7 +611,6 @@ fun PositionAndHighScoreDrawer(
                                 GeoPoint(0.0, 0.0)
                             )
 
-                            throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
                             mapViewState.controller.animateTo(newLocation, 12.0, 1000)
                             throwViewModel.moveLocation(
                                 newLocation,
@@ -727,11 +740,20 @@ fun PositionAndHighScoreDrawer(
                                 if (!highScoreShown) {
                                     drawHighScorePath(mapViewState.overlays, locationName.flightPath, location.namePos)
                                     drawGoalMarker(
-                                        { HighScoreMarker(mapViewState, location.namePos) },
+                                        { _,_,_ ->
+                                            GoalMarker(
+                                                mapViewState,
+                                                location.namePos,
+                                                highScore = true,
+                                                temporary = true
+                                            )
+                                        },
                                         mapViewState.overlays,
                                         locationName.flightPath[0],
+                                        locationName.locationName,
                                         locationName.flightPath.last(),
-                                        true
+                                        newHS = true,
+                                        temporary = true
                                     )
                                 } else {
                                     removeHighScorePath(mapViewState.overlays, location.namePos)

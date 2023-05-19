@@ -1,7 +1,7 @@
 package com.example.in2000_papirfly.network
 
 import android.util.Log
-import com.example.in2000_papirfly.data.LocationforecastData
+import com.example.in2000_papirfly.data.apidata.LocationforecastData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*

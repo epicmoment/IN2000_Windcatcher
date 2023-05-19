@@ -1,4 +1,4 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.components
 
 import org.osmdroid.util.GeoPoint
 

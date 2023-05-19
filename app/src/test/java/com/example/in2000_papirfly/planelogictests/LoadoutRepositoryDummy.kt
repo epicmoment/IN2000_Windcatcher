@@ -1,20 +1,21 @@
 package com.example.in2000_papirfly.planelogictests
 
-import com.example.in2000_papirfly.data.Attachment
-import com.example.in2000_papirfly.data.Loadout
-import com.example.in2000_papirfly.data.LoadoutRepository
+import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.data.components.Attachment
+import com.example.in2000_papirfly.data.components.LoadOut
+import com.example.in2000_papirfly.data.repositories.LoadOutRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class LoadoutRepositoryDummy: LoadoutRepository {
-    val loadout = Loadout()
-    override val loadoutState: StateFlow<Loadout> = MutableStateFlow(Loadout()).asStateFlow()
+class LoadOutRepositoryDummy: LoadOutRepository {
+    val loadOut = LoadOut()
+    override val loadOutState: StateFlow<LoadOut> = MutableStateFlow(LoadOut()).asStateFlow()
     override fun equipAttachment(slot: Int, attachmentID: Int) {
 
     }
 
     override fun getAttachmentInSlot(slot: Int): Attachment {
-        return Attachment("Test attachment", "Description")
+        return Attachment(R.string.papertype_01, R.string.papertype_02)
     }
 }

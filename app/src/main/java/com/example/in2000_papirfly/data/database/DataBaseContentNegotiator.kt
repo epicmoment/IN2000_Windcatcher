@@ -1,7 +1,9 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.database
 
 import android.util.Log
-import com.example.in2000_papirfly.data.database.PapirflyDatabase
+import com.example.in2000_papirfly.data.components.HighScore
+import com.example.in2000_papirfly.data.components.ThrowPointList
+import com.example.in2000_papirfly.data.components.Weather
 import com.example.in2000_papirfly.data.database.entities.FlightPathPoint
 import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 import com.example.in2000_papirfly.data.database.entities.WeatherTile
@@ -16,7 +18,7 @@ import kotlinx.coroutines.sync.withLock
 import org.osmdroid.util.GeoPoint
 import kotlin.math.roundToInt
 
-class DataRepository(database: PapirflyDatabase) {
+class DataBaseContentNegotiator(database: PapirflyDatabase) {
 
     private val roundingFactor = 10.0 // Rounds to one decimal point
     private val throwDao = database.throwPointDao()

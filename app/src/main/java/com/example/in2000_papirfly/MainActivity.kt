@@ -13,7 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.in2000_papirfly.ui.theme.IN2000_PapirflyTheme
 import org.osmdroid.config.Configuration
-import com.example.in2000_papirfly.ui.screens.NavScreen
+import com.example.in2000_papirfly.ui.screens.NavHub
 
 
 class MainActivity : ComponentActivity() {
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    NavScreen()
+                    NavHub()
                     /*FlightLog(
                         distance = 120,
                         logPoints = mutableListOf(
