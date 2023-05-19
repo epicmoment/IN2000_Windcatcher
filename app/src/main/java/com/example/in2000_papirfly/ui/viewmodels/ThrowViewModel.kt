@@ -109,6 +109,7 @@ class ThrowViewModel(
         ThrowPointList.throwPoints.forEach {
             val marker = drawStartMarker(
                 markerFactory = markerFactory,
+                getThrowScreenState = { getThrowScreenState() },
                 setThrowScreenState = {
                     setThrowScreenState(ThrowScreenState.ChoosingPosition)
                 },
@@ -130,6 +131,8 @@ class ThrowViewModel(
 
         // Fetches weather for Oslo as start value
         weather = uiState.value.throwPointWeatherList[12]
+
+        closeLog()
     }
 
     private fun redrawMapMarkers() {
@@ -161,6 +164,10 @@ class ThrowViewModel(
                 uiState = state
             )
         }
+    }
+
+    private fun getThrowScreenState(): ThrowScreenState {
+        return uiState.value.uiState
     }
 
     fun throwPlane() {

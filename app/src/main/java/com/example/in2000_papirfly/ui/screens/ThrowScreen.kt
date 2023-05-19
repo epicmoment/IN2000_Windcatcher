@@ -135,7 +135,8 @@ fun ThrowScreen(
         { mapViewState },
         Modifier.border(1.dp, Color(0xFF000000))
     ) {
-        mapView -> onLoad?.invoke(mapView)
+        mapView ->
+            onLoad?.invoke(mapView)
     }
 
     // Paper plane
@@ -172,6 +173,7 @@ fun ThrowScreen(
         ButtonPanel(
             throwScreenState = throwScreenState.uiState,
             throwViewModel = throwViewModel,
+            mapView = mapViewState,
             scope = scope,
             rowState = rowState,
             onCustomizePage = onCustomizePage,
@@ -429,6 +431,7 @@ fun FlightInfoBox(
 fun ButtonPanel(
     throwScreenState: ThrowScreenState,
     throwViewModel: ThrowViewModel,
+    mapView: DisableMapView,
     scope: CoroutineScope,
     rowState: LazyListState,
     onCustomizePage: () -> Unit,
@@ -451,13 +454,18 @@ fun ButtonPanel(
                     // Throws the plane
                     if (throwScreenState == ThrowScreenState.Throwing) throwViewModel.throwPlane()
                     // Sets state to "Throwing"
-                    else throwViewModel.changeAngle(0.toFloat())
+                    else {
+                        mapView.controller.stopAnimation(false)
+                        throwViewModel.changeAngle(0.toFloat())
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(colRed),
                 shape = RoundedCornerShape(20),
             ) {
                 Text(
-                    text = if (throwScreenState == ThrowScreenState.Throwing) stringResource(R.string.throw_string).uppercase() else stringResource(R.string.ready).uppercase(),
+                    text = if (throwScreenState == ThrowScreenState.Throwing)
+                                stringResource(R.string.throw_string).uppercase()
+                           else stringResource(R.string.ready).uppercase(),
                     fontSize = 35.sp,
                     color = Color.White
                 )
@@ -603,7 +611,6 @@ fun PositionAndHighScoreDrawer(
                                 GeoPoint(0.0, 0.0)
                             )
 
-//                            throwViewModel.previousPlanePos = mapViewState.mapCenter as GeoPoint
                             mapViewState.controller.animateTo(newLocation, 12.0, 1000)
                             throwViewModel.moveLocation(
                                 newLocation,

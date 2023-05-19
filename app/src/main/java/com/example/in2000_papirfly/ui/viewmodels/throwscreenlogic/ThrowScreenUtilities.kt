@@ -8,6 +8,7 @@ import com.example.in2000_papirfly.data.components.HighScore
 import com.example.in2000_papirfly.data.components.ThrowPointList
 import com.example.in2000_papirfly.data.components.Weather
 import com.example.in2000_papirfly.data.repositories.FlightPathRepository
+import com.example.in2000_papirfly.data.screenuistates.ThrowScreenState
 import com.example.in2000_papirfly.ui.theme.colBlue
 import com.example.in2000_papirfly.ui.theme.colGold
 import org.osmdroid.util.GeoPoint
@@ -92,6 +93,7 @@ object ThrowScreenUtilities {
 
     fun drawStartMarker(
         markerFactory: (type: String, throwLocation: String, temporary: Boolean) -> Marker,
+        getThrowScreenState: () -> ThrowScreenState,
         setThrowScreenState: () -> Unit,
         updateWeather: () -> Unit,
         moveLocation: () -> Unit,
@@ -107,7 +109,9 @@ object ThrowScreenUtilities {
         ) as ThrowPositionMarker
 
         marker.setInfoFromViewModel(
-            setThrowScreenState, updateWeather,
+            getThrowScreenState,
+            setThrowScreenState,
+            updateWeather,
             moveLocation,
             ThrowPointList.throwPoints.keys.indexOf(locationName)
         )

@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.data.screenuistates.ThrowScreenState
 import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -49,6 +50,7 @@ val openBottomSheet: (Int) -> Unit,
 val throwLocation: String
 ) : Marker(mapView) {
 
+    var getThrowScreenState: () -> ThrowScreenState = { ThrowScreenState.Throwing }
     var setThrowScreenState = {}
     var updateWeather = {}
     var moveLocation = {}
@@ -56,15 +58,26 @@ val throwLocation: String
 
     public override fun onMarkerClickDefault(marker: Marker, mapView: MapView): Boolean {
         updateWeather()
-        setThrowScreenState()
-        moveLocation()
-        openBottomSheet(rowPosition)
+
+        if (getThrowScreenState() !is ThrowScreenState.ViewingLog) {
+            setThrowScreenState()
+            moveLocation()
+            openBottomSheet(rowPosition)
+        }
+
         mapView.controller.animateTo(mPosition, 12.0, 1000)
         showInfoWindow()
         return true
     }
 
-    fun setInfoFromViewModel(setThrowScreenState: () -> Unit, updateWeather: () -> Unit, moveLocation: () -> Unit, rowPosition: Int) {
+    fun setInfoFromViewModel(
+        getThrowScreenState: () -> ThrowScreenState,
+        setThrowScreenState: () -> Unit,
+        updateWeather: () -> Unit,
+        moveLocation: () -> Unit,
+        rowPosition: Int
+    ) {
+        this.getThrowScreenState = getThrowScreenState
         this.setThrowScreenState = setThrowScreenState
         this.updateWeather = updateWeather
         this.moveLocation = moveLocation
