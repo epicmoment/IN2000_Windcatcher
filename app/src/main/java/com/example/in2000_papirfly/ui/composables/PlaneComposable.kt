@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import com.example.in2000_papirfly.data.Plane
+import com.example.in2000_papirfly.data.components.Plane
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -25,7 +25,7 @@ fun PlaneComposable(planeSize: Float, planeState: StateFlow<Plane>, planeVisible
         Box (
             modifier = Modifier
                 .rotate((plane.angle).toFloat())
-                .scale(planeSize*0.25f)
+                .scale(planeSize * 0.25f)
                 .alpha(alpha)
 
         ) {

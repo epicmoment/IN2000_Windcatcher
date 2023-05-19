@@ -1,9 +1,4 @@
-package com.example.in2000_papirfly.data
-
-import java.util.Vector
-import kotlin.math.acos
-import kotlin.math.cos
-import kotlin.math.sin
+package com.example.in2000_papirfly.data.components
 
 data class Plane(
     val flightModifier: FlightModifier = FlightModifier(),

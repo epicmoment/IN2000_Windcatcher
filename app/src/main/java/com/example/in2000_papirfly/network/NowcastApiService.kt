@@ -1,7 +1,7 @@
 package com.example.in2000_papirfly.network
 
 import android.util.Log
-import com.example.in2000_papirfly.data.NowcastData
+import com.example.in2000_papirfly.data.apidata.NowcastData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.engine.android.*

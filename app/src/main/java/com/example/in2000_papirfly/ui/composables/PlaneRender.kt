@@ -8,7 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import com.example.in2000_papirfly.data.Attachment
+import com.example.in2000_papirfly.data.components.Attachment
 
 @Composable
 fun PlaneRender(

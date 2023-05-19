@@ -1,8 +1,8 @@
 package com.example.in2000_papirfly
 
-import com.example.in2000_papirfly.data.HighScore
-import com.example.in2000_papirfly.data.ThrowPointList
-import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.components.HighScore
+import com.example.in2000_papirfly.data.components.ThrowPointList
+import com.example.in2000_papirfly.data.components.Weather
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.defaultHighScoreShownMap
 import org.junit.Test

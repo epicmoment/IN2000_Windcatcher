@@ -1,8 +1,7 @@
 package com.example.in2000_papirfly.planelogictests
 
-import androidx.compose.runtime.collectAsState
-import com.example.in2000_papirfly.data.Plane
-import com.example.in2000_papirfly.data.PlaneRepository
+import com.example.in2000_papirfly.data.components.Plane
+import com.example.in2000_papirfly.data.repositories.PlaneRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

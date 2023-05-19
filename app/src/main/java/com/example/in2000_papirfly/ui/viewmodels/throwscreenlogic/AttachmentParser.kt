@@ -1,19 +1,21 @@
 package com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic
 
 import android.util.Log
-import com.example.in2000_papirfly.data.*
+import com.example.in2000_papirfly.data.components.FlightModifier
+import com.example.in2000_papirfly.data.repositories.LoadOutRepository
+import com.example.in2000_papirfly.data.repositories.PlaneRepository
 
 /**
  * Updates the plane in the PlaneRepository to have a FlightModifier that is the result of all the
  * attachments on the plane.
  */
-fun addAttachments(planeRepository: PlaneRepository, loadoutRepository: LoadoutRepository){
+fun addAttachments(planeRepository: PlaneRepository, loadOutRepository: LoadOutRepository){
 
     val flightModifiers: MutableList<FlightModifier> = mutableListOf()
 
     // Add all flight modifiers in the attached attachments
     repeat(4) {
-        flightModifiers.add(loadoutRepository.getAttachmentInSlot(it).flightModifier)
+        flightModifiers.add(loadOutRepository.getAttachmentInSlot(it).flightModifier)
     }
 
     // val loadout = loadoutRepository.loadoutState.value

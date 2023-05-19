@@ -1,8 +1,6 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.repositories
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.addAttachments
+import com.example.in2000_papirfly.data.components.Plane
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +11,7 @@ interface PlaneRepository{
     val planeState: StateFlow<Plane>
     fun update(newPlane: Plane)
 }
-class PlaneRepo(): PlaneRepository{
+class PlaneRepo(): PlaneRepository {
 
     private val _planeState = MutableStateFlow(Plane())
     override val planeState : StateFlow<Plane> = _planeState.asStateFlow()
@@ -32,7 +30,7 @@ class PlaneRepo(): PlaneRepository{
          */
     }
 
-    fun getCurrentPlane(): Plane{
+    fun getCurrentPlane(): Plane {
         return planeState.value
     }
 }

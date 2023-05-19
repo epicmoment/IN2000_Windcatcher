@@ -1,11 +1,6 @@
-package com.example.in2000_papirfly.data
+package com.example.in2000_papirfly.data.components
 
-import android.content.res.Resources
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.core.content.res.TypedArrayUtils.getString
-import androidx.core.content.res.TypedArrayUtils.getText
-import com.example.in2000_papirfly.PapirflyApplication
 import com.example.in2000_papirfly.R
 
 object Attachments {
@@ -24,13 +19,13 @@ object Attachments {
                 name = R.string.papertype_02,
                 description = R.string.papertype_02_description,
                 icon = R.drawable.attachmentpaperphoto,
-                flightModifier = FlightModifier(windEffect = 0.25, weight = 1.0, rainEffect = -1.0)
+                flightModifier = FlightModifier(windEffect = 0.57, weight = 0.5, rainEffect = -1.0)
             ),
             Attachment(
                 name = R.string.papertype_03,
                 description = R.string.papertype_03_description,
                 icon = R.drawable.attachmentpaperbake,
-                flightModifier = FlightModifier(rainEffect = 1.0, temperatureEffect = 1.0),
+                flightModifier = FlightModifier(windEffect = 0.18, rainEffect = 1.19, temperatureEffect = 1.0),
                 tint = Color(211, 176, 139)
             )
         ),
@@ -75,14 +70,14 @@ object Attachments {
                 name = R.string.wing_02,
                 description = R.string.wing_02_description,
                 icon = R.drawable.attachmentwingsnarrow,
-                flightModifier = FlightModifier(airPressureEffect = 1.0)
+                flightModifier = FlightModifier(airPressureEffect = -1.0)
             ),
 
             Attachment(
                 name = R.string.wing_03,
                 description = R.string.wing_03_description,
                 icon = R.drawable.attachmentwingswide,
-                flightModifier = FlightModifier(airPressureEffect = -1.0)
+                flightModifier = FlightModifier(airPressureEffect = 1.0)
             )
 
         ),

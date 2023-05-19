@@ -1,9 +1,10 @@
 package com.example.in2000_papirfly.planelogictests
 
-import com.example.in2000_papirfly.data.FlightModifier
-import com.example.in2000_papirfly.data.Plane
-import com.example.in2000_papirfly.data.PlaneRepository
-import com.example.in2000_papirfly.data.Weather
+import com.example.in2000_papirfly.data.components.FlightModifier
+import com.example.in2000_papirfly.data.components.Plane
+import com.example.in2000_papirfly.data.repositories.PlaneRepository
+import com.example.in2000_papirfly.data.components.Weather
+import com.example.in2000_papirfly.helpers.WeatherConstants
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.PlaneLogic
 import org.junit.Test
 
@@ -77,7 +78,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val rainDropRate = planeLogic.calculateRainDropRate(planeLogic.RAIN_MAX, planeRepository.planeState.value.flightModifier)
+        val rainDropRate = planeLogic.calculateRainDropRate(WeatherConstants.RAIN_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(rainDropRate == 0.0 ){ println("rainDropRate = $rainDropRate, Expected 0.0") }
     }
@@ -103,7 +104,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val rainDropRate = planeLogic.calculateRainDropRate(planeLogic.RAIN_MAX, planeRepository.planeState.value.flightModifier)
+        val rainDropRate = planeLogic.calculateRainDropRate(WeatherConstants.RAIN_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(rainDropRate > 0.0 ){ println("rainDropRate = $rainDropRate, Expected positive value") }
     }
@@ -116,7 +117,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val rainDropRate = planeLogic.calculateRainDropRate(planeLogic.RAIN_MAX, planeRepository.planeState.value.flightModifier)
+        val rainDropRate = planeLogic.calculateRainDropRate(WeatherConstants.RAIN_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(rainDropRate < 0.0 ){ println("rainDropRate = $rainDropRate, Expected negative value") }
     }
@@ -131,7 +132,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val temperatureDropRate = planeLogic.calculateRainDropRate(planeLogic.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
+        val temperatureDropRate = planeLogic.calculateRainDropRate(WeatherConstants.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate == 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected 0.0") }
     }
@@ -144,7 +145,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(planeLogic.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
+        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(WeatherConstants.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate < 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected negative value") }
     }
@@ -157,7 +158,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(planeLogic.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
+        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(WeatherConstants.TEMPERATURE_MAX, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate > 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected positive value") }
     }
@@ -170,7 +171,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(planeLogic.TEMPERATURE_MIN, planeRepository.planeState.value.flightModifier)
+        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(WeatherConstants.TEMPERATURE_MIN, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate < 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected negative value") }
     }
@@ -183,7 +184,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(planeLogic.TEMPERATURE_MIN, planeRepository.planeState.value.flightModifier)
+        val temperatureDropRate = planeLogic.calculateTemperatureDropRate(WeatherConstants.TEMPERATURE_MIN, planeRepository.planeState.value.flightModifier)
 
         assert(temperatureDropRate > 0.0 ){ println("temperatureDropRate = $temperatureDropRate, Expected positive value") }
     }

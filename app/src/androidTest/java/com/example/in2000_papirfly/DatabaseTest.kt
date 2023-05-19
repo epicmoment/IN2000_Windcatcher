@@ -1,23 +1,15 @@
-package com.example.in2000_papirfly;
+package com.example.in2000_papirfly
 
 import android.content.Context
-import android.database.sqlite.SQLiteDatabase.deleteDatabase
-import android.util.Log
-import androidx.compose.ui.platform.LocalContext
-import androidx.room.Room;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.platform.app.InstrumentationRegistry;
-
-import com.example.in2000_papirfly.data.database.PapirflyDatabase;
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.example.in2000_papirfly.data.database.entities.FlightPathPoint
 import com.example.in2000_papirfly.data.database.entities.ThrowPoint
 import com.example.in2000_papirfly.data.database.entities.WeatherTile
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.runBlocking
-import org.junit.Before
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.Test
+import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseTest {
@@ -46,7 +38,7 @@ class DatabaseTest {
             tileDao.insert(testTile)
         }
 
-        val testPoint = ThrowPoint("Andeby", 42.0, 0.0, null, null)
+        val testPoint = ThrowPoint("Andeby", 42.0, 0.0, 0, 0)
         runBlocking {
             throwDao.insert(testPoint)
         }
@@ -85,7 +77,7 @@ class DatabaseTest {
             tileDao.insert(testTile)
         }
 
-        val testPoint = ThrowPoint("Andeby", 42.0, 0.0, null, null)
+        val testPoint = ThrowPoint("Andeby", 42.0, 0.0, 0, 0)
         runBlocking {
             throwDao.insert(testPoint)
         }
@@ -101,7 +93,9 @@ class DatabaseTest {
         )
 
         runBlocking {
-            flightPathDao.insert(testFlight)
+            testFlight.forEach {
+                flightPathDao.insert(it)
+            }
         }
         assertEquals(3, flightPathDao.getSize())
         assertEquals(0.0, flightPathDao.getFlightPath("Andeby")[2].locY)
