@@ -36,6 +36,9 @@ class PlaneLogic(
     private val groundedThreshold = 0.0
     val updateFrequency: Long = 1000
 
+    private val gainHeightAllowed = false
+    private val minDropRate = 1.0
+
     /**
      * This method fetches the current plane state and uses the position, angle, speed
      * and modifiers to calculate how it should be affected by the weather
@@ -70,7 +73,7 @@ class PlaneLogic(
         // Calculate new plane stats
         val newPlaneAngle = calculateAngle(affectedPlaneVector)
         val newPlaneSpeed = vectorLength(affectedPlaneVector)
-        val newHeight = plane.height - calculateDropRate(plane.speed, weather)
+        val newHeight = plane.height - calculateDropRate(weather)
         val flying = newHeight > groundedThreshold
 
         // Update planeState with the calculated changes
@@ -117,7 +120,7 @@ class PlaneLogic(
      *
      * **Adding functionality:** Any functionality that affects the drop rate goes here.
      */
-    fun calculateDropRate(speed: Double, weather: Weather): Double{
+    fun calculateDropRate(weather: Weather): Double{
         val flightModifier = planeState.value.flightModifier
 
         var newDropRate = 0.0
@@ -125,7 +128,15 @@ class PlaneLogic(
         newDropRate += calculateRainDropRate(weather.rain, flightModifier)
         newDropRate += calculateTemperatureDropRate(weather.temperature, flightModifier)
 
-        return round((flightModifier.weight * defaultDropRate) + newDropRate)
+        // if gaining height is not allowed, we cap the drop rate at the minDropRate value and return tht if we would get anything below
+        // This is a cheap hack and should be done fundamentally differently by making the modifier effect calculations combined naturally cap out at the minimum
+        // now there are many evaluations that result in the minimum possible drop rate, which makes for less distinct choices
+        var result = round((flightModifier.weight * defaultDropRate) + newDropRate)
+        if (!gainHeightAllowed && result < minDropRate){
+            result = minDropRate
+        }
+
+        return result
     }
 
     /**
