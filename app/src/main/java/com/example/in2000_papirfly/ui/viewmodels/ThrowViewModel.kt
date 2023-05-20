@@ -11,6 +11,7 @@ import com.example.in2000_papirfly.data.database.DataBaseContentNegotiator
 import com.example.in2000_papirfly.data.repositories.FlightPathRepository
 import com.example.in2000_papirfly.data.repositories.LoadOutRepository
 import com.example.in2000_papirfly.data.repositories.PlaneRepository
+import com.example.in2000_papirfly.data.screenuistates.LogPoint
 import com.example.in2000_papirfly.data.screenuistates.LogState
 import com.example.in2000_papirfly.data.screenuistates.ThrowScreenState
 import com.example.in2000_papirfly.data.screenuistates.ThrowScreenUIState
@@ -197,7 +198,7 @@ class ThrowViewModel(
         addAttachments(planeRepository, loadOutRepository)
 
         // FLIGHT-LOG
-        val logPoints = mutableListOf<Pair<GeoPoint, Weather>>()
+        val logPoints = mutableListOf<LogPoint>()
 
         // Start the coroutine that updates the plane every second
         planeFlying = viewModelScope.launch {
@@ -227,7 +228,14 @@ class ThrowViewModel(
                 flightPath.add(nextPlanePos)
 
                 // FLIGHT-LOG
-                val logPoint = Pair(GeoPoint(planeState.value.pos[0], planeState.value.pos[1]), weather.copy())
+                val logPoint = LogPoint(
+                    geoPoint = GeoPoint(planeState.value.pos[0], planeState.value.pos[1]),
+                    weather = weather.copy(),
+                    height = planeState.value.height,
+                    speed = planeState.value.speed
+
+                )
+
                 logPoints.add(logPoint)
 
                 // This fixes the map glitching
@@ -282,7 +290,7 @@ class ThrowViewModel(
     private fun showLog(
         distance: Int,
         newHS: Boolean,
-        logPoints: MutableList<Pair<GeoPoint, Weather>>,
+        logPoints: MutableList<LogPoint>,
     ) {
         viewModelScope.launch {
             _uiState.update {

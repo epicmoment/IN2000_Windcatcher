@@ -48,8 +48,8 @@
     <string name="throw_string">kast</string>
     <string name="ready">klar</string>
     <string name="choose_throw_location">Velg kastested</string>
-    <string name="show_highscore">Vis highscore</string>
-    <string name="hide_highscore">Skjul highscore</string>
+    <string name="show_highscore">VIS REKORD</string>
+    <string name="hide_highscore">SKJUL REKORD</string>
 
     <string name="weather_icon_description">Weather Icon</string>
     <string name="position_selection_card_description">See current weather and choose position</string>
@@ -58,11 +58,12 @@
 
     <string name="high_air_pressure_display">H</string>
     <string name="low_air_pressure_display">L</string>
-    <string name="speed_display">Fart: %s</string>
-    <string name="height_display">Høyde: %s</string>
+    <string name="speed_display">FART</string>
+    <string name="height_display">HØYDE</string>
     <string name="temperature_display">%s °C</string>
     <string name="rain_display">%s mm</string>
-    <string name="wind_speed_display">%sm/s</string>
-    <string name="highscore_display">Highscore: %dkm</string>
+    <string name="wind_speed_display">%s m/s</string>
+    <string name="highscore_display">Rekord: </string>
+    <string name="km_display">%s km</string>
 
 </resources>

@@ -77,7 +77,8 @@ val colBlue = Color(0xFF5C7994)
 val colGold = Color(0xFFFFCE21)
 val colDarkBlue = Color(0xFF1E2D3C)
 val colBlueTransparent = Color(0x64001432)
-// Color(0, 20, 50, 100),
+val colGray = Color(195, 195, 195)
+val colGrayLight = Color(220, 220, 220)
 
 
 

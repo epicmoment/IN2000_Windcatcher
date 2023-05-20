@@ -16,21 +16,25 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.in2000_papirfly.data.components.Weather
+import com.example.in2000_papirfly.R
+import com.example.in2000_papirfly.data.screenuistates.LogPoint
 import com.example.in2000_papirfly.data.screenuistates.LogState
 import com.example.in2000_papirfly.data.screenuistates.ThrowScreenState
 import com.example.in2000_papirfly.data.screenuistates.ThrowScreenUIState
-import com.example.in2000_papirfly.ui.theme.colBlueTransparent
-import com.example.in2000_papirfly.ui.theme.colRed
-import com.example.in2000_papirfly.ui.theme.colDarkBlue
-import com.example.in2000_papirfly.ui.theme.colGold
+import com.example.in2000_papirfly.ui.theme.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.osmdroid.util.GeoPoint
@@ -47,7 +51,7 @@ fun FlightLog (
 ) {
 
     LaunchedEffect(scaffoldState.bottomSheetState.currentValue) {
-        delay(100)
+        //delay(100)
         Log.d("Log", "LogState: ${scaffoldState.bottomSheetState.currentValue}")
         if (
             scaffoldState.bottomSheetState.currentValue == SheetValue.Hidden &&
@@ -74,6 +78,7 @@ fun FlightLog (
             ) {
 
                 Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
@@ -105,7 +110,7 @@ fun FlightLog (
                             modifier = Modifier.clickable {
                                 scope.launch {
                                     //scaffoldState.bottomSheetState.partialExpand()
-                                    centerMap(logState.logPoints[it].first)
+                                    centerMap(logState.logPoints[it].geoPoint)
                                 }
                             }
                         ) {
@@ -138,17 +143,17 @@ fun FlightLog (
 fun PathEntryCard(
     showTopLine : Boolean,
     showBottomLine : Boolean,
-    logPoint : Pair<GeoPoint, Weather>
+    logPoint : LogPoint
 ) {
 
-    val weather = logPoint.second
+    val weather = logPoint.weather
 
     // Padding
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .fillMaxWidth()
-            .height(65.dp)
+            .height(75.dp)
     ) {
 
         Row (
@@ -217,20 +222,21 @@ fun PathEntryCard(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(60.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(colDarkBlue)
             ) {
 
 
                 Row (
-                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .fillMaxWidth()
-
+                        .fillMaxHeight()
+                        .padding(horizontal = 10.dp)
                 ){
 
-                    Text(weather.windSpeed.toString())
 
                     Image(
                         painter = painterResource(
@@ -242,6 +248,122 @@ fun PathEntryCard(
                         ),
                         contentDescription = "ikon"
                     )
+
+
+                    Box (
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .width(45.dp)
+                            .fillMaxHeight()
+                    ){
+                        Image(
+                            modifier = Modifier
+                                .rotate((weather.windAngle + 180).toFloat())
+                                .size(40.dp),
+                            painter = painterResource(id = R.drawable.up_arrow__1_),
+                            contentDescription = stringResource(R.string.wind_direction_arrow_description),
+                            colorFilter = ColorFilter.tint(Color.White)
+                        )
+                    }
+
+                    Column(verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+                        Text(
+                            text = weather.windSpeed.toString(),
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text (
+                            text = "m/s",
+                            color = colGray
+                        )
+                    }
+
+                    Column(
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+                        Text(
+                            text = weather.rain.toString(),
+                            color = if (weather.rain > 0) {
+                                Color(85, 147, 198)
+                            } else {
+                                colGray
+                            },
+                            fontWeight = if (weather.rain > 0) {
+                                FontWeight.Bold
+                            } else {
+                                FontWeight.Normal
+                            }
+                        )
+                        Text (
+                            text = "mm",
+                            color = colGray
+                        )
+                    }
+
+
+                    Column(
+                        horizontalAlignment = Alignment.Start,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+
+                        // Speed
+                        Text(
+                            text = buildAnnotatedString {
+
+                                withStyle(style = SpanStyle(color = colGray)) {
+                                    append("F ")
+                                }
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = when {
+                                            logPoint.speed > 20 -> Color(92, 196, 104)
+                                            logPoint.speed > 5 -> Color.White
+                                            else -> colRed
+                                        },
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append(
+                                        "%.1f".format(logPoint.speed)
+                                    )
+                                }
+                            },
+                            fontSize = 14.sp
+                        )
+
+                        // Height
+                        Text(
+                            text = buildAnnotatedString {
+
+                                withStyle(style = SpanStyle(color = colGray)) {
+                                    append("H ")
+                                }
+
+                                withStyle(
+                                    style = SpanStyle(
+                                        color = if (logPoint.height>20) Color.White else colRed,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                ) {
+                                    append(
+                                        if (logPoint.height > 0)"%.0f".format(logPoint.height) else "0"
+                                    )
+                                }
+                            },
+                            fontSize = 14.sp
+                        )
+
+                    }
 
                 }
 
