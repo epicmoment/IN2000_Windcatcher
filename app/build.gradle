@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.in2000_papirfly'
+    namespace 'no.met.in2000.windcatcher'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.in2000_papirfly"
+        applicationId 'no.met.in2000.windcatcher'
         minSdk 24
         targetSdk 33
         versionCode 1
