@@ -4,11 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -27,12 +23,16 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -46,8 +46,7 @@ import com.example.in2000_papirfly.data.screenuistates.ThrowScreenUIState
 import com.example.in2000_papirfly.helpers.WeatherConstants.AIR_PRESSURE_NORMAL
 import com.example.in2000_papirfly.ui.composables.FlightLog
 import com.example.in2000_papirfly.ui.composables.PlaneComposable
-import com.example.in2000_papirfly.ui.theme.colBlueTransparent
-import com.example.in2000_papirfly.ui.theme.colRed
+import com.example.in2000_papirfly.ui.theme.*
 import com.example.in2000_papirfly.ui.viewmodels.ThrowViewModel
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.*
 import com.example.in2000_papirfly.ui.viewmodels.throwscreenlogic.ThrowScreenUtilities.drawGoalMarker
@@ -329,99 +328,172 @@ fun FlightInfoBox(
     val planeState = throwViewModel.planeState.collectAsState().value
 
     var airPressureDescription = stringResource(R.string.low_air_pressure_display)
-    var airPressureColor = Color.Red
+    var airPressureColor = colRed
 
     if (throwViewModel.weather.airPressure > 1013) {
         airPressureDescription = stringResource(R.string.high_air_pressure_display)
-        airPressureColor = Color.Blue
+        airPressureColor = Color(82, 170, 242)
     }
 
     // Invisible box filling the entire screen
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp),
+            .offset(y = 20.dp)
+            .height(90.dp),
         contentAlignment = Alignment.Center,
     ) {
         // Box containing the info elements
         Box(
             modifier = Modifier
-                .fillMaxSize(0.8f)
+                .fillMaxHeight()
+                .fillMaxWidth(0.85f)
                 .clip(RoundedCornerShape(14.dp))
                 .background(colBlueTransparent),
         ) {
-            // Column for positioning the info elements correctly
-            Column(
+
+            Row(
                 modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Top,
+                    .fillMaxWidth()
+                    .fillMaxHeight(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                // Box containing weather icon, wind arrow and air pressure symbol
-                Box {
-                    Row(
+
+                // Weather icon
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.25f)
+                ) {
+                    Icon(
+                        painter = painterResource(id = id),
+                        contentDescription = stringResource(R.string.weather_icon_description),
+                        tint = Color.Unspecified,
+                        modifier = Modifier
+                            .fillMaxSize(0.6f)
+                    )
+                }
+
+                // Air pressure status
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.33f)
+                ) {
+
+                    Text(
+                        text = airPressureDescription,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = airPressureColor,
+                    )
+                }
+
+                // Wind direction indicator
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(0.5f)
+                ){
+
+
+                    Box (
+                        contentAlignment = Alignment.Center,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(90.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        // Weather icon
-                        Icon(
-                            painter = painterResource(id = id),
-                            contentDescription = stringResource(R.string.weather_icon_description),
-                            modifier = modifier
-                                .padding(start = 20.dp, top = 20.dp)
-                                .size(size = 80.dp),
-                            tint = Color.Unspecified
-                        )
-
-                        // Wind direction indicator
+                            .fillMaxHeight(0.65f)
+                    ){
                         Image(
                             modifier = Modifier
-                                .padding(end = 40.dp, top = 10.dp)
+                                //.padding(end = 40.dp, top = 10.dp)
                                 .rotate((throwViewModel.weather.windAngle + 180).toFloat())
-                                .size(100.dp),
+                                .size(60.dp),
                             painter = painterResource(id = R.drawable.up_arrow__1_),
                             contentDescription = stringResource(R.string.wind_direction_arrow_description),
                             colorFilter = ColorFilter.tint(Color.White)
                         )
-
-                        // Air pressure status
-                        Text(
-                            modifier = Modifier
-                                .padding(end = 40.dp),
-                            text = airPressureDescription,
-                            fontSize = 40.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = airPressureColor
-                        )
                     }
-                }
-                // Row showing speed and height data
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    // Speed indicator
+
                     Text(
-                        modifier = Modifier
-                            .padding(start = 40.dp),
-                        text = stringResource(R.string.speed_display, "%.2f".format(planeState.speed.toFloat())),
-                        fontSize = 20.sp,
-                        color = Color.White,
+                        text = buildAnnotatedString {
+
+                            withStyle(style = SpanStyle(color = Color.White)) {
+                                append("%.1f".format(throwViewModel.weather.windSpeed.toFloat()))
+                            }
+
+                            withStyle(style = SpanStyle(color = colGrayLight, fontWeight = FontWeight.Normal)) {
+                                append(" m/s")
+                            }
+                        },
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
 
-                    // Height indicator
-                    Text(
-                        modifier = Modifier
-                            .padding(end = 40.dp),
-                        text = stringResource(R.string.height_display, if (planeState.height >= 0) "%.0f".format(planeState.height) else 0),
-                        fontSize = 20.sp,
-                        color = Color.White,
-                    )
                 }
+
+                // Speed and height displays
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth()
+                ) {
+
+                    Column (
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxHeight(0.5f)
+                    ){
+
+                        Text(
+                            text = stringResource(R.string.speed_display),
+                            fontSize = 10.sp,
+                            color = colGrayLight
+                        )
+
+                        Text(
+                            text = "%.1f".format(planeState.speed.toFloat()),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+
+                    }
+
+                    Column (
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                        modifier = Modifier
+                            .fillMaxHeight()
+                    ) {
+
+                        // Height indicator
+                        Text(
+                            text = stringResource(R.string.height_display),
+                            fontSize = 10.sp,
+                            color = colGrayLight
+                        )
+
+                        Text(
+                            text = if (planeState.height >= 0) "%.0f".format(planeState.height) else "0",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+
+                    }
+
+                }
+
             }
+
         }
     }
 }
@@ -569,20 +641,16 @@ fun PositionAndHighScoreDrawer(
             throwViewModel.setThrowScreenState(ThrowScreenState.MovingMap)
         },
         sheetState = bottomSheetState,
-        dragHandle = {
-            Card(
-                modifier = Modifier
-                    .padding(8.dp),
-            ) {
-                Text(
-                    modifier = Modifier
-                        .padding(horizontal = 10.dp),
-                    text = stringResource(R.string.choose_throw_location),
-                    fontSize = 20.sp,
-                )
-            }
-        }
+        containerColor = colBlueTransparent
     ) {
+
+        Text(
+            text = stringResource(R.string.choose_throw_location),
+            fontSize = 30.sp,
+            color = Color(255, 255, 255, 170),
+            modifier = Modifier.padding(start = 15.dp)
+        )
+
         // Cards for the different throw locations
         LazyRow(state = rowState) {
             items(throwPointWeather.size) {
@@ -593,10 +661,13 @@ fun PositionAndHighScoreDrawer(
                 // Clickable card
                 Card(
                     shape = MaterialTheme.shapes.medium,
+                    colors = CardDefaults.cardColors(
+                        containerColor = colDarkBlue
+                    ),
                     modifier = modifier
-                        .fillMaxWidth()
+                        .fillParentMaxWidth()
                         .padding(15.dp)
-                        .size(width = 380.dp, height = 200.dp),
+                        .height(200.dp),
                     onClick = {
                         if (location.namePos == throwViewModel.locationName) {
                             // Sets ThrowScreenState to Throwing when sheet is dismissed
@@ -621,152 +692,209 @@ fun PositionAndHighScoreDrawer(
                     }
                 ) {
                     // Place name and weather icon
-                    Row(
-                        modifier = modifier
+                    Column (
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        // Place name
-                        Text(
-                            modifier = modifier.padding(start = 12.dp, top = 6.dp),
-                            text = location.namePos,
-                            fontSize = 30.sp
-                        )
+                            .fillMaxHeight(),
+                    ){
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .fillMaxHeight(0.35f)
+                                .padding(start = 10.dp, end = 10.dp, top = 10.dp)
+                        ) {
+                            // Place name
+                            Text(
+                                modifier = modifier.padding(start = 12.dp, top = 0.dp),
+                                text = location.namePos,
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold
+                            )
 
-                        // Weather icon
-                        Icon(
-                            painter = painterResource(id = id),
-                            contentDescription = stringResource(R.string.weather_icon_description),
-                            modifier = modifier
-                                .padding(end = 20.dp, top = 5.dp)
-                                .size(size = 65.dp),
-                            tint = Color.Unspecified
-                        )
-                    }
-
-                    // Row containing temperature, precipitation, wind direction and air pressure
-                    Row(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp),
-                        horizontalArrangement = Arrangement.SpaceAround,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
-                        // Temperature
-                        Text(
-                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = stringResource(R.string.temperature_display, "%.0f".format(location.temperature)),
-                            fontSize = 28.sp
-                        )
-
-                        // Precipitation
-                        Text(
-                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = stringResource(R.string.rain_display, "%.0f".format(location.rain)),
-                            fontSize = 18.sp
-                        )
-
-                        // Wind speed
-                        Text(
-                            modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
-                            text = stringResource(R.string.wind_speed_display, "%.0f".format(location.windSpeed)),
-                            fontSize = 18.sp
-                        )
-
-                        // Wind direction arrow
-                        Icon(
-                            painterResource(id = R.drawable.baseline_arrow_right_alt_24),
-                            modifier = modifier
-                                .size(size = 45.dp)
-                                .rotate(location.windAngle.toFloat() + 90.toFloat()),
-                            contentDescription = stringResource(R.string.wind_direction_arrow_description, location.windAngle.toInt()),
-                        )
-
-                        // Air pressure symbol
-                        var airPressureDescription = stringResource(R.string.low_air_pressure_display)
-                        var airPressureColor = Color.Red
-                        if (location.airPressure > AIR_PRESSURE_NORMAL) {
-                            airPressureDescription = stringResource(R.string.high_air_pressure_display)
-                            airPressureColor = Color.Blue
+                            // Weather icon
+                            Icon(
+                                painter = painterResource(id = id),
+                                contentDescription = stringResource(R.string.weather_icon_description),
+                                modifier = modifier
+                                    .padding(end = 12.dp, top = 8.dp)
+                                    .size(size = 50.dp),
+                                tint = Color.Unspecified
+                            )
                         }
 
-                        Text(
-                            modifier = modifier.padding(
-                                start = 10.dp,
-                                end = 10.dp,
-                                top = 8.dp,
-                                bottom = 8.dp
-                            ),
-                            text = airPressureDescription,
-                            fontSize = 28.sp,
-                            color = airPressureColor
-                        )
-                    }
-
-                    // High score banner
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 10.dp, vertical = 5.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        val locationName = highScores.getOrDefault(
-                            location.namePos,
-                            HighScore()
-                        )
-                        val highScoreShown = highScoreOnMap.getOrDefault(
-                            location.namePos,
-                            false
-                        )
-
-                        // High score distance
-                        Text(
+                        // Row containing temperature, precipitation, wind direction and air pressure
+                        Row(
                             modifier = modifier
-                                .padding(end = 10.dp),
-                            text = stringResource(R.string.highscore_display, locationName.distance),
-                            fontSize = 16.sp
-                        )
-
-                        // Button for toggling if high score path is shown or not
-                        Button (
-                            modifier = modifier
-                                .size(180.dp, 45.dp),
-                            enabled = locationName.distance != 0,
-                            onClick = {
-                                if (!highScoreShown) {
-                                    drawHighScorePath(mapViewState.overlays, locationName.flightPath, location.namePos)
-                                    drawGoalMarker(
-                                        { _,_,_ ->
-                                            GoalMarker(
-                                                mapViewState,
-                                                location.namePos,
-                                                highScore = true,
-                                                temporary = true
-                                            )
-                                        },
-                                        mapViewState.overlays,
-                                        locationName.flightPath[0],
-                                        locationName.locationName,
-                                        locationName.flightPath.last(),
-                                        newHS = true,
-                                        temporary = true
-                                    )
-                                } else {
-                                    removeHighScorePath(mapViewState.overlays, location.namePos)
-                                    mapViewState.invalidate()
-                                }
-                                throwViewModel.updateHighScoreShownState(location.namePos)
-                            },
-                            colors = ButtonDefaults.buttonColors(colRed),
-                            shape = RoundedCornerShape(10),
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp),
+                            horizontalArrangement = Arrangement.SpaceAround,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
+
+                            // Temperature
                             Text(
-                                text = if (!highScoreShown) stringResource(R.string.show_highscore) else stringResource(R.string.hide_highscore),
-                                fontSize = 16.sp,
+                                modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                text = stringResource(
+                                    R.string.temperature_display,
+                                    "%.0f".format(location.temperature)
+                                ),
+                                fontSize = 28.sp
                             )
+
+                            // Precipitation
+                            Text(
+                                modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                text = stringResource(
+                                    R.string.rain_display,
+                                    "%.0f".format(location.rain)
+                                ),
+                                fontSize = 18.sp
+                            )
+
+                            // Wind speed
+                            Text(
+                                modifier = modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                                text = stringResource(
+                                    R.string.wind_speed_display,
+                                    "%.0f".format(location.windSpeed)
+                                ),
+                                fontSize = 18.sp
+                            )
+
+                            // Wind direction arrow
+                            Icon(
+                                painterResource(id = R.drawable.baseline_arrow_right_alt_24),
+                                modifier = modifier
+                                    .size(size = 45.dp)
+                                    .rotate(location.windAngle.toFloat() + 90.toFloat()),
+                                contentDescription = stringResource(
+                                    R.string.wind_direction_arrow_description,
+                                    location.windAngle.toInt()
+                                ),
+                            )
+
+                            // Air pressure symbol
+                            var airPressureDescription =
+                                stringResource(R.string.low_air_pressure_display)
+                            var airPressureColor = colRed
+                            if (location.airPressure > AIR_PRESSURE_NORMAL) {
+                                airPressureDescription =
+                                    stringResource(R.string.high_air_pressure_display)
+                                airPressureColor = Color(82, 170, 242)
+                            }
+
+                            Text(
+                                modifier = modifier.padding(
+                                    start = 10.dp,
+                                    end = 10.dp,
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                                text = airPressureDescription,
+                                fontSize = 28.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = airPressureColor
+                            )
+                        }
+
+                        // High score banner
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 10.dp, vertical = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val locationName = highScores.getOrDefault(
+                                location.namePos,
+                                HighScore()
+                            )
+                            val highScoreShown = highScoreOnMap.getOrDefault(
+                                location.namePos,
+                                false
+                            )
+
+                            // High score distance
+                            /*Text(
+                                modifier = modifier
+                                    .padding(end = 10.dp),
+                                text = stringResource(
+                                    R.string.highscore_display,
+                                    locationName.distance
+                                ),
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )*/
+
+                            Text(
+                                text = buildAnnotatedString {
+
+                                    withStyle(style = SpanStyle(color = colGrayLight)) {
+                                        append(stringResource(R.string.highscore_display))
+                                    }
+
+                                    withStyle(
+                                        style = SpanStyle(
+                                            color = if (locationName.distance != 0) colGold else colGrayLight,
+                                            fontWeight = FontWeight.Bold)
+                                    ) {
+                                        append(" "+stringResource(id = R.string.km_display, locationName.distance.toString()))
+                                    }
+                                },
+                                fontSize = 16.sp
+                            )
+
+                            // Button for toggling if high score path is shown or not
+                            Button(
+                                modifier = modifier
+                                    .height(45.dp)
+                                    .width(165.dp),
+                                enabled = locationName.distance != 0,
+                                onClick = {
+                                    if (!highScoreShown) {
+                                        drawHighScorePath(
+                                            mapViewState.overlays,
+                                            locationName.flightPath,
+                                            location.namePos
+                                        )
+                                        drawGoalMarker(
+                                            { _, _, _ ->
+                                                GoalMarker(
+                                                    mapViewState,
+                                                    location.namePos,
+                                                    highScore = true,
+                                                    temporary = true
+                                                )
+                                            },
+                                            mapViewState.overlays,
+                                            locationName.flightPath[0],
+                                            locationName.locationName,
+                                            locationName.flightPath.last(),
+                                            newHS = true,
+                                            temporary = true
+                                        )
+                                    } else {
+                                        removeHighScorePath(mapViewState.overlays, location.namePos)
+                                        mapViewState.invalidate()
+                                    }
+                                    throwViewModel.updateHighScoreShownState(location.namePos)
+                                },
+                                colors = ButtonDefaults.buttonColors(colRed),
+                                shape = RoundedCornerShape(14),
+                            ) {
+                                Text(
+                                    text = if (!highScoreShown) {
+                                        stringResource(R.string.show_highscore)
+                                    } else {
+                                        stringResource(R.string.hide_highscore)
+                                    },
+                                    fontSize = 16.sp,
+                                    color = Color.White
+                                )
+                            }
                         }
                     }
                 }

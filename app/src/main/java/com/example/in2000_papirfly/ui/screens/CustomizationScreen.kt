@@ -31,11 +31,10 @@ import com.example.in2000_papirfly.ui.composables.PlaneRender
 import com.example.in2000_papirfly.ui.viewmodels.CustomizationViewModel
 import com.example.in2000_papirfly.ui.theme.colRed
 import com.example.in2000_papirfly.ui.theme.colDarkBlue
+import com.example.in2000_papirfly.ui.theme.colGray
 
 val colOrangeHighlightTransparent = Color(127, 44, 36, 175)
 val colOrangeHighlight = Color(102, 51, 46)
-val colTextGray = Color(195, 195, 195)
-
 
 @Composable
 fun CustomizationScreen (
@@ -315,7 +314,7 @@ fun AttachmentCard (attachment: Attachment, tint: Color, isSelected: Boolean, on
                 )
                 Text(
                     text = stringResource(attachment.description),
-                    color = colTextGray,
+                    color = colGray,
                     fontFamily = FontFamily.SansSerif,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
