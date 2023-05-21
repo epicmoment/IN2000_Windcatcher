@@ -200,7 +200,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val weightDropRate = planeLogic.calculateDropRate(0.0, Weather())
+        val weightDropRate = planeLogic.calculateDropRate(Weather())
 
         assert(weightDropRate > 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected positive value") }
     }
@@ -213,7 +213,7 @@ class PlaneLogicTests {
         val planeRepository: PlaneRepository = PlaneRepositoryDummy(plane)
         val planeLogic = PlaneLogic(planeRepository)
 
-        val weightDropRate = planeLogic.calculateDropRate(0.0, Weather())
+        val weightDropRate = planeLogic.calculateDropRate( Weather())
 
         assert(weightDropRate == 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected 0.0") }
     }
