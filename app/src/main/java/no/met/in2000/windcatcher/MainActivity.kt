@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import no.met.in2000.windcatcher.ui.theme.IN2000_PapirflyTheme
+import no.met.in2000.windcatcher.ui.theme.WindcatcherTheme
 import org.osmdroid.config.Configuration
 import no.met.in2000.windcatcher.ui.screens.NavHub
 
@@ -30,7 +30,7 @@ class MainActivity : ComponentActivity() {
         // END OSM config
 
         setContent {
-            IN2000_PapirflyTheme {
+            WindcatcherTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),

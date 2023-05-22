@@ -35,10 +35,9 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun IN2000_PapirflyTheme(
+fun WindcatcherTheme(
     content: @Composable () -> Unit
 ) {
-
     MaterialTheme(
         colorScheme = DarkColorScheme,
         content = content
