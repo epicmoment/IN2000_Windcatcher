@@ -8,6 +8,7 @@ import no.met.in2000.windcatcher.ui.viewmodels.throwscreenlogic.ThrowScreenUtili
 import org.junit.Test
 
 import org.junit.Assert.*
+import org.osmdroid.util.GeoPoint
 
 class ThrowScreenStateObjectsTest {
 
@@ -19,9 +20,9 @@ class ThrowScreenStateObjectsTest {
 
         ThrowPointList.throwPoints.forEach {
             assertEquals(it.key, testMap[it.key]?.locationName)
-            assertEquals(null, testMap[it.key]?.date)
+            assertEquals(0L, testMap[it.key]?.date)
             assertEquals(0, testMap[it.key]?.distance)
-            assertEquals(null, testMap[it.key]?.flightPath)
+            assertEquals(listOf(GeoPoint(0.0,0.0)), testMap[it.key]?.flightPath)
         }
     }
 

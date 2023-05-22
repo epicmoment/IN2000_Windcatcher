@@ -16,7 +16,7 @@ class VectorTests {
         val correct = Vector(0.7071067811865476,0.7071067811865476)
 
         val check01 = calculateVector(45.0, 1.0)
-        assert(correct.equals(check01))
+        assertEquals(correct, check01)
     }
 
     @Test
@@ -66,7 +66,7 @@ class VectorTests {
 
         val correct01 = Vector(1.0, 0.0)
         val check01 = subtractVectors(vector1, vector2)
-        assert(correct01.equals(check01))
+        assertEquals(correct01, check01)
     }
 
     @Test
@@ -76,6 +76,6 @@ class VectorTests {
 
         val correct = Vector(-3.0, -1.0)
         val check = subtractVectors(vector1, vector2)
-        assert(correct.equals(check)) {println("\nvector1 $vector1 vector2 $vector2")}
+        assertEquals("\nvector1 $vector1 vector2 $vector2", correct, check)
     }
 }
