@@ -1,9 +1,7 @@
 package no.met.in2000.windcatcher.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val DarkColorScheme = darkColorScheme(
@@ -36,49 +34,13 @@ private val DarkColorScheme = darkColorScheme(
     surfaceTint = md_theme_dark_surfaceTint,
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = md_theme_light_primary,
-    primaryContainer = md_theme_light_primaryContainer,
-    onPrimary = md_theme_light_onPrimary,
-    onPrimaryContainer = md_theme_light_onPrimaryContainer,
-    secondary = md_theme_light_secondary,
-    secondaryContainer = md_theme_light_secondaryContainer,
-    onSecondary = md_theme_light_onSecondary,
-    onSecondaryContainer = md_theme_light_onSecondaryContainer,
-    tertiary = md_theme_light_tertiary,
-    tertiaryContainer = md_theme_light_tertiaryContainer,
-    onTertiary = md_theme_light_onTertiary,
-    onTertiaryContainer = md_theme_light_onTertiaryContainer,
-    error = md_theme_light_error,
-    errorContainer = md_theme_light_errorContainer,
-    onError = md_theme_light_onError,
-    onErrorContainer = md_theme_light_onErrorContainer,
-    outline = md_theme_light_outline,
-    background = md_theme_light_background,
-    onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
-    surfaceVariant = md_theme_light_surfaceVariant,
-    onSurfaceVariant = md_theme_light_onSurfaceVariant,
-    inverseSurface = md_theme_light_inverseSurface,
-    inverseOnSurface = md_theme_light_inverseOnSurface,
-    inversePrimary = md_theme_light_inversePrimary,
-    surfaceTint = md_theme_light_surfaceTint,
-)
-
 @Composable
 fun IN2000_PapirflyTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colors = if (!useDarkTheme) {
-        LightColorScheme
-    } else {
-        DarkColorScheme
-    }
 
     MaterialTheme(
-        colorScheme = colors,
+        colorScheme = DarkColorScheme,
         content = content
     )
 }
