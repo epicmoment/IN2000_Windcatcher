@@ -8,7 +8,7 @@
     <string name="papertype_02">Fotopapir</string>
     <string name="papertype_02_description">Tung papirtype som flyr bedre i regn.</string>
     <string name="papertype_03">Bakepapir</string>
-    <string name="papertype_03_description">Lett papirtype som flyr bedre i høye temperaturer, men tåler regn dårlig.</string>
+    <string name="papertype_03_description">Lett papirtype som flyr bedre i varme, men tåler regn dårlig.</string>
 
 
     <string name="nose_01">Medium nese</string>
