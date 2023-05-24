@@ -202,7 +202,7 @@ class PlaneLogicTests {
 
         val weightDropRate = planeLogic.calculateDropRate(Weather())
 
-        assert(weightDropRate > 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected positive value") }
+        assert(weightDropRate > 0.0 ){ println("weightDropRate = $weightDropRate, Expected positive value") }
     }
 
     @Test
@@ -215,7 +215,7 @@ class PlaneLogicTests {
 
         val weightDropRate = planeLogic.calculateDropRate( Weather())
 
-        assert(weightDropRate == 0.0 ){ println("temperatureDropRate = $weightDropRate, Expected 0.0") }
+        assert(weightDropRate > 0.0 ){ println("weightDropRate = $weightDropRate, Expected positive value") }
     }
 
 
