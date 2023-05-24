@@ -7,8 +7,8 @@ import no.met.in2000.windcatcher.data.components.Weather
 import no.met.in2000.windcatcher.data.database.entities.FlightPathPoint
 import no.met.in2000.windcatcher.data.database.entities.ThrowPoint
 import no.met.in2000.windcatcher.data.database.entities.WeatherTile
-import no.met.in2000.windcatcher.network.getLocationforecastData
-import no.met.in2000.windcatcher.network.getNowcastData
+import no.met.in2000.windcatcher.network.LocationforecastApiService.getLocationforecastData
+import no.met.in2000.windcatcher.network.NowcastApiService.getNowcastData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope

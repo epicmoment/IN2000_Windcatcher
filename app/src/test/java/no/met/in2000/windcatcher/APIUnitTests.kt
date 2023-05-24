@@ -1,7 +1,7 @@
 package no.met.in2000.windcatcher
 
-import no.met.in2000.windcatcher.network.getLocationforecastData
-import no.met.in2000.windcatcher.network.getNowcastData
+import no.met.in2000.windcatcher.network.LocationforecastApiService.getLocationforecastData
+import no.met.in2000.windcatcher.network.NowcastApiService.getNowcastData
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Test
@@ -23,5 +23,4 @@ class APIUnitTests {
             Assert.assertEquals("Feature", response.type)
         }
     }
-
 }
